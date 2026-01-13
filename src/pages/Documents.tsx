@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiFolder, FiFile, FiUpload, FiDownload, FiTrash2, FiSearch } from 'react-icons/fi';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
@@ -41,7 +41,7 @@ const Documents = () => {
 
         try {
             await api.vault.add({
-                id: `DOC-${Date.now()}`,
+                id: `DOC - ${Date.now()} `,
                 name: dummyName,
                 type: 'PDF',
                 size: '1.2 MB',

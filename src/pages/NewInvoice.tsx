@@ -204,12 +204,12 @@ const NewInvoice: React.FC = () => {
           setActiveDocumentType(invoiceToEdit.type);
 
           const customer = {
-            id: invoiceToEdit.customer?.id || invoiceToEdit.customerId || invoiceToEdit.customer_id || '',
-            name: invoiceToEdit.customer?.name || invoiceToEdit.customerName || invoiceToEdit.customer_name || '',
-            phone: invoiceToEdit.customer?.phone || invoiceToEdit.customerPhone || invoiceToEdit.customer_phone || '',
-            email: invoiceToEdit.customer?.email || invoiceToEdit.customerEmail || invoiceToEdit.customer_email || '',
-            address: invoiceToEdit.customer?.address || invoiceToEdit.customerAddress || invoiceToEdit.customer_address || '',
-            kraPin: invoiceToEdit.customer?.kraPin || invoiceToEdit.customerKraPin || invoiceToEdit.customer_kra_pin || ''
+            id: invoiceToEdit.customer?.id || '',
+            name: invoiceToEdit.customer?.name || '',
+            phone: invoiceToEdit.customer?.phone || '',
+            email: invoiceToEdit.customer?.email || '',
+            address: invoiceToEdit.customer?.address || '',
+            kraPin: invoiceToEdit.customer?.kraPin || ''
           };
 
           setCustomerId(customer.id);
@@ -627,7 +627,7 @@ const NewInvoice: React.FC = () => {
   /* ----------------------------
      Handle Convert (Unidirectional Workflow)
      ---------------------------- */
-  const handleConvert = (targetType: InvoiceType) => {
+  const handleConvert = async (targetType: InvoiceType) => {
     if (!confirm(`Convert this ${activeDocumentType} to ${targetType}? This will create a NEW document.`)) return;
 
     try {

@@ -4,6 +4,7 @@ export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
 export interface Product {
   id: string;
   name: string;
+  category?: string;
   priceKsh?: number;
   priceUSD?: number;
   description?: string;

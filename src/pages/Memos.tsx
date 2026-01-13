@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiMessageSquare, FiPlus, FiStar, FiClock } from 'react-icons/fi';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
