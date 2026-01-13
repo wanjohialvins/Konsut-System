@@ -35,7 +35,6 @@ type StockItemWithCategory = Product & { type: Category };
 
 // Constants
 const DRAFT_KEY = "konsut_newinvoice_draft_vFinal";
-const INVOICES_KEY = "invoices";
 const USD_TO_KSH_KEY = "usdToKshRate";
 
 const NewInvoice: React.FC = () => {
@@ -181,7 +180,7 @@ const NewInvoice: React.FC = () => {
 
       if (stockData) {
         // Map Backend (unitPrice) -> Frontend (priceKsh)
-        const mappedStock: Product[] = stockData.map((s: any) => ({
+        const mappedStock: Product[] = stockData.map((s: { id?: string | number; name?: string; category?: string; description?: string; unitPrice?: number; unit_price?: number; unitPriceUsd?: number; unit_price_usd?: number }) => ({
           ...s,
           id: String(s.id || ''),
           name: String(s.name || ''),

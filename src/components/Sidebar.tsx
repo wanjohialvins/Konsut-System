@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid } from "react-icons/fi";
+import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy } from "react-icons/fi";
 import { useIsMobile } from "../hooks/useMediaQuery";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../services/api";

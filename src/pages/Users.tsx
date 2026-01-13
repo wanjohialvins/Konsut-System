@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiTrash2, FiEdit2, FiShield, FiCheckCircle, FiX } from 'react-icons/fi';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
