@@ -1,0 +1,277 @@
+/* Icon Animations - KONSUT Invoice System */
+/* ENHANCED: Jarvis-Like Interactions */
+
+/* ============================================
+   CORE INTERACTION PRIMITIVES
+   ============================================ */
+
+/* 1. Holographic Tilt Container
+   Use this on cards to give them a 3D feel */
+.jarvis-card {
+  transition: transform 0.1s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.jarvis-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 153, 255, 0.15), 0 0 0 1px rgba(0, 153, 255, 0.1);
+}
+
+/* 2. Liquid Button Effect */
+.btn-liquid {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-liquid::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease-out;
+  border-radius: 50%;
+}
+
+.btn-liquid:hover::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.btn-liquid:active {
+  transform: scale(0.96);
+}
+
+/* 3. Neon Glow Text */
+.text-glow {
+  text-shadow: 0 0 10px rgba(0, 153, 255, 0.3);
+}
+
+/* ============================================
+   HOVER ANIMATIONS
+   ============================================ */
+
+/* Bounce Effect - Navigation, Primary Actions */
+.icon-hover-bounce {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.icon-hover-bounce:hover {
+  animation: bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  25% {
+    transform: translateY(-8px);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+
+  75% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Pulse Effect - Notifications, Alerts */
+.icon-hover-pulse {
+  transition: transform 0.3s ease;
+}
+
+.icon-hover-pulse:hover {
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Rotate Effect */
+.icon-hover-rotate {
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.icon-hover-rotate:hover {
+  transform: rotate(360deg);
+}
+
+/* Scale Effect */
+.icon-hover-scale {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.icon-hover-scale:hover {
+  transform: scale(1.2);
+}
+
+/* Shake Effect */
+.icon-hover-shake {
+  transition: transform 0.3s ease;
+}
+
+.icon-hover-shake:hover {
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Float Effect - Subtle hover */
+.icon-hover-float {
+  transition: transform 0.3s ease;
+}
+
+.icon-hover-float:hover {
+  transform: translateY(-5px);
+}
+
+/* ============================================
+   ENTRY ANIMATIONS (Staggered Support)
+   ============================================ */
+
+/* Staggered Fade Up */
+.animate-slide-up {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delays for Staggering */
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+/* ============================================
+   CONTINUOUS ANIMATIONS ("Alive" feel)
+   ============================================ */
+
+/* Breathing Glow */
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(0, 153, 255, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(0, 153, 255, 0.5);
+  }
+}
+
+/* Pulse Continuous - Active indicators */
+.icon-pulse-continuous {
+  animation: pulseContinuous 2s ease-in-out infinite;
+}
+
+@keyframes pulseContinuous {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* Smooth transitions helper */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   MISSING UTILITIES
+   ============================================ */
+
+/* Simple Fade In */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Ensure animation works with Tailwind */
+.animate-slide-up {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
