@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost/invoice-system-backend';
 
 const request = async (endpoint: string, options: RequestInit = {}) => {
     // Get user info from localStorage (as stored by AuthContext)
-    const userJson = localStorage.getItem('konsut_auth_user');
+    const userJson = localStorage.getItem('invoice_system_auth');
     const user = userJson ? JSON.parse(userJson) : null;
 
     const headers = {

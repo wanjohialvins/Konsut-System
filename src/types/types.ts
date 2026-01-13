@@ -40,7 +40,9 @@ export interface Invoice {
   items: InvoiceItem[];
   subtotal: number;
   tax: number;
+  taxAmount?: number; // Added for backend compatibility (optional)
   grandTotal: number;
+  currency?: string; // Added for backend compatibility (optional)
   currencyRate?: number;
   clientResponsibilities?: string;
   termsAndConditions?: string;

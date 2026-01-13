@@ -450,8 +450,10 @@ const NewInvoice: React.FC = () => {
         customer: { id: customerId, name: customerName, phone: customerPhone, email: customerEmail, address: customerAddress, kraPin: customerKraPin },
         items: lines,
         subtotal: calcSubtotal,
-        grandTotal: calcGrandTotal,
         tax: taxAmount,
+        taxAmount: taxAmount, // Added for backend compatibility
+        currency: "Ksh", // Added for backend compatibility
+        grandTotal: calcGrandTotal,
         currencyRate: usdToKshRate,
         status: "draft",
         createdAt: new Date().toISOString(),
@@ -523,6 +525,8 @@ const NewInvoice: React.FC = () => {
         items: lines,
         subtotal: calcSubtotal,
         tax: taxAmount,
+        taxAmount: taxAmount, // Added for backend compatibility
+        currency: "Ksh", // Added for backend compatibility
         grandTotal: calcGrandTotal,
         currencyRate: usdToKshRate,
         status: "draft" as const,
@@ -667,8 +671,10 @@ const NewInvoice: React.FC = () => {
         },
         items: lines,
         subtotal: calcSubtotal,
-        grandTotal: calcGrandTotal,
         tax: taxAmount,
+        taxAmount: taxAmount, // Added for backend compatibility
+        currency: "Ksh", // Added for backend compatibility
+        grandTotal: calcGrandTotal,
         currencyRate: usdToKshRate,
         status: "draft",
         convertedFrom: editId || undefined,

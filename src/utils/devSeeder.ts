@@ -115,7 +115,9 @@ const generateRandomInvoice = (date: Date, client: Customer, products: Product[]
         items,
         subtotal,
         tax,
+        taxAmount: tax, // Added for backend compatibility
         grandTotal: total,
+        currency: "Ksh", // Added for backend compatibility
         currencyRate: 130,
     };
 };

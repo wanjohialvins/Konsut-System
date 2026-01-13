@@ -428,7 +428,7 @@ export const generateInvoicePDF = async (
 
     // Use invoice values if available, otherwise calculate
     const subtotal = invoice.subtotal;
-    const vatAmount = includeTax ? (invoice.tax || (subtotal * vatRate)) : 0;
+    const vatAmount = includeTax ? (invoice.taxAmount || invoice.tax || (subtotal * vatRate)) : 0;
     const finalTotal = invoice.grandTotal || (subtotal + vatAmount);
 
     // Subtotal
