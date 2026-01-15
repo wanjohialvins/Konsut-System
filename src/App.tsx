@@ -13,7 +13,6 @@ import Tasks from "./pages/Tasks";
 import Documents from "./pages/Documents";
 import Memos from "./pages/Memos";
 import Suppliers from "./pages/Suppliers";
-import Suppliers from "./pages/Suppliers";
 import Support from "./pages/Support"; // Keeping legacy ref if needed but prefer new ones
 import HelpCenter from "./pages/support/HelpCenter";
 import SystemGuide from "./pages/support/SystemGuide";
