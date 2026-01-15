@@ -39,17 +39,18 @@ const Users = () => {
         { id: '/settings/preferences', label: 'Preferences', desc: 'User UI/UX settings' },
         { id: '/settings/system', label: 'System Control', desc: 'Administrative state management' },
         { id: '/users', label: 'User Control', desc: 'Manage accounts & permissions' },
+        { id: '/support', label: 'Support Center', desc: 'Access Help Center & Manuals' },
     ];
 
     const ROLE_PRESETS: Record<string, string[]> = {
-        admin: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/stock/add', '/analytics', '/audit-logs', '/system-health', '/settings/profile', '/settings/invoice', '/settings/preferences', '/settings/system', '/users'],
-        ceo: ['/', '/invoices', '/clients', '/analytics', '/audit-logs', '/settings/profile', '/settings/preferences'],
-        manager: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/stock/add', '/analytics'],
-        sales: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory'],
+        admin: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/stock/add', '/analytics', '/audit-logs', '/system-health', '/settings/profile', '/settings/invoice', '/settings/preferences', '/settings/system', '/users', '/support'],
+        ceo: ['/', '/invoices', '/clients', '/analytics', '/audit-logs', '/settings/profile', '/settings/preferences', '/support'],
+        manager: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/stock/add', '/analytics', '/support'],
+        sales: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/support'],
         storekeeper: ['/', '/stock/inventory', '/stock/add', '/invoices'],
-        accountant: ['/', '/invoices', '/analytics', '/settings/invoice'],
-        staff: ['/', '/new-invoice', '/invoices', '/clients'],
-        viewer: ['/', '/invoices', '/clients'],
+        accountant: ['/', '/invoices', '/analytics', '/settings/invoice', '/support'],
+        staff: ['/', '/new-invoice', '/invoices', '/clients', '/support'],
+        viewer: ['/', '/invoices', '/clients', '/support'],
     };
 
     const showMessage = useCallback((type: 'success' | 'error', text: string) => {

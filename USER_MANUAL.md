@@ -115,6 +115,12 @@ Customize the logic of your system at `/settings/system`.
 ---
 
 ## 7. Admin & Data Security
+### User Management
+Located at `/users` (Admin only).
+-   **Roles**: Assign preset roles like *CEO*, *Manager*, or *Staff*.
+-   **Permissions**: Fine-tune access controls (e.g., allow specific users to see Analytics but not delete Stock).
+-   **Security**: Create accounts with secure passwords. Accounts can be deactivated instantly.
+
 ### Data Persistence
 -   All core data (Invoices, Clients, Stock) is stored in a **MariaDB Database**.
 -   Drafts and UI preferences are stored in **Browser LocalStorage**.
