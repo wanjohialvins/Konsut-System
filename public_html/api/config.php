@@ -49,12 +49,39 @@ function getDbConnection()
 }
 
 /**
+ * Helper to get headers compatibly across servers
+ */
+function getRequestHeader($name)
+{
+    // 1. Try $_SERVER (Standard Apache/CGI)
+    $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+    if (isset($_SERVER[$key])) {
+        return $_SERVER[$key];
+    }
+
+    // 2. Try getallheaders() (Apache mod_php)
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        // Case-insensitive check
+        $nameLower = strtolower($name);
+        foreach ($headers as $k => $v) {
+            if (strtolower($k) === $nameLower) {
+                return $v;
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
  * RBAC Helper: Check if current user has permission
  */
 function checkPermission($action)
 {
-    $role = $_SERVER['HTTP_X_USER_ROLE'] ?? 'viewer';
-    $permissionsJson = $_SERVER['HTTP_X_USER_PERMISSIONS'] ?? '[]';
+    // Use the robust helper instead of direct $_SERVER access
+    $role = getRequestHeader('X-User-Role') ?? 'viewer';
+    $permissionsJson = getRequestHeader('X-User-Permissions') ?? '[]';
     $permissions = json_decode($permissionsJson, true) ?? [];
 
     if ($role === 'admin')
@@ -64,12 +91,12 @@ function checkPermission($action)
     $permissionMap = [
         // Stock
         'view_stock' => '/stock/inventory',
-        'manage_stock' => '/stock/add', // Requires "Add Stock" permission to create/edit/delete
+        'manage_stock' => '/stock/add',
 
         // Invoices
         'view_invoices' => '/invoices',
-        'manage_invoices' => '/new-invoice', // Requires "Create Order" permission
-        'delete_invoice' => '/invoices',      // Deleting requires access to the list (refined later?)
+        'manage_invoices' => '/new-invoice',
+        'delete_invoice' => '/invoices',
 
         // Clients
         'view_clients' => '/clients',
@@ -83,7 +110,7 @@ function checkPermission($action)
         'view_settings' => '/settings/profile',
         'manage_settings' => '/settings/system',
 
-        // Suppliers (New)
+        // Suppliers
         'view_suppliers' => '/stock/inventory',
         'manage_suppliers' => '/stock/add',
     ];
