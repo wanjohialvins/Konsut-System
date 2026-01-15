@@ -53,3 +53,21 @@ body {
 .density-compact .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: var(--ui-gap) !important; }
 .density-compact .text-sm { font-size: var(--ui-font-sm) !important; }
 .density-compact .text-base { font-size: var(--ui-font-base) !important; }
+
+/* Custom Animations */
+@layer utilities {
+  .animate-modal-enter {
+    animation: modalEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes modalEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

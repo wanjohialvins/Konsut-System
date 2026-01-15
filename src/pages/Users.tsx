@@ -254,114 +254,151 @@ const Users = () => {
 
             {/* Add/Edit User Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-midnight-950/40 dark:bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-midnight-900 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20 scale-up-center">
-                        <div className="p-8 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center bg-gray-50/50 dark:bg-midnight-800/50 sticky top-0 z-10">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
+                        onClick={() => setShowModal(false)}
+                    ></div>
+
+                    {/* Modal Content */}
+                    <div className="relative bg-white dark:bg-midnight-900 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100 dark:border-midnight-800 animate-modal-enter">
+                        <div className="px-8 py-6 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center bg-white/50 dark:bg-midnight-900/50 backdrop-blur-xl z-10">
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{isEditing ? 'Modify Profile' : 'New Security Account'}</h3>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{isEditing ? 'Updating existing access' : 'Enter details for the new operator'}</p>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{isEditing ? 'Modify Access' : 'New User'}</h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider mt-1">{isEditing ? 'Update security privileges' : 'Onboard a new team member'}</p>
                             </div>
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-midnight-700 transition-colors"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-midnight-800 hover:text-gray-900 dark:hover:text-white transition-all"
                             >
-                                <FiX size={24} />
+                                <FiX size={20} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-8 space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Left Side: Identity */}
-                                <div className="space-y-6">
-                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-midnight-800 pb-2">Identification</h4>
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Username</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            readOnly={isEditing}
-                                            className={`w - full px - 5 py - 3.5 rounded - 2xl border bg - gray - 50 dark: bg - midnight - 950 text - gray - 900 dark: text - white focus: ring - 4 focus: ring - brand - 500 / 20 focus: border - brand - 500 outline - none transition - all font - medium
-                      ${isEditing ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-midnight-800' : 'border-gray-200 dark:border-midnight-700'} `}
-                                            value={formData.username}
-                                            onChange={e => setFormData({ ...formData, username: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Password</label>
-                                        <input
-                                            type="password"
-                                            required={!isEditing}
-                                            placeholder={isEditing ? "(Leave blank to keep current)" : "Minimum 8 characters"}
-                                            className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 dark:border-midnight-700 bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium"
-                                            value={formData.password}
-                                            onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                                        <input
-                                            type="email"
-                                            className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 dark:border-midnight-700 bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium"
-                                            value={formData.email}
-                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                        />
+                        <div className="overflow-y-auto custom-scrollbar flex-1">
+                            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                                <div className="grid grid-cols-1 gap-8">
+                                    {/* Identity Section */}
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-3 pb-2 border-b border-gray-100 dark:border-midnight-800">
+                                            <div className="p-2 bg-brand-50 dark:bg-brand-900/20 rounded-lg text-brand-600">
+                                                <FiUser size={18} />
+                                            </div>
+                                            <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Identity & Credentials</h4>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Username</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    readOnly={isEditing}
+                                                    placeholder="e.g. jdoe"
+                                                    className={`w-full px-5 py-4 rounded-xl border bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-bold text-sm
+                                                        ${isEditing ? 'opacity-60 cursor-not-allowed border-gray-200 dark:border-midnight-800' : 'border-gray-200 dark:border-midnight-800'}`}
+                                                    value={formData.username}
+                                                    onChange={e => setFormData({ ...formData, username: e.target.value })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Email Address</label>
+                                                <input
+                                                    type="email"
+                                                    placeholder="john@konsut.com"
+                                                    className="w-full px-5 py-4 rounded-xl border border-gray-200 dark:border-midnight-800 bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-bold text-sm"
+                                                    value={formData.email}
+                                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Password</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="password"
+                                                        required={!isEditing}
+                                                        placeholder={isEditing ? "•••••••••••• (Unchanged)" : "Create a strong password"}
+                                                        className="w-full px-5 py-4 pl-12 rounded-xl border border-gray-200 dark:border-midnight-800 bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-bold text-sm"
+                                                        value={formData.password}
+                                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                                    />
+                                                    <FiKey className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 mt-2 ml-1">Must be at least 8 characters long.</p>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-midnight-800 pb-2 mt-8">Clearance Level</h4>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {['admin', 'ceo', 'manager', 'sales', 'storekeeper', 'accountant', 'staff', 'viewer'].map((role) => (
-                                            <button
-                                                type="button"
-                                                key={role}
-                                                onClick={() => applyPreset(role)}
-                                                className={`px - 4 py - 3 rounded - 2xl text - sm font - bold capitalize border transition - all flex items - center justify - between
-                          ${formData.role === role
-                                                        ? 'bg-brand-600 border-brand-600 text-white shadow-lg'
-                                                        : 'bg-white dark:bg-midnight-950 border-gray-200 dark:border-midnight-800 text-gray-500 dark:text-gray-400'
-                                                    } `}
-                                            >
-                                                {role}
-                                                {formData.role === role && <FiCheckCircle size={14} />}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                                    {/* Role Section */}
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-3 pb-2 border-b border-gray-100 dark:border-midnight-800">
+                                            <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600">
+                                                <FiShield size={18} />
+                                            </div>
+                                            <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Access Control</h4>
+                                        </div>
 
-                                {/* Right Side: Permissions */}
-                                <div className="space-y-6">
-                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-midnight-800 pb-2">Page Access Control</h4>
-                                    <div className="space-y-3">
-                                        {ALL_PERMISSIONS.map((perm) => (
-                                            <label key={perm.id} className="flex items-start gap-4 p-4 rounded-2xl border border-gray-100 dark:border-midnight-800 hover:bg-gray-50 dark:hover:bg-midnight-950 transition-colors cursor-pointer group">
-                                                <div className="mt-1">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Role Presets</label>
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                {['admin', 'ceo', 'manager', 'sales', 'storekeeper', 'accountant', 'staff', 'viewer'].map((role) => (
+                                                    <button
+                                                        type="button"
+                                                        key={role}
+                                                        onClick={() => applyPreset(role)}
+                                                        className={`px-3 py-3 rounded-xl text-xs font-bold capitalize border transition-all flex flex-col items-center justify-center gap-2 group
+                                                            ${formData.role === role
+                                                                ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-500/30 transform scale-[1.02]'
+                                                                : 'bg-white dark:bg-midnight-950 border-gray-200 dark:border-midnight-800 text-gray-600 dark:text-gray-400 hover:border-brand-300 dark:hover:border-brand-800 hover:bg-brand-50 dark:hover:bg-brand-900/10'
+                                                            }`}
+                                                    >
+                                                        {role}
+                                                        {formData.role === role && <FiCheckCircle size={14} className="text-white/90" />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Detailed Permissions (Collapsible or just listed nicely) */}
+                                    <div className="bg-gray-50 dark:bg-midnight-950/50 rounded-2xl p-6 border border-gray-100 dark:border-midnight-800">
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Granted Permissions</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {ALL_PERMISSIONS.map((perm) => (
+                                                <label
+                                                    key={perm.id}
+                                                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all border
+                                                        ${formData.permissions.includes(perm.id)
+                                                            ? 'bg-white dark:bg-midnight-900 border-brand-200 dark:border-brand-900 text-brand-700 dark:text-brand-300 shadow-sm'
+                                                            : 'bg-transparent border-transparent text-gray-400 hover:bg-white dark:hover:bg-midnight-900'
+                                                        }`}
+                                                >
                                                     <input
                                                         type="checkbox"
+                                                        className="hidden"
                                                         checked={formData.permissions.includes(perm.id)}
                                                         onChange={() => togglePermission(perm.id)}
-                                                        className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 transition-all cursor-pointer"
                                                     />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="font-bold text-gray-900 dark:text-white group-hover:text-brand-600 transition-colors">{perm.label}</div>
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{perm.desc}</div>
-                                                </div>
-                                                {formData.permissions.includes(perm.id) && <FiShield className="text-brand-500" size={16} />}
-                                            </label>
-                                        ))}
+                                                    {formData.permissions.includes(perm.id) && <FiCheckCircle size={12} />}
+                                                    {perm.label}
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="pt-6 flex gap-4 sticky bottom-0 bg-white dark:bg-midnight-900 pb-2">
-                                <button
-                                    type="submit"
-                                    className="flex-1 px-6 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl transition-all font-bold shadow-xl shadow-brand-900/30 active:scale-95 flex items-center justify-center gap-2"
-                                >
-                                    <FiPlus size={20} />
-                                    <span>{isEditing ? 'Save Security Changes' : 'Initialize New Account'}</span>
-                                </button>
-                            </div>
-                        </form>
+                                <div className="pt-4 sticky bottom-0 bg-white dark:bg-midnight-900 z-10">
+                                    <button
+                                        type="submit"
+                                        className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl transition-all font-black uppercase tracking-widest shadow-xl shadow-brand-500/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        <FiPlus size={18} />
+                                        <span>{isEditing ? 'Save Changes' : 'Create User Account'}</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}
