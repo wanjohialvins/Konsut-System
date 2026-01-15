@@ -23,6 +23,22 @@ const Users = () => {
         permissions: [] as string[]
     });
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [revealedPassword, setRevealedPassword] = useState<string | null>(null); // New state for modal
+
+    const handleResetPassword = async (id: number) => {
+        const confirmed = await showConfirm('Override this user\'s password? This action will be logged and alerted to the CEO.');
+        if (!confirmed) return;
+
+        try {
+            const res = await api.users.resetPassword(id.toString());
+            if (res.success) {
+                setRevealedPassword(res.newPassword);
+                showMessage('success', 'Password reset successfully');
+            }
+        } catch (error: any) {
+            showMessage('error', error.message || 'Failed to reset password');
+        }
+    };
 
     const ALL_PERMISSIONS = [
         { id: '/', label: 'Overview', desc: 'Main business dashboard' },
@@ -229,6 +245,13 @@ const Users = () => {
                                     <td className="p-5 text-right">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
+                                                onClick={() => handleResetPassword(u.id)}
+                                                className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-midnight-800 rounded-lg transition-all"
+                                                title="Reset & Reveal Password"
+                                            >
+                                                <FiKey size={18} />
+                                            </button>
+                                            <button
                                                 onClick={() => handleEdit(u)}
                                                 className="p-2 text-brand-600 hover:bg-brand-50 dark:hover:bg-midnight-800 rounded-lg transition-all"
                                                 title="Edit User"
@@ -251,6 +274,36 @@ const Users = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Password Reveal Modal */}
+            {revealedPassword && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setRevealedPassword(null)}></div>
+                    <div className="relative bg-white dark:bg-midnight-900 rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-100 dark:border-midnight-800 text-center space-y-6">
+                        <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/20 text-red-600 rounded-full flex items-center justify-center">
+                            <FiKey size={32} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Security Alert</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+                                The password has been reset. This is the <strong>ONLY</strong> time you will see this credentials.
+                                <br />An alert has been sent to the CEO.
+                            </p>
+                        </div>
+                        <div className="p-4 bg-gray-100 dark:bg-midnight-950 rounded-xl border border-gray-200 dark:border-midnight-800">
+                            <code className="text-2xl font-mono font-black text-brand-600 dark:text-brand-400 tracking-wider select-all">
+                                {revealedPassword}
+                            </code>
+                        </div>
+                        <button
+                            onClick={() => setRevealedPassword(null)}
+                            className="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-bold transition-all hover:opacity-90"
+                        >
+                            I have copied it
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Add/Edit User Modal */}
             {showModal && (
