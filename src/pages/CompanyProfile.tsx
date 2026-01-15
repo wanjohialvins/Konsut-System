@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText } from "react-icons/fi";
+import logoUrl from '../assets/logo.jpg';
 import { api } from "../services/api";
 import { useToast } from "../contexts/ToastContext";
 
 const CompanyProfile = () => {
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
-    const [company, setCompany] = useState({
-        name: "",
-        address: "",
-        phone: "",
-        email: "",
-        website: "",
-        pin: "",
-        logo: ""
-    });
+    // Initial state moved to below DEFAULT_COMPANY definition
+
+    const DEFAULT_COMPANY = {
+        name: "Konsut Ltd",
+        address: "P.O. Box 12345, Nairobi, Kenya\nWestlands, Mirage Tower 2",
+        phone: "+254 700 000 000",
+        email: "info@konsut.com",
+        website: "www.konsut.com",
+        pin: "P051234567Z",
+        logo: logoUrl
+    };
+
+    const [company, setCompany] = useState(DEFAULT_COMPANY);
 
     useEffect(() => {
         api.settings.get().then(s => {
-            if (s?.company) setCompany(s.company);
+            if (s?.company) {
+                // Merge API data with defaults to ensure no missing fields
+                setCompany(prev => ({ ...prev, ...s.company }));
+            }
         });
     }, []);
 
