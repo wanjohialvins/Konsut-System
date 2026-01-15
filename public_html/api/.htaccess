@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Ensure Authorization header is passed to PHP
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Ensure Custom Headers are passed
+RewriteCond %{HTTP:X-User-Id} .
+RewriteRule .* - [E=HTTP_X_USER_ID:%{HTTP:X-User-Id}]
+
+RewriteCond %{HTTP:X-User-Role} .
+RewriteRule .* - [E=HTTP_X_USER_ROLE:%{HTTP:X-User-Role}]
+
+RewriteCond %{HTTP:X-User-Permissions} .
+RewriteRule .* - [E=HTTP_X_USER_PERMISSIONS:%{HTTP:X-User-Permissions}]
+
+# Handle Preflight OPTIONS requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]

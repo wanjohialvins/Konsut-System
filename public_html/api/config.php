@@ -55,11 +55,52 @@ function checkPermission($action)
 {
     $role = $_SERVER['HTTP_X_USER_ROLE'] ?? 'viewer';
     $permissionsJson = $_SERVER['HTTP_X_USER_PERMISSIONS'] ?? '[]';
-    $permissions = json_decode($permissionsJson, true);
+    $permissions = json_decode($permissionsJson, true) ?? [];
 
     if ($role === 'admin')
         return true;
 
+    // Map Backend Actions -> Frontend Route Permissions
+    $permissionMap = [
+        // Stock
+        'view_stock' => '/stock/inventory',
+        'manage_stock' => '/stock/add', // Requires "Add Stock" permission to create/edit/delete
+
+        // Invoices
+        'view_invoices' => '/invoices',
+        'manage_invoices' => '/new-invoice', // Requires "Create Order" permission
+        'delete_invoice' => '/invoices',      // Deleting requires access to the list (refined later?)
+
+        // Clients
+        'view_clients' => '/clients',
+        'manage_clients' => '/clients',
+
+        // Users
+        'view_users' => '/users',
+        'manage_users' => '/users',
+
+        // Settings
+        'view_settings' => '/settings/profile',
+        'manage_settings' => '/settings/system',
+
+        // Suppliers (New)
+        'view_suppliers' => '/stock/inventory',
+        'manage_suppliers' => '/stock/add',
+    ];
+
+    // If the action is in the map, check for the mapped route
+    if (isset($permissionMap[$action])) {
+        $requiredRoute = $permissionMap[$action];
+        $hasPermission = in_array($requiredRoute, $permissions);
+
+        // DEBUG LOGGING
+        $logData = date('Y-m-d H:i:s') . " | Action: $action | Required: $requiredRoute | Role: $role | Perms: $permissionsJson | Result: " . ($hasPermission ? 'PASS' : 'FAIL') . "\n";
+        file_put_contents('debug_auth.txt', $logData, FILE_APPEND);
+
+        return $hasPermission;
+    }
+
+    // Fallback
     return in_array($action, $permissions);
 }
 
