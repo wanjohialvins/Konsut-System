@@ -120,10 +120,10 @@ const SystemControl = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-midnight-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl border border-gray-700">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-black text-white uppercase flex items-center gap-3">
+                            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase flex items-center gap-3">
                                 <FiSearch /> Login Diagnostic
                             </h2>
-                            <button onClick={() => setDebugModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full text-white"><FiX size={24} /></button>
+                            <button onClick={() => setDebugModalOpen(false)} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-gray-500 dark:text-white"><FiX size={24} /></button>
                         </div>
 
                         <form onSubmit={handleDebugLogin} className="space-y-4 mb-6">
@@ -131,7 +131,7 @@ const SystemControl = () => {
                                 value={debugUsername}
                                 onChange={e => setDebugUsername(e.target.value)}
                                 placeholder="Username to test"
-                                className="w-full px-4 py-3 bg-midnight-900 border border-gray-600 rounded-xl text-white outline-none focus:border-brand-500"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white outline-none focus:border-brand-500"
                                 required
                             />
                             <div className="flex gap-2">
@@ -139,7 +139,8 @@ const SystemControl = () => {
                                     value={debugPassword}
                                     onChange={e => setDebugPassword(e.target.value)}
                                     placeholder="Password to check"
-                                    className="w-full px-4 py-3 bg-midnight-900 border border-gray-600 rounded-xl text-white outline-none focus:border-brand-500"
+                                    type="password"
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white outline-none focus:border-brand-500"
                                     required
                                 />
                                 <button type="submit" className="bg-brand-600 hover:bg-brand-500 text-white px-6 py-3 rounded-xl font-bold uppercase text-sm">Test</button>
@@ -147,30 +148,30 @@ const SystemControl = () => {
                         </form>
 
                         {debugResult && (
-                            <div className="bg-black/30 rounded-xl p-4 border border-white/10 space-y-2 font-mono text-sm">
-                                <div className="flex justify-between border-b border-white/10 pb-2 mb-2">
-                                    <span className="text-gray-400">User Found:</span>
-                                    <span className={debugResult.found ? "text-green-400 font-bold" : "text-red-400 font-bold"}>
+                            <div className="bg-gray-100 dark:bg-black/30 rounded-xl p-4 border border-gray-200 dark:border-white/10 space-y-2 font-mono text-sm">
+                                <div className="flex justify-between border-b border-gray-200 dark:border-white/10 pb-2 mb-2">
+                                    <span className="text-gray-500 dark:text-gray-400">User Found:</span>
+                                    <span className={debugResult.found ? "text-green-600 dark:text-green-400 font-bold" : "text-red-600 dark:text-red-400 font-bold"}>
                                         {debugResult.found ? "YES" : "NO"}
                                     </span>
                                 </div>
                                 {debugResult.found && (
                                     <>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-400">Role:</span>
-                                            <span className="text-white">{debugResult.role}</span>
+                                            <span className="text-gray-500 dark:text-gray-400">Role:</span>
+                                            <span className="text-gray-900 dark:text-white">{debugResult.role}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-400">Stored Hash:</span>
+                                            <span className="text-gray-500 dark:text-gray-400">Stored Hash:</span>
                                             <span className="text-gray-500 text-xs">{debugResult.stored_hash_preview}</span>
                                         </div>
-                                        <div className="flex justify-between pt-2 border-t border-white/10 mt-2">
-                                            <span className="text-gray-400">Password Match:</span>
+                                        <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-white/10 mt-2">
+                                            <span className="text-gray-500 dark:text-gray-400">Password Match:</span>
                                             <div className="flex items-center gap-2">
                                                 {debugResult.match ? (
-                                                    <span className="text-green-400 font-bold flex items-center gap-1"><FiCheck /> MATCH</span>
+                                                    <span className="text-green-600 dark:text-green-400 font-bold flex items-center gap-1"><FiCheck /> MATCH</span>
                                                 ) : (
-                                                    <span className="text-red-500 font-bold flex items-center gap-1"><FiX /> FAIL</span>
+                                                    <span className="text-red-600 dark:text-red-500 font-bold flex items-center gap-1"><FiX /> FAIL</span>
                                                 )}
                                             </div>
                                         </div>
@@ -223,17 +224,17 @@ const SystemControl = () => {
                     desc="Rotate system sessions and force-clear sensitive temporary data pools. Recommended after high-volume operations."
                     action="purge-sessions"
                 />
-                <div className={`p-8 rounded-[2.5rem] border-2 border-dashed flex flex-col justify-between transition-all ${maintenanceMode ? 'bg-amber-50 border-amber-500' : 'bg-gray-50 border-gray-200'} h-full shadow-sm`}>
+                <div className={`p-8 rounded-[2.5rem] border-2 border-dashed flex flex-col justify-between transition-all ${maintenanceMode ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-500' : 'bg-gray-50 dark:bg-midnight-900 border-gray-200 dark:border-midnight-800'} h-full shadow-sm`}>
                     <div>
-                        <div className={`p-4 rounded-2xl w-fit mb-6 ${maintenanceMode ? 'bg-amber-500 text-white animate-pulse' : 'bg-gray-200 text-gray-500'}`}>
+                        <div className={`p-4 rounded-2xl w-fit mb-6 ${maintenanceMode ? 'bg-amber-500 text-white animate-pulse' : 'bg-gray-200 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
                             <FiLock size={28} />
                         </div>
                         <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">Maintenance Lock</h3>
-                        <p className="text-sm text-gray-500 font-medium leading-relaxed">Prevent non-admin users from accessing the system. Active sessions will be redirected to a standby page.</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">Prevent non-admin users from accessing the system. Active sessions will be redirected to a standby page.</p>
                     </div>
                     <button
                         onClick={() => runAction('maintenance')}
-                        className={`mt-10 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${maintenanceMode ? 'bg-amber-600 text-white shadow-xl shadow-amber-500/30' : 'bg-slate-200 text-gray-700 hover:bg-slate-300'}`}
+                        className={`mt-10 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${maintenanceMode ? 'bg-amber-600 text-white shadow-xl shadow-amber-500/30' : 'bg-slate-200 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700'}`}
                     >
                         {maintenanceMode ? 'DEACTIVATE LOCK' : 'ACTIVATE LOCK'}
                     </button>
