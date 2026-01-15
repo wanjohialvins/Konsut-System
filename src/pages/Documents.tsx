@@ -36,25 +36,57 @@ const Documents = () => {
         loadDocs();
     }, [loadDocs]);
 
-    const handleUpload = async () => {
-        // Simulation of file upload logic
-        const dummyName = await showPrompt("Enter document name (Simulation):");
-        if (!dummyName) return;
+    // Hidden file input ref
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const triggerUpload = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
 
         try {
-            await api.vault.add({
-                id: `DOC - ${Date.now()} `,
-                name: dummyName,
-                type: 'PDF',
-                size: '1.2 MB',
-                upload_date: new Date().toISOString().split('T')[0],
-                path: '/uploads/simulated.pdf'
-            });
-            showToast('success', 'Document uploaded (Metadata only)');
-            loadDocs();
-        } catch (e) {
-            showToast('error', 'Upload failed');
+            setLoading(true);
+            const res: any = await api.vault.upload(formData);
+            if (res.success) {
+                showToast('success', 'Document uploaded successfully');
+                loadDocs();
+            } else {
+                showToast('error', res.error || 'Upload failed');
+            }
+        } catch (error: any) {
+            showToast('error', error.message || 'Upload failed');
+        } finally {
+            setLoading(false);
+            // Reset input
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
+    };
+
+    const handleDownload = (path: string) => {
+        // Path matches /public_html/uploads/... coming from DB
+        // We need to construct full URL. 
+        // Backend saves path as '/public_html/uploads/filename.ext'.
+        // We are on localhost.
+
+        // Remove leading slash if present to avoid double slash issues if base has it
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
+        // If we want to support the cPanel url structure we used:
+        // API_BASE_URL is .../public_html/api
+        // Files are in .../public_html/uploads
+
+        // Easiest is to point relatively or absolutely based on known structure.
+        // If path is '/public_html/uploads/...' and our site root is valid,
+        // we can just match it.
+
+        const downloadUrl = `http://127.0.0.1/${cleanPath}`;
+        window.open(downloadUrl, '_blank');
     };
 
     const handleDelete = async (id: string) => {
@@ -84,7 +116,13 @@ const Documents = () => {
                     <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Centralized repository for licenses, contracts, and digital assets</p>
                 </div>
                 <div className="flex gap-3">
-                    <button onClick={handleUpload} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-all active:scale-95">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
+                    <button onClick={triggerUpload} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-all active:scale-95">
                         <FiUpload /> Upload File
                     </button>
                 </div>
@@ -134,7 +172,7 @@ const Documents = () => {
                                         <td className="px-6 py-5 text-sm text-gray-500 font-medium">{doc.upload_date}</td>
                                         <td className="px-6 py-5 text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all" title="Download"><FiDownload /></button>
+                                                <button onClick={() => handleDownload(doc.path)} className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all" title="Download"><FiDownload /></button>
                                                 <button onClick={() => handleDelete(doc.id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all" title="Delete"><FiTrash2 /></button>
                                             </div>
                                         </td>

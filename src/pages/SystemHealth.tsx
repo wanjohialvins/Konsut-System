@@ -23,6 +23,16 @@ const SystemHealth = () => {
             if (data) setStats(data);
         } catch (error) {
             console.error('Failed to fetch health vital stats:', error);
+            // Fallback stats to avoid crash
+            setStats({
+                dbSize: 'Unknown',
+                uptime: 'Offline',
+                cpuUsage: 0,
+                ramUsage: 0,
+                status: 'Error',
+                phpVersion: 'Unknown',
+                serverSoftware: 'Unknown'
+            });
         } finally {
             setLoading(false);
         }

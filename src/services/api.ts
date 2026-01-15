@@ -141,6 +141,27 @@ export const api = {
     vault: {
         getAll: () => request('vault.php'),
         add: (data: Record<string, any>) => request('vault.php', { method: 'POST', body: JSON.stringify(data) }),
+        upload: (formData: FormData) => {
+            const token = localStorage.getItem('invoice_system_auth');
+            const headers: any = {};
+            if (token) {
+                const user = JSON.parse(token);
+                headers['X-User-Id'] = user.id;
+                headers['X-User-Role'] = user.role;
+            }
+            return fetch(`${API_BASE_URL}/vault.php`, {
+                method: 'POST',
+                headers,
+                body: formData
+            }).then(async res => {
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Server response was not JSON: ' + text);
+                }
+            });
+        },
         delete: (id: string) => request(`vault.php?id=${id}`, { method: 'DELETE' }),
     },
     tasks: {
