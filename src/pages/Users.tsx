@@ -1,21 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiTrash2, FiEdit2, FiShield, FiCheckCircle, FiX } from 'react-icons/fi';
+import { FiUserPlus, FiTrash2, FiShield, FiUser, FiActivity, FiKey, FiMail, FiEdit2, FiX, FiCheckCircle, FiPlus } from "react-icons/fi";
+import { useModal } from "../contexts/ModalContext";
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import UserAvatar from '../components/UserAvatar';
 
-interface User {
-    id: number;
-    username: string;
-    email?: string;
-    role: string;
-    is_active: number | boolean;
-    last_login?: string;
-    created_at?: string;
-    permissions?: string[]; // Added permissions field
-}
+import type { User } from "../types/types";
 
 const Users = () => {
+    const { showConfirm } = useModal();
     const { user: currentUser } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
@@ -128,10 +121,10 @@ const Users = () => {
         e.preventDefault();
         try {
             if (isEditing && editingId) {
-                await api.users.update({ ...formData, id: editingId });
+                await api.users.update({ ...formData, id: editingId } as any);
                 showMessage('success', 'User updated successfully');
             } else {
-                await api.users.create(formData);
+                await api.users.create(formData as any);
                 showMessage('success', 'User created successfully');
             }
             setShowModal(false);
@@ -143,7 +136,8 @@ const Users = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this user?')) return;
+        const confirmed = await showConfirm('Are you sure you want to delete this user?');
+        if (!confirmed) return;
         try {
             await api.users.delete(id.toString());
             showMessage('success', 'User deleted');
@@ -178,7 +172,7 @@ const Users = () => {
             </div>
 
             {message && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in slide-in-from-top duration-300 ${message.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
+                <div className={`p - 4 rounded - xl flex items - center gap - 3 animate -in slide -in -from - top duration - 300 ${message.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'} `}>
                     <FiCheckCircle />
                     <span className="font-medium">{message.text}</span>
                 </div>
@@ -209,18 +203,18 @@ const Users = () => {
                                         </div>
                                     </td>
                                     <td className="p-5 text-center">
-                                        <span className={`px-3 py-1.5 rounded-xl font-bold border
+                                        <span className={`px - 3 py - 1.5 rounded - xl font - bold border
                       ${u.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800' :
                                                 u.role === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' :
                                                     'bg-slate-100 text-slate-700 border-slate-200 dark:bg-midnight-800 dark:text-midnight-text-secondary dark:border-midnight-700'
-                                            }`}>
+                                            } `}>
                                             {u.role}
                                         </span>
                                     </td>
                                     <td className="p-5">
                                         <div className="flex items-center justify-center gap-2">
-                                            <span className={`w-2 h-2 rounded-full shadow-sm ${u.is_active ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-slate-300'}`}></span>
-                                            <span className={`font-bold ${u.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
+                                            <span className={`w - 2 h - 2 rounded - full shadow - sm ${u.is_active ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-slate-300'} `}></span>
+                                            <span className={`font - bold ${u.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} `}>
                                                 {u.is_active ? 'Online' : 'Offline'}
                                             </span>
                                         </div>
@@ -285,8 +279,8 @@ const Users = () => {
                                             type="text"
                                             required
                                             readOnly={isEditing}
-                                            className={`w-full px-5 py-3.5 rounded-2xl border bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium
-                      ${isEditing ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-midnight-800' : 'border-gray-200 dark:border-midnight-700'}`}
+                                            className={`w - full px - 5 py - 3.5 rounded - 2xl border bg - gray - 50 dark: bg - midnight - 950 text - gray - 900 dark: text - white focus: ring - 4 focus: ring - brand - 500 / 20 focus: border - brand - 500 outline - none transition - all font - medium
+                      ${isEditing ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-midnight-800' : 'border-gray-200 dark:border-midnight-700'} `}
                                             value={formData.username}
                                             onChange={e => setFormData({ ...formData, username: e.target.value })}
                                         />
@@ -319,11 +313,11 @@ const Users = () => {
                                                 type="button"
                                                 key={role}
                                                 onClick={() => applyPreset(role)}
-                                                className={`px-4 py-3 rounded-2xl text-sm font-bold capitalize border transition-all flex items-center justify-between
+                                                className={`px - 4 py - 3 rounded - 2xl text - sm font - bold capitalize border transition - all flex items - center justify - between
                           ${formData.role === role
                                                         ? 'bg-brand-600 border-brand-600 text-white shadow-lg'
                                                         : 'bg-white dark:bg-midnight-950 border-gray-200 dark:border-midnight-800 text-gray-500 dark:text-gray-400'
-                                                    }`}
+                                                    } `}
                                             >
                                                 {role}
                                                 {formData.role === role && <FiCheckCircle size={14} />}

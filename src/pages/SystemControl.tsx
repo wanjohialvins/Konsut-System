@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { FiShield, FiDatabase, FiRefreshCcw, FiTrash2, FiDownload, FiUpload, FiLock, FiSearch, FiCheck, FiX, FiActivity } from "react-icons/fi";
+import { FiShield, FiDatabase, FiRefreshCcw, FiTrash2, FiLock, FiSearch, FiCheck, FiX, FiActivity } from "react-icons/fi";
 import { api } from "../services/api";
 import { useToast } from "../contexts/ToastContext";
+import { useModal } from "../contexts/ModalContext";
 
 const SystemControl = () => {
     const { showToast } = useToast();
+    const { showAlert, showPrompt } = useModal();
     const [debugModalOpen, setDebugModalOpen] = useState(false);
     const [debugUsername, setDebugUsername] = useState("");
     const [debugPassword, setDebugPassword] = useState("");
-    const [debugResult, setDebugResult] = useState<any>(null);
+    const [debugResult, setDebugResult] = useState<Record<string, any> | null>(null);
     const [loading, setLoading] = useState(false);
     const [confirmWipe, setConfirmWipe] = useState("");
     const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -22,8 +24,8 @@ const SystemControl = () => {
                 } else {
                     setMaintenanceMode(localStorage.getItem('system_maintenance') === 'true');
                 }
-            } catch (e) {
-                console.error("Failed to sync settings", e);
+            } catch {
+                console.error("Failed to sync settings");
             }
         };
         loadSettings();
@@ -54,7 +56,7 @@ const SystemControl = () => {
                 await api.settings.save({ 'system_maintenance': newState });
                 showToast('info', `Maintenance mode ${newState ? 'ENABLED' : 'DISABLED'}`);
             } else if (action === 'broadcast') {
-                const msg = prompt("Enter broadcast message for all users:");
+                const msg = await showPrompt("Enter broadcast message for all users:");
                 if (msg) {
                     await api.admin.runAction(action, msg);
                     showToast('success', 'Message broadcasted');
@@ -62,15 +64,16 @@ const SystemControl = () => {
             } else if (action === 'sync') {
                 const res = await api.admin.runAction('sync');
                 showToast('success', res.message || 'System synced');
-                alert(JSON.stringify(res, null, 2)); // Show detailed health stats
+                showAlert(JSON.stringify(res, null, 2), { title: "System Analytics" });
             } else if (action === 'debug_login') {
                 setDebugModalOpen(true);
             } else {
                 await api.admin.runAction(action);
                 showToast('success', 'Protocol executed successfully');
             }
-        } catch (e: any) {
-            showToast('error', e.message || 'Execution failure');
+        } catch (e: unknown) {
+            const errorMsg = e instanceof Error ? e.message : 'Execution failure';
+            showToast('error', errorMsg);
             console.error(e);
         } finally {
             setLoading(false);
@@ -84,14 +87,15 @@ const SystemControl = () => {
         try {
             const res = await api.admin.debugAuth({ username: debugUsername, password: debugPassword });
             setDebugResult(res.debug_info);
-        } catch (e: any) {
-            showToast('error', e.message || 'Debug execution failed');
+        } catch (e: unknown) {
+            const errorMsg = e instanceof Error ? e.message : 'Debug execution failed';
+            showToast('error', errorMsg);
         } finally {
             setLoading(false);
         }
     }
 
-    const ActionCard = ({ icon: Icon, title, desc, action, color = "brand", warning = false }: any) => (
+    const ActionCard = ({ icon: Icon, title, desc, action, warning = false }: { icon: React.ElementType, title: string, desc: string, action: string, color?: string, warning?: boolean }) => (
         <div className={`p-8 rounded-[2.5rem] bg-white dark:bg-midnight-900 border border-gray-100 dark:border-midnight-800 shadow-xl flex flex-col justify-between group h-full ${warning ? 'hover:border-red-500' : 'hover:border-brand-500'} transition-all`}>
             <div>
                 <div className={`p-4 rounded-2xl w-fit mb-6 ${warning ? 'bg-red-50 dark:bg-red-950/20 text-red-600' : 'bg-brand-50 dark:bg-brand-900/20 text-brand-600'}`}>

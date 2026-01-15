@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiCheckSquare, FiPlus, FiClock, FiUser, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2, FiEdit2, FiCalendar, FiCheckSquare, FiUser } from 'react-icons/fi';
+import { useModal } from "../contexts/ModalContext";
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -13,6 +14,7 @@ interface Task {
 }
 
 const Tasks = () => {
+    const { showConfirm } = useModal();
     const { showToast } = useToast();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(false);
@@ -46,7 +48,8 @@ const Tasks = () => {
     );
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete task?')) return;
+        const confirmed = await showConfirm('Delete task?');
+        if (!confirmed) return;
         try {
             await api.tasks.delete(id);
             loadTasks();

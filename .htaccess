@@ -1,0 +1,15 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Prevent Directory Listing
+Options -Indexes
+
+# Block access to sensitive directories
+RewriteRule ^(\.git|node_modules|src|\.vscode) - [F,L]
+
+# Block access to sensitive files
+RewriteRule ^(\.env|\.gitignore|package\.json|package-lock\.json|tsconfig\.json|vite\.config\.ts|README\.md) - [F,L]
+
+# Allow access to everything else (like backend/ and standard public files)
+# Specifically allow public_html
+RewriteRule ^public_html/ - [L]

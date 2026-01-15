@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaBoxOpen, FaFileImport, FaArrowLeft } from "react-icons/fa";
-import { FiBox, FiTruck, FiTool } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiPlus, FiTrash2, FiPackage, FiInfo, FiHash, FiImage, FiUpload, FiBox, FiTruck, FiTool } from "react-icons/fi";
+import { FaBoxOpen, FaFileImport } from "react-icons/fa";
+import { useModal } from "../contexts/ModalContext";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../contexts/ToastContext";
@@ -8,6 +9,7 @@ import { useToast } from "../contexts/ToastContext";
 type Category = "products" | "mobilization" | "services";
 
 const AddStock = () => {
+    const { showConfirm } = useModal();
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -59,7 +61,7 @@ const AddStock = () => {
             await api.stock.create(payload);
             showToast('success', 'Resource initialized in cloud');
             navigate('/stock/inventory');
-        } catch (error) {
+        } catch {
             showToast('error', 'Cloud sync failed');
         } finally {
             setLoading(false);
@@ -78,17 +80,24 @@ const AddStock = () => {
             try {
                 showToast('info', 'Analysis initiated...');
                 const { parseCSV } = await import('../utils/csvHelper');
-                const rows = parseCSV(text);
+                const rows = parseCSV(text) as Record<string, string>[];
 
                 if (rows.length === 0) {
                     showToast('error', 'CSV appears empty or invalid');
                     return;
                 }
 
+                // Helper to parse currency/numbers (removes $ , etc)
+                const parseNum = (val: any) => {
+                    if (!val) return 0;
+                    const str = String(val).replace(/[^0-9.-]+/g, "");
+                    return Number(str) || 0;
+                };
+
                 // Map CSV fields to StockItem
                 const itemsToImport = rows.map(r => {
-                    let ksh = Number(r.price || r.cost || 0);
-                    let usd = Number(r.priceusd || r.usd || 0);
+                    let ksh = parseNum(r.price || r.cost || r.amount || 0);
+                    let usd = parseNum(r.priceusd || r.usd || 0);
 
                     // Auto-convert if one is missing
                     if (ksh > 0 && usd === 0) {
@@ -100,8 +109,10 @@ const AddStock = () => {
                     return {
                         id: r.id || genId(),
                         name: r.name || r.item || 'Unknown Item',
-                        category: activeCategory,
-                        quantity: Number(r.quantity || r.qty || 0),
+                        category: (['products', 'mobilization', 'services'].includes((r.category || r.cat || '').toLowerCase())
+                            ? (r.category || r.cat).toLowerCase()
+                            : activeCategory) as Category,
+                        quantity: parseNum(r.quantity || r.qty || 1),
                         unitPrice: ksh,
                         unitPriceUsd: usd,
                         description: r.description || r.desc || ''
@@ -113,7 +124,8 @@ const AddStock = () => {
                     return;
                 }
 
-                if (!confirm(`Import ${itemsToImport.length} items into ${activeCategory}?`)) return;
+                const confirmed = await showConfirm(`Import ${itemsToImport.length} items into ${activeCategory}?`);
+                if (!confirmed) return;
 
                 setLoading(true);
                 // Batch upload
@@ -122,7 +134,7 @@ const AddStock = () => {
                     try {
                         await api.stock.create(item);
                         success++;
-                    } catch (e) {
+                    } catch {
                         console.error('Import failed for', item.name);
                     }
                 }
@@ -130,8 +142,7 @@ const AddStock = () => {
                 showToast('success', `${success}/${itemsToImport.length} items imported successfully`);
                 navigate('/stock/inventory');
 
-            } catch (err) {
-                console.error(err);
+            } catch {
                 showToast('error', 'Failed to parse CSV');
             } finally {
                 setLoading(false);
@@ -153,7 +164,7 @@ const AddStock = () => {
                     <p className="text-gray-500 dark:text-gray-400 mt-3 font-medium text-lg">Initialize new resources into the company ecosystem</p>
                 </div>
                 <Link to="/stock/inventory" className="p-4 bg-gray-100 dark:bg-midnight-900 rounded-2xl text-gray-500 hover:text-brand-600 transition-all">
-                    <FaArrowLeft size={24} />
+                    <FiArrowLeft size={24} />
                 </Link>
             </header>
 
@@ -210,7 +221,7 @@ const AddStock = () => {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Base Cost (Ksh)</label>
                                 <input
@@ -219,6 +230,16 @@ const AddStock = () => {
                                     onChange={e => onKshChange(Number(e.target.value))}
                                     className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-[1.5rem] p-6 text-xl font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all"
                                     required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Base Cost (USD)</label>
+                                <input
+                                    type="number"
+                                    value={formPriceUSD || ""}
+                                    onChange={e => onUsdChange(Number(e.target.value))}
+                                    className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-[1.5rem] p-6 text-xl font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all"
+                                    placeholder="0.00"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -249,7 +270,7 @@ const AddStock = () => {
                             disabled={loading}
                             className="w-full bg-slate-950 dark:bg-brand-600 hover:bg-black dark:hover:bg-brand-700 text-white py-8 rounded-[2rem] font-black text-2xl uppercase tracking-[0.1em] transition-all shadow-2xl shadow-brand-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4"
                         >
-                            <FaPlus /> {loading ? 'Initializing...' : 'Add To Database'}
+                            <FiPlus /> {loading ? 'Initializing...' : 'Add To Database'}
                         </button>
                     </form>
                 </div>

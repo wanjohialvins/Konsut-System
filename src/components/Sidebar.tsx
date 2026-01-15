@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy } from "react-icons/fi";
+import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy, FiAward } from "react-icons/fi";
 import { useIsMobile } from "../hooks/useMediaQuery";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../services/api";
@@ -21,10 +21,10 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     try {
       const notifs = await api.admin.getNotifications();
       if (Array.isArray(notifs)) {
-        setUnreadCount(notifs.filter((n: any) => !n.read).length);
+        setUnreadCount(notifs.filter((n: { read: boolean | number }) => !n.read).length);
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // console.error(e);
     }
   };
 
@@ -186,6 +186,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 <FiShield size={18} /> Audit Logs
               </NavLink>
               <NavLink to="/accountability" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/accountability', isActive)}>
+                <FiAward size={18} /> Accountability Reports
+              </NavLink>
+              <NavLink to="/system-health" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/system-health', isActive)}>
                 <FiActivity size={18} /> System Health
               </NavLink>
             </nav>

@@ -28,6 +28,7 @@ import CommandPalette from "./components/CommandPalette";
 import GlobalSearch from "./components/GlobalSearch";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { ModalProvider } from "./contexts/ModalContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import { AuthProvider } from "./contexts/AuthContext";
@@ -46,50 +47,52 @@ const App = () => {
       <AuthProvider>
         <ThemeProvider>
           <ToastProvider>
-            <Router>
-              <CommandPalette />
-              <GlobalSearch />
-              <Routes>
-                {/* Public Route */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/maintenance" element={<Maintenance />} />
+            <ModalProvider>
+              <Router>
+                <CommandPalette />
+                <GlobalSearch />
+                <Routes>
+                  {/* Public Route */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/maintenance" element={<Maintenance />} />
 
-                {/* Protected Routes */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Layout />
-                  </ProtectedRoute>
-                }>
-                  <Route index element={<Dashboard />} />
-                  <Route path="new-invoice" element={<NewInvoice />} />
-                  <Route path="invoices" element={<Invoices />} />
-                  <Route path="clients" element={<Clients />} />
+                  {/* Protected Routes */}
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <Layout />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<Dashboard />} />
+                    <Route path="new-invoice" element={<NewInvoice />} />
+                    <Route path="invoices" element={<Invoices />} />
+                    <Route path="clients" element={<Clients />} />
 
-                  {/* Stock Module */}
-                  <Route path="stock/inventory" element={<Inventory />} />
-                  <Route path="stock/add" element={<AddStock />} />
+                    {/* Stock Module */}
+                    <Route path="stock/inventory" element={<Inventory />} />
+                    <Route path="stock/add" element={<AddStock />} />
 
-                  {/* Configuration Module */}
-                  <Route path="settings/profile" element={<CompanyProfile />} />
-                  <Route path="settings/invoice" element={<InvoiceSettings />} />
-                  <Route path="settings/preferences" element={<Preferences />} />
-                  <Route path="settings/system" element={<SystemControl />} />
+                    {/* Configuration Module */}
+                    <Route path="settings/profile" element={<CompanyProfile />} />
+                    <Route path="settings/invoice" element={<InvoiceSettings />} />
+                    <Route path="settings/preferences" element={<Preferences />} />
+                    <Route path="settings/system" element={<SystemControl />} />
 
-                  <Route path="analytics" element={<Analytics />} />
-                  <Route path="users" element={<Users />} />
-                  <Route path="audit-logs" element={<AuditLogs />} />
-                  <Route path="accountability" element={<Accountability />} />
-                  <Route path="system-health" element={<SystemHealth />} />
-                  <Route path="tasks" element={<Tasks />} />
-                  <Route path="documents" element={<Documents />} />
-                  <Route path="memos" element={<Memos />} />
-                  <Route path="suppliers" element={<Suppliers />} />
-                  <Route path="support" element={<Support />} />
-                  <Route path="notifications" element={<Notifications />} />
-                </Route>
-              </Routes>
-            </Router>
+                    <Route path="analytics" element={<Analytics />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="audit-logs" element={<AuditLogs />} />
+                    <Route path="accountability" element={<Accountability />} />
+                    <Route path="system-health" element={<SystemHealth />} />
+                    <Route path="tasks" element={<Tasks />} />
+                    <Route path="documents" element={<Documents />} />
+                    <Route path="memos" element={<Memos />} />
+                    <Route path="suppliers" element={<Suppliers />} />
+                    <Route path="support" element={<Support />} />
+                    <Route path="notifications" element={<Notifications />} />
+                  </Route>
+                </Routes>
+              </Router>
+            </ModalProvider>
           </ToastProvider>
         </ThemeProvider>
       </AuthProvider>

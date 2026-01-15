@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (isLoading) {
         return <div className="min-h-screen flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        </div>; // Or a proper Loading component
+        </div>;
     }
 
     if (!user) {
@@ -29,11 +29,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     }
 
     // Permission Guard
-    if (user?.permissions && user.permissions.length > 0 && !isAdmin) {
+    if (user?.permissions && Array.isArray(user.permissions) && user.permissions.length > 0 && !isAdmin) {
         // Check if current path is in permissions OR if it's the root path
-        const isAllowed = user.permissions.some(path => location.pathname === path || location.pathname.startsWith(path + '/'));
+        // Also allow sub-paths (e.g. /settings/profile allowed if /settings is allowed? No, usually specific)
+        // Adjust logic matches my previous understanding: strict path or startsWith check
+        const path = location.pathname;
+        const isAllowed = user.permissions.some(permPath => path === permPath || path.startsWith(permPath + '/'));
 
-        if (!isAllowed && location.pathname !== '/') {
+        if (!isAllowed && path !== '/') {
             const firstAllowed = user.permissions[0];
             if (firstAllowed) {
                 return <Navigate to={firstAllowed} replace />;
@@ -41,7 +44,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         }
 
         // If at root '/' and it's not strictly allowed, also redirect to first allowed
-        if (location.pathname === '/' && !user.permissions.includes('/')) {
+        if (path === '/' && !user.permissions.includes('/')) {
             const firstAllowed = user.permissions[0];
             if (firstAllowed) {
                 return <Navigate to={firstAllowed} replace />;

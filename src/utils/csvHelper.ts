@@ -2,7 +2,7 @@
  * Simple CSV Parser Utility
  */
 
-export const parseCSV = (text: string): any[] => {
+export const parseCSV = (text: string): Record<string, string>[] => {
     const lines = text.split('\n').map(l => l.trim()).filter(l => l);
     if (lines.length < 2) return [];
 
@@ -18,7 +18,7 @@ export const parseCSV = (text: string): any[] => {
 
         if (row.length === 0) continue;
 
-        const obj: any = {};
+        const obj: Record<string, string> = {};
         headers.forEach((h, index) => {
             let val = row[index] ? row[index].trim().replace(/^"|"$/g, '') : '';
             // Try convert to number if looks like one
@@ -36,7 +36,7 @@ export const parseCSV = (text: string): any[] => {
     return result;
 };
 
-export const generateCSV = (data: any[], headers?: string[]): string => {
+export const generateCSV = (data: Record<string, any>[], headers?: string[]): string => {
     if (!data.length) return '';
     const head = headers || Object.keys(data[0]);
     const rows = data.map(obj =>

@@ -1,0 +1,12 @@
+﻿src/components/Topbar.tsx(54,23): error TS2322: Type 'import("D:/Personal Projects/invoice system database/src/types/types").User | null' is not assignable to type 'import("D:/Personal Projects/invoice system database/src/types/auth").User | null'.
+  Type 'import("D:/Personal Projects/invoice system database/src/types/types").User' is not assignable to type 'import("D:/Personal Projects/invoice system database/src/types/auth").User'.
+    Types of property 'role' are incompatible.
+      Type 'string' is not assignable to type 'UserRole'.
+src/contexts/AuthContext.tsx(118,87): error TS2353: Object literal may only specify known properties, and 'updateUser' does not exist in type 'AuthContextType'.
+src/contexts/ThemeContext.tsx(95,13): error TS2353: Object literal may only specify known properties, and 'ocean' does not exist in type 'Record<AccentColor, Record<string, string>>'.
+src/contexts/ThemeContext.tsx(199,13): error TS2353: Object literal may only specify known properties, and 'setTheme' does not exist in type 'ThemeContextType'.
+src/pages/Inventory.tsx(177,57): error TS2353: Object literal may only specify known properties, and 'quantity' does not exist in type 'Product'.
+src/pages/Login.tsx(54,34): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/pages/Login.tsx(54,34): error TS18048: 'recoveryLogin' is possibly 'undefined'.
+src/pages/ResetPassword.tsx(23,38): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+  Type 'undefined' is not assignable to type 'number'.

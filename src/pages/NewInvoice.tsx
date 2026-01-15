@@ -1,6 +1,6 @@
-// Invoice & Quotation Creator
 import { DocumentEngine } from "../utils/DocumentEngine";
 import { SequenceManager } from "../utils/SequenceManager";
+
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -23,9 +23,10 @@ import {
 } from "react-icons/fa";
 
 import { useAuth } from "../contexts/AuthContext";
-import { FiBox, FiTruck, FiTool } from "react-icons/fi";
+import { FiBox, FiTruck, FiTool, FiPlus } from "react-icons/fi";
 import { useToast } from "../contexts/ToastContext";
 import { api } from "../services/api";
+import { useModal } from "../contexts/ModalContext";
 
 // Types
 import type { Invoice, InvoiceType, InvoiceItem as InvoiceLine, Product, Customer } from "../types/types";
@@ -38,6 +39,7 @@ const DRAFT_KEY = "konsut_newinvoice_draft_vFinal";
 const USD_TO_KSH_KEY = "usdToKshRate";
 
 const NewInvoice: React.FC = () => {
+  const { showAlert, showConfirm } = useModal();
   const { showToast } = useToast();
   const { user } = useAuth();
 
@@ -180,7 +182,7 @@ const NewInvoice: React.FC = () => {
 
       if (stockData) {
         // Map Backend (unitPrice) -> Frontend (priceKsh)
-        const mappedStock: Product[] = stockData.map((s: { id?: string | number; name?: string; category?: string; description?: string; unitPrice?: number; unit_price?: number; unitPriceUsd?: number; unit_price_usd?: number }) => ({
+        const mappedStock: Product[] = stockData.map((s: Record<string, any>) => ({
           ...s,
           id: String(s.id || ''),
           name: String(s.name || ''),
@@ -217,7 +219,7 @@ const NewInvoice: React.FC = () => {
           setCustomerEmail(customer.email);
           setCustomerAddress(customer.address);
           setCustomerKraPin(customer.kraPin);
-          setIssuedDate(invoiceToEdit.issuedDate);
+          setIssuedDate(invoiceToEdit.issuedDate || new Date().toISOString().split('T')[0]);
           setDueDate(invoiceToEdit.dueDate || invoiceToEdit.quotationValidUntil || "");
           setLines(invoiceToEdit.items || []);
           if (invoiceToEdit.currencyRate) setUsdToKshRate(invoiceToEdit.currencyRate);
@@ -258,8 +260,8 @@ const NewInvoice: React.FC = () => {
             if (d.dueDate) setDueDate(d.dueDate);
             if (d.lines) setLines(d.lines);
             if (d.activeDocumentType) setActiveDocumentType(d.activeDocumentType);
-          } catch (e) {
-            console.warn("Draft parse failed", e);
+          } catch {
+            console.warn("Draft parse failed");
           }
         }
       }
@@ -303,8 +305,8 @@ const NewInvoice: React.FC = () => {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(dataToSave));
       localStorage.setItem(USD_TO_KSH_KEY, String(usdToKshRate));
       return true;
-    } catch (e) {
-      console.error("Failed to save data:", e);
+    } catch {
+      console.error("Failed to save data");
       return false;
     }
   }, [customerId, customerName, customerPhone, customerEmail, customerAddress, customerKraPin, issuedDate, dueDate, lines, showDescriptions, includeDescriptionsInPDF, usdToKshRate, activeDocumentType, includeClientResponsibilities, clientResponsibilities, includeTermsAndConditions, termsAndConditions]);
@@ -410,8 +412,15 @@ const NewInvoice: React.FC = () => {
     setLines(updated);
   };
 
-  const removeLine = (index: number) => {
-    if (!confirm("Remove this line?")) return;
+  const updateLineItem = (index: number, field: keyof InvoiceLine, value: any) => {
+    const updated = [...lines];
+    updated[index] = { ...updated[index], [field]: value };
+    setLines(updated);
+  };
+
+  const removeLine = async (index: number) => {
+    const confirmed = await showConfirm("Remove this line?");
+    if (!confirmed) return;
     setLines((s) => s.filter((_, i) => i !== index));
     showToast("info", "Line removed");
   }
@@ -445,8 +454,8 @@ const NewInvoice: React.FC = () => {
         type: activeDocumentType,
         date: new Date().toISOString(),
         issuedDate,
-        dueDate: dueDate || "",
-        quotationValidUntil: activeDocumentType === 'quotation' ? dueDate : undefined,
+        dueDate: dueDate || undefined,
+        quotationValidUntil: activeDocumentType === 'quotation' ? (dueDate || undefined) : undefined,
         customer: { id: customerId, name: customerName, phone: customerPhone, email: customerEmail, address: customerAddress, kraPin: customerKraPin },
         items: lines,
         subtotal: calcSubtotal,
@@ -471,9 +480,9 @@ const NewInvoice: React.FC = () => {
       showToast("success", `${activeDocumentType.charAt(0).toUpperCase() + activeDocumentType.slice(1)} ${docId} saved to cloud`);
       localStorage.removeItem(DRAFT_KEY);
       navigate(`/new-invoice?id=${invoiceObj.id}&type=${activeDocumentType}`, { replace: true });
-    } catch (e) {
-      console.error("Failed to save document:", e);
-      showToast("error", "Failed to save to cloud");
+    } catch (e: unknown) {
+      const errorMsg = e instanceof Error ? e.message : 'Failed to save to cloud';
+      showToast("error", errorMsg);
     } finally {
       setLoading(false);
     }
@@ -525,9 +534,9 @@ const NewInvoice: React.FC = () => {
         items: lines,
         subtotal: calcSubtotal,
         tax: taxAmount,
-        taxAmount: taxAmount, // Added for backend compatibility
-        currency: "Ksh", // Added for backend compatibility
+        taxAmount: taxAmount,
         grandTotal: calcGrandTotal,
+        currency: "Ksh",
         currencyRate: usdToKshRate,
         status: "draft" as const,
         clientResponsibilities: includeClientResponsibilities ? clientResponsibilities : undefined,
@@ -588,8 +597,7 @@ const NewInvoice: React.FC = () => {
       });
 
       showToast("success", "PDF generated and saved successfully");
-    } catch (err) {
-      console.error("PDF generation failed:", err);
+    } catch {
       showToast("error", "PDF generation failed. See console for details");
     }
   };
@@ -631,7 +639,8 @@ const NewInvoice: React.FC = () => {
      Handle Convert (Unidirectional Workflow)
      ---------------------------- */
   const handleConvert = async (targetType: InvoiceType) => {
-    if (!confirm(`Convert this ${activeDocumentType} to ${targetType}? This will create a NEW document.`)) return;
+    const confirmed = await showConfirm(`Convert this ${activeDocumentType} to ${targetType}? This will create a NEW document.`);
+    if (!confirmed) return;
 
     try {
       if (!validateCustomerInfo() || lines.length === 0) {
@@ -695,8 +704,7 @@ const NewInvoice: React.FC = () => {
         window.location.reload(); // Force reload to pick up new ID cleanly
       }, 500);
 
-    } catch (e) {
-      console.error("Conversion failed:", e);
+    } catch {
       showToast("error", "Conversion failed");
     }
   };
@@ -1003,12 +1011,22 @@ const NewInvoice: React.FC = () => {
             <div className="bg-white dark:bg-midnight-900 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800 overflow-hidden">
               <div className="p-6 bg-gray-50/50 dark:bg-midnight-950/50 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center">
                 <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tight">Line Items <span className="text-gray-400 ml-2 text-sm font-bold">({lines.length})</span></h3>
-                <button
-                  onClick={() => setIncludeDescriptionsInPDF(!includeDescriptionsInPDF)}
-                  className={`text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-lg border transition-colors ${includeDescriptionsInPDF ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400' : 'bg-white dark:bg-midnight-800 border-gray-200 dark:border-midnight-700 text-gray-500 dark:text-gray-400'}`}
-                >
-                  {includeDescriptionsInPDF ? 'PDF: With Desc' : 'PDF: Compact'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIncludeDescriptionsInPDF(!includeDescriptionsInPDF)}
+                    className={`text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-xl border transition-all shadow-sm ${includeDescriptionsInPDF ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400' : 'bg-white dark:bg-midnight-800 border-gray-200 dark:border-midnight-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50'}`}
+                  >
+                    {includeDescriptionsInPDF ? 'PDF: With Desc' : 'PDF: Compact'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDescriptions(!showDescriptions)}
+                    className={`text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-xl border transition-all shadow-sm ${showDescriptions ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-900/50 text-brand-700 dark:text-brand-400' : 'bg-white dark:bg-midnight-800 border-gray-200 dark:border-midnight-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50'}`}
+                  >
+                    {showDescriptions ? 'Hide Desc' : 'Show Desc'}
+                  </button>
+                </div>
               </div>
 
               {lines.length === 0 ? (
@@ -1035,8 +1053,23 @@ const NewInvoice: React.FC = () => {
                         <tr key={`${item.id}-${idx}`} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                           <td className="p-6">
                             <div className="font-bold text-gray-900 dark:text-white text-sm">{item.name}</div>
-                            {showDescriptions && item.description && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 font-medium">{item.description}</div>
+
+                            <button
+                              onClick={() => setShowDescriptions(!showDescriptions)}
+                              className="text-[10px] uppercase font-bold text-brand-500 hover:text-brand-600 mt-1 flex items-center gap-1"
+                            >
+                              {showDescriptions ? <FiTool size={10} /> : <FiPlus size={10} />}
+                              {showDescriptions ? 'Hide Details' : 'Add Details'}
+                            </button>
+
+                            {showDescriptions && (
+                              <textarea
+                                value={item.description || ''}
+                                onChange={(e) => updateLineItem(idx, 'description', e.target.value)}
+                                className="w-full mt-2 bg-gray-50/50 dark:bg-midnight-800 border-none rounded-lg p-2 text-xs text-gray-600 dark:text-gray-300 focus:ring-1 focus:ring-brand-500/50 outline-none resize-none"
+                                rows={2}
+                                placeholder="Item description..."
+                              />
                             )}
                           </td>
                           <td className="p-6">

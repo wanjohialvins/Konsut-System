@@ -10,20 +10,21 @@
  */
 import React, { useEffect, useState, useMemo } from "react";
 import {
-  FaFileInvoiceDollar,
-  FaFileInvoice,
-  FaPlus,
-  FaChartLine,
-  FaUsers,
-  FaMoneyBillWave,
-  FaExclamationTriangle,
-  FaCheckCircle,
-  FaClock,
-  FaEye,
   FaBell,
   FaBolt,
-  FaBoxOpen
+  FaBoxOpen,
+  FaPlus,
+  FaMoneyBillWave,
+  FaFileInvoiceDollar,
+  FaChartLine,
+  FaUsers,
+  FaFileInvoice,
+  FaClock,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaEye
 } from "react-icons/fa";
+import type { Product } from "../types/types";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import { usePermissions } from "../hooks/usePermissions";
@@ -98,28 +99,28 @@ const Dashboard: React.FC = () => {
 
         if (Array.isArray(stockData)) {
           // Map Backend (unitPrice) -> Frontend (priceKsh)
-          const mappedStock = stockData.map((s: any) => ({
+          const mappedStock = (stockData as any[]).map(s => ({
             ...s,
-            priceKsh: Number(s.unitPrice || 0),
-            priceUSD: Number(s.unitPriceUsd || 0)
+            priceKsh: Number(s.unitPrice || s.priceKsh || 0),
+            priceUSD: Number(s.unitPriceUsd || s.priceUSD || 0)
           }));
 
           // Normalize stock data into categories
           const organizedStock: Record<string, StockItem[]> = { products: [], mobilization: [], services: [] };
-          mappedStock.forEach((item: any) => {
+          mappedStock.forEach(item => {
             const cat = item.category?.toLowerCase() || 'products';
             if (organizedStock[cat]) {
-              organizedStock[cat].push(item);
+              organizedStock[cat].push(item as unknown as StockItem);
             } else {
               // Fallback for unknown categories
               if (!organizedStock['products']) organizedStock['products'] = [];
-              organizedStock['products'].push(item);
+              organizedStock['products'].push(item as unknown as StockItem);
             }
           });
           setStock(organizedStock);
         }
-      } catch (err) {
-        console.error("Failed to load data", err);
+      } catch {
+        console.error("Failed to load data");
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiTruck, FiPlus, FiPhone, FiMail, FiTrash2 } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiSearch, FiPhone, FiMail, FiMapPin, FiTrash2, FiEdit3, FiGlobe, FiTruck } from "react-icons/fi";
+import { useModal } from "../contexts/ModalContext";
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -14,6 +15,7 @@ interface Supplier {
 }
 
 const Suppliers = () => {
+    const { showConfirm } = useModal();
     const { showToast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [loading, setLoading] = useState(false);
@@ -48,7 +50,8 @@ const Suppliers = () => {
     );
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to remove this supplier?')) return;
+        const confirmed = await showConfirm('Are you sure you want to remove this supplier?');
+        if (!confirmed) return;
         try {
             await api.suppliers.delete(id);
             showToast('success', 'Supplier removed');

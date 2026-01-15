@@ -214,7 +214,7 @@ export const seedWorkload = () => {
 
         // Sort invoices by date descending
         const finalInvoices = [...existingInvoices, ...newInvoices].sort((a, b) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
+            new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
         );
 
         localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(finalInvoices));

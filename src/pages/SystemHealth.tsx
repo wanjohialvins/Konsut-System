@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FiActivity, FiDatabase, FiCpu, FiHardDrive, FiCheckCircle, FiRotateCcw, FiTrash, FiShield } from 'react-icons/fi';
 import { api } from '../services/api';
+import { useModal } from '../contexts/ModalContext';
 
 const SystemHealth = () => {
+    const { showAlert, showConfirm } = useModal();
     const [stats, setStats] = useState({
         dbSize: '...',
         uptime: '...',
@@ -33,8 +35,37 @@ const SystemHealth = () => {
     }, []);
 
     const runAction = async (action: string) => {
-        if (!confirm(`Execute ${action}? This is a privileged system operation.`)) return;
-        alert(`Request sent: ${action}. Processing in background...`);
+        let payload = null;
+
+        if (action === 'broadcast') {
+            // For broadcast, we need a message
+            // using window.prompt for simplicity as we don't have a complex modal input ready-wired here instantly,
+            // or we could use a custom modal if preferred, but user just asked to make it work.
+            // Given the context 'make it work', a simple prompt is effective and robust.
+            const message = prompt("Enter system-wide broadcast message:");
+            if (!message) return;
+            payload = message;
+        } else {
+            const confirmed = await showConfirm(`Execute ${action}? This is a privileged system operation.`);
+            if (!confirmed) return;
+        }
+
+        try {
+            // Map frontend action names to backend if needed
+            // Frontend: re-sync, purge-logs, toggle-lock, broadcast
+            // Backend: sync, purge-logs, toggle-lock, broadcast
+            const backendAction = action === 're-sync' ? 'sync' : action;
+
+            const res: any = await api.admin.runAction(backendAction, payload);
+            if (res && res.success) {
+                showAlert(res.message, 'success');
+                if (backendAction === 'sync') fetchHealth(); // Refresh stats if we synced
+            } else {
+                showAlert(res?.message || 'Operation failed', 'error');
+            }
+        } catch (error: any) {
+            showAlert(error.message || 'System error occurred', 'error');
+        }
     };
 
     return (

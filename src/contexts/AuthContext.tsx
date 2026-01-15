@@ -1,27 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 
-export type UserRole = 'admin' | 'ceo' | 'manager' | 'sales' | 'storekeeper' | 'accountant' | 'staff' | 'viewer';
-
-export interface User {
-    id: string | number;
-    username: string;
-    role: UserRole;
-    displayRole: string;
-    permissions: string[];
-    name: string;
-    email?: string;
-    is_active?: boolean;
-}
-
-interface AuthContextType {
-    user: User | null;
-    isLoading: boolean;
-    login: (username: string, password: string) => Promise<{ success: boolean; forceReset?: boolean; message?: string }>;
-    recoveryLogin: (phrase: string) => Promise<{ success: boolean; forceReset?: boolean; message?: string }>;
-    logout: () => void;
-    updateUser: (data: Partial<User>) => void;
-}
+import type { User, UserRole, AuthContextType } from "../types/types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -48,12 +28,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await api.auth.login({ username, password });
             if (response.success && response.user) {
-                const parsePermissions = (perms: any) => {
+                const parsePermissions = (perms: unknown) => {
                     if (!perms) return [];
-                    if (typeof perms === 'object') return perms;
+                    if (Array.isArray(perms)) return perms;
+                    if (typeof perms === 'object' && perms !== null) return perms as string[];
                     try {
                         if (typeof perms === 'string' && perms.trim() === '') return [];
-                        return JSON.parse(perms) || [];
+                        const parsed = typeof perms === 'string' ? JSON.parse(perms) : perms;
+                        return Array.isArray(parsed) ? parsed : [];
                     } catch (error) {
                         console.error("Failed to parse permissions", error);
                         return [];
@@ -74,9 +56,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 return { success: true, forceReset: response.forceReset, message: response.message };
             }
             return { success: false, message: response.message || 'Invalid credentials' };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Login failed:', error);
-            return { success: false, message: error.message || 'Login failed' };
+            const message = error instanceof Error ? error.message : 'Login failed';
+            return { success: false, message };
         }
     };
 
@@ -84,12 +67,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await api.auth.recoveryLogin(phrase);
             if (response.success && response.user) {
-                const parsePermissions = (perms: any) => {
+                const parsePermissions = (perms: unknown) => {
                     if (!perms) return [];
-                    if (typeof perms === 'object') return perms;
+                    if (Array.isArray(perms)) return perms;
+                    if (typeof perms === 'object' && perms !== null) return perms as string[];
                     try {
                         if (typeof perms === 'string' && perms.trim() === '') return [];
-                        return JSON.parse(perms) || [];
+                        const parsed = typeof perms === 'string' ? JSON.parse(perms) : perms;
+                        return Array.isArray(parsed) ? parsed : [];
                     } catch (error) {
                         console.error("Failed to parse permissions", error);
                         return [];
@@ -110,9 +95,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 return { success: true, forceReset: response.forceReset, ...response };
             }
             return { success: false, message: response.message || 'Invalid recovery phrase' };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Recovery login failed:', error);
-            return { success: false, message: error.message || 'Recovery failed' };
+            const message = error instanceof Error ? error.message : 'Recovery failed';
+            return { success: false, message };
         }
     };
 
@@ -129,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, recoveryLogin, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, isLoading, login, recoveryLogin, logout, updateUser, isAuthenticated: !!user, loading: isLoading }}>
             {children}
         </AuthContext.Provider>
     );

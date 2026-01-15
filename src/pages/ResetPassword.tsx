@@ -20,7 +20,7 @@ const ResetPassword = () => {
         setLoading(true);
         try {
             // Need to implement a password update API
-            await api.users.update({ id: user?.id, password, force_password_change: 0 });
+            await api.users.update({ id: user?.id || 0, password, force_password_change: 0 } as any);
             navigate('/', { replace: true });
         } catch (err) {
             setError('Failed to update password');

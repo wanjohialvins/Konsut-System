@@ -29,7 +29,7 @@ const Memos = () => {
             setLoading(true);
             const data = await api.memos.getAll();
             setMemos(Array.isArray(data) ? data : []);
-        } catch (e) {
+        } catch {
             showToast('error', 'Failed to load memos');
         } finally {
             setLoading(false);
@@ -57,7 +57,7 @@ const Memos = () => {
             setIsAddOpen(false);
             setNewItem({ title: '', content: '', urgent: false, author: 'Admin' });
             loadMemos();
-        } catch (e) {
+        } catch {
             showToast('error', 'Failed to post memo');
         }
     };

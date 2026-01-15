@@ -1,5 +1,6 @@
 import React from 'react';
-import type { User } from '../contexts/AuthContext';
+import type { User } from '../types/types';
+import type { IconType } from 'react-icons';
 import { FiShield, FiUsers, FiPackage, FiBarChart2, FiUser, FiEye, FiDollarSign, FiAward } from "react-icons/fi";
 
 interface UserAvatarProps {
@@ -8,7 +9,7 @@ interface UserAvatarProps {
     className?: string;
 }
 
-const roleIcons: Record<string, any> = {
+const roleIcons: Record<string, IconType> = {
     admin: FiShield,
     ceo: FiAward,
     manager: FiUsers,

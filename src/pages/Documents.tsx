@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiFolder, FiFile, FiUpload, FiDownload, FiTrash2, FiSearch } from 'react-icons/fi';
+import { FiFolder, FiFile, FiUpload, FiDownload, FiTrash2, FiSearch, FiEye } from 'react-icons/fi';
+import { useModal } from '../contexts/ModalContext';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -13,6 +14,7 @@ interface VaultDoc {
 }
 
 const Documents = () => {
+    const { showConfirm, showPrompt } = useModal();
     const { showToast } = useToast();
     const [docs, setDocs] = useState<VaultDoc[]>([]);
     const [loading, setLoading] = useState(false);
@@ -36,7 +38,7 @@ const Documents = () => {
 
     const handleUpload = async () => {
         // Simulation of file upload logic
-        const dummyName = prompt("Enter document name (Simulation):");
+        const dummyName = await showPrompt("Enter document name (Simulation):");
         if (!dummyName) return;
 
         try {
@@ -56,7 +58,8 @@ const Documents = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this document?")) return;
+        const confirmed = await showConfirm("Delete this document?");
+        if (!confirmed) return;
         try {
             await api.vault.delete(id);
             showToast('success', 'Document deleted');

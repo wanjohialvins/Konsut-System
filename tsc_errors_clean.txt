@@ -1,0 +1,117 @@
+﻿src/components/AdminOverseer.tsx(4,10): error TS1484: 'Product' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/AdminOverseer.tsx(32,76): error TS2339: Property 'quantity' does not exist on type 'Product'.
+src/components/GlobalSearch.tsx(6,10): error TS1484: 'Invoice' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/GlobalSearch.tsx(6,19): error TS1484: 'Customer' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/GlobalSearch.tsx(6,29): error TS1484: 'Product' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/AuthContext.tsx(4,10): error TS1484: 'User' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/AuthContext.tsx(4,16): error TS1484: 'UserRole' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/AuthContext.tsx(4,26): error TS1484: 'AuthContextType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ModalContext.tsx(1,67): error TS1484: 'ReactNode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ThemeContext.tsx(4,10): error TS1484: 'ThemeMode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ThemeContext.tsx(4,21): error TS1484: 'UiDensity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ThemeContext.tsx(4,32): error TS1484: 'AccentColor' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ThemeContext.tsx(4,45): error TS1484: 'ThemeContextType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ToastContext.tsx(5,10): error TS1484: 'ToastType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ToastContext.tsx(5,21): error TS1484: 'ToastMessage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/contexts/ToastContext.tsx(5,35): error TS1484: 'ToastContextType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/pages/AddStock.tsx(150,30): error TS2304: Cannot find name 'FaBoxOpen'.
+src/pages/AddStock.tsx(157,22): error TS2304: Cannot find name 'FaArrowLeft'.
+src/pages/AddStock.tsx(166,78): error TS2304: Cannot find name 'FiBox'.
+src/pages/AddStock.tsx(167,76): error TS2304: Cannot find name 'FiTruck'.
+src/pages/AddStock.tsx(168,81): error TS2304: Cannot find name 'FiTool'.
+src/pages/AddStock.tsx(190,30): error TS2304: Cannot find name 'FaFileImport'.
+src/pages/AuditLogs.tsx(52,53): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/pages/AuditLogs.tsx(131,85): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/pages/AuditLogs.tsx(138,54): error TS2304: Cannot find name 'FiClock'.
+src/pages/AuditLogs.tsx(193,34): error TS2304: Cannot find name 'FiArrowLeft'.
+src/pages/Clients.tsx(449,16): error TS2304: Cannot find name 'FaDownload'.
+src/pages/Clients.tsx(452,16): error TS2304: Cannot find name 'FaFileImport'.
+src/pages/Clients.tsx(497,12): error TS2552: Cannot find name 'FaSearch'. Did you mean 'FiSearch'?
+src/pages/Clients.tsx(544,124): error TS2304: Cannot find name 'FaEnvelope'.
+src/pages/Clients.tsx(545,105): error TS2304: Cannot find name 'FaPhone'.
+src/pages/Clients.tsx(567,32): error TS2304: Cannot find name 'FaEye'.
+src/pages/Clients.tsx(570,32): error TS2304: Cannot find name 'FaFileInvoice'.
+src/pages/Clients.tsx(590,187): error TS2304: Cannot find name 'FaTimes'.
+src/pages/Clients.tsx(635,222): error TS2304: Cannot find name 'FaTimes'.
+src/pages/Clients.tsx(644,64): error TS2304: Cannot find name 'FaEnvelope'.
+src/pages/Clients.tsx(645,64): error TS2304: Cannot find name 'FaPhone'.
+src/pages/Clients.tsx(673,136): error TS2304: Cannot find name 'FaIdCard'.
+src/pages/Dashboard.tsx(18,10): error TS1484: 'Product' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/pages/Dashboard.tsx(95,32): error TS2339: Property 'unitPrice' does not exist on type 'Product'.
+src/pages/Dashboard.tsx(96,32): error TS2551: Property 'unitPriceUsd' does not exist on type 'Product'. Did you mean 'priceUSD'?
+src/pages/Dashboard.tsx(236,107): error TS2304: Cannot find name 'FaMoneyBillWave'.
+src/pages/Dashboard.tsx(237,94): error TS2304: Cannot find name 'FaFileInvoiceDollar'.
+src/pages/Dashboard.tsx(238,125): error TS2304: Cannot find name 'FaChartLine'.
+src/pages/Dashboard.tsx(239,103): error TS2304: Cannot find name 'FaUsers'.
+src/pages/Dashboard.tsx(316,26): error TS2304: Cannot find name 'FaFileInvoice'.
+src/pages/Dashboard.tsx(324,28): error TS2304: Cannot find name 'FaClock'.
+src/pages/Dashboard.tsx(356,22): error TS2304: Cannot find name 'FaCheckCircle'.
+src/pages/Dashboard.tsx(364,24): error TS2304: Cannot find name 'FaExclamationTriangle'.
+src/pages/Dashboard.tsx(386,20): error TS2304: Cannot find name 'FaEye'.
+src/pages/Inventory.tsx(15,10): error TS1484: 'Product' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/pages/Inventory.tsx(58,36): error TS2339: Property 'unitPrice' does not exist on type 'Product'.
+src/pages/Inventory.tsx(59,36): error TS2551: Property 'unitPriceUsd' does not exist on type 'Product'. Did you mean 'priceUSD'?
+src/pages/Inventory.tsx(63,17): error TS2322: Type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]' is not assignable to type 'StockItem[]'.
+  Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+src/pages/Inventory.tsx(63,44): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => value is { ...; }, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(i: StockItem) => boolean' is not assignable to parameter of type '(value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => value is { ...; }'.
+      Types of parameters 'i' and 'value' are incompatible.
+        Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+  Overload 2 of 2, '(predicate: (value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => unknown, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(i: StockItem) => boolean' is not assignable to parameter of type '(value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => unknown'.
+      Types of parameters 'i' and 'value' are incompatible.
+        Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+src/pages/Inventory.tsx(64,17): error TS2322: Type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]' is not assignable to type 'StockItem[]'.
+  Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+src/pages/Inventory.tsx(64,48): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => value is { ...; }, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(i: StockItem) => boolean' is not assignable to parameter of type '(value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => value is { ...; }'.
+      Types of parameters 'i' and 'value' are incompatible.
+        Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+  Overload 2 of 2, '(predicate: (value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => unknown, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(i: StockItem) => boolean' is not assignable to parameter of type '(value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => unknown'.
+      Types of parameters 'i' and 'value' are incompatible.
+        Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+src/pages/Inventory.tsx(65,17): error TS2322: Type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]' is not assignable to type 'StockItem[]'.
+  Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+src/pages/Inventory.tsx(65,44): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => value is { ...; }, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(i: StockItem) => boolean' is not assignable to parameter of type '(value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => value is { ...; }'.
+      Types of parameters 'i' and 'value' are incompatible.
+        Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+  Overload 2 of 2, '(predicate: (value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => unknown, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(i: StockItem) => boolean' is not assignable to parameter of type '(value: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }, index: number, array: { priceKsh: number; priceUSD: number; id: string; name: string; category?: string | undefined; description?: string | undefined; }[]) => unknown'.
+      Types of parameters 'i' and 'value' are incompatible.
+        Property 'quantity' is missing in type '{ priceKsh: number; priceUSD: number; id: string; name: string; category?: string; description?: string; }' but required in type 'StockItem'.
+src/pages/Inventory.tsx(173,57): error TS2353: Object literal may only specify known properties, and 'quantity' does not exist in type 'Product'.
+src/pages/Inventory.tsx(291,38): error TS2304: Cannot find name 'FaCompressArrowsAlt'.
+src/pages/Inventory.tsx(305,38): error TS2304: Cannot find name 'FaBroom'.
+src/pages/Inventory.tsx(334,64): error TS2304: Cannot find name 'FiBox'.
+src/pages/Inventory.tsx(335,72): error TS2304: Cannot find name 'FiTruck'.
+src/pages/Inventory.tsx(336,64): error TS2304: Cannot find name 'FiTool'.
+src/pages/ResetPassword.tsx(23,38): error TS2322: Type 'string | number | undefined' is not assignable to type 'string | number'.
+  Type 'undefined' is not assignable to type 'string | number'.
+src/pages/Suppliers.tsx(86,30): error TS2304: Cannot find name 'FiTruck'.
+src/pages/Suppliers.tsx(118,38): error TS2304: Cannot find name 'FiTruck'.
+src/pages/Tasks.tsx(103,30): error TS2304: Cannot find name 'FiCheckSquare'.
+src/pages/Tasks.tsx(144,46): error TS2304: Cannot find name 'FiUser'.
+src/pages/Users.tsx(133,40): error TS2345: Argument of type '{ id: number; username: string; password: string; email: string; role: string; permissions: string[]; }' is not assignable to parameter of type 'User'.
+  Type '{ id: number; username: string; password: string; email: string; role: string; permissions: string[]; }' is missing the following properties from type 'User': displayRole, name
+src/pages/Users.tsx(136,40): error TS2345: Argument of type '{ username: string; password: string; email: string; role: string; permissions: string[]; }' is not assignable to parameter of type 'User'.
+  Type '{ username: string; password: string; email: string; role: string; permissions: string[]; }' is missing the following properties from type 'User': id, displayRole, name
+src/pages/Users.tsx(178,22): error TS2304: Cannot find name 'FiPlus'.
+src/pages/Users.tsx(185,22): error TS2304: Cannot find name 'FiCheckCircle'.
+src/pages/Users.tsx(244,50): error TS2304: Cannot find name 'FiEdit2'.
+src/pages/Users.tsx(276,34): error TS2304: Cannot find name 'FiX'.
+src/pages/Users.tsx(332,77): error TS2304: Cannot find name 'FiCheckCircle'.
+src/pages/Users.tsx(368,38): error TS2304: Cannot find name 'FiPlus'.
+src/services/api.ts(2,10): error TS1484: 'Invoice' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/api.ts(2,19): error TS1484: 'Product' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/api.ts(2,28): error TS1484: 'Customer' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/api.ts(3,10): error TS1484: 'User' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/utils/backupManager.ts(2,10): error TS1484: 'Invoice' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/utils/backupManager.ts(2,19): error TS1484: 'Product' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/utils/backupManager.ts(2,28): error TS1484: 'Customer' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/utils/backupManager.ts(103,13): error TS2741: Property 'data' is missing in type 'Record<string, any>' but required in type '{ data: { [key: string]: any; invoices?: Invoice[] | undefined; konsut_clients?: Customer[] | undefined; stockData?: Record<string, Product[]> | undefined; ... 4 more ...; usdToKshRate?: string | undefined; }; }'.
+src/utils/backupManager.ts(181,81): error TS2488: Type '{ [key: string]: any; invoices?: Invoice[] | undefined; konsut_clients?: Customer[] | undefined; stockData?: Record<string, Product[]> | undefined; ... 4 more ...; usdToKshRate?: string | undefined; }' must have a '[Symbol.iterator]()' method that returns an iterator.

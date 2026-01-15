@@ -24,20 +24,16 @@ This guide will help you set up the PHP backend for the KONSUT System using XAMP
    - *Success Message*: "Import has been successfully finished."
 
 ## Step 3: Deploy Backend Files
-1. Navigate to your XAMPP installation folder, usually `C:\xampp`.
-2. Open the `htdocs` folder: `C:\xampp\htdocs`.
-3. Create a new folder named `invoice-system-backend`.
-4. Copy **ALL files** from your local backend folder:
-   `d:\Personal Projects\invoice system database\backend`
-   ...into the new `C:\xampp\htdocs\invoice-system-backend` folder.
+### For Local Development (Direct)
+If you are running the project directly from your `D:` drive (XAMPP DocumentRoot pointing to project), you don't need to copy files. The API is available at `http://localhost/public_html/api`.
 
-Your structure should look like:
-- `C:\xampp\htdocs\invoice-system-backend/config.php`
-- `C:\xampp\htdocs\invoice-system-backend/auth.php`
-- `C:\xampp\htdocs\invoice-system-backend/admin/...` etc.
+### For cPanel / Standard Production
+1. Upload the **contents** of your local `public_html` folder to the `public_html` folder on your web server.
+2. Ensure your database is imported via phpMyAdmin on the server.
+3. Update `config.php` with your production database credentials.
 
 ## Step 4: Verify Connection
-1. Ensure your Frontend `api.ts` is pointing to the correct URL (I have already verified it is set to `http://localhost/invoice-system-backend`).
+1. Ensure your Frontend `api.ts` is pointing to the correct URL (e.g., `http://your-domain.com/api` or `http://localhost/public_html/api`).
 2. Go to your Frontend Application (running via `npm run dev`).
 3. Try to **Login** with the default admin credentials:
    - **Username**: `admin`

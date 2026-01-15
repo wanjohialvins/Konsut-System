@@ -34,7 +34,7 @@ export const InvoiceTemplate = React.forwardRef<HTMLDivElement, InvoiceTemplateP
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(amount);
 
-    const formatDate = (dateStr: string) => {
+    const formatDate = (dateStr?: string) => {
         if (!dateStr) return '';
         return new Date(dateStr).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     };
@@ -63,9 +63,9 @@ export const InvoiceTemplate = React.forwardRef<HTMLDivElement, InvoiceTemplateP
                     </h1>
                     <div className="text-gray-600 text-sm space-y-1">
                         <p><span className="font-semibold text-gray-800">No:</span> {data.id}</p>
-                        <p><span className="font-semibold text-gray-800">Date:</span> {formatDate(data.issuedDate)}</p>
+                        <p><span className="font-semibold text-gray-800">Date:</span> {formatDate(data.issuedDate || '')}</p>
 
-                        {data.type !== 'quotation' && (
+                        {data.type !== 'quotation' && data.dueDate && (
                             <p><span className="font-semibold text-gray-800">Due Date:</span> {formatDate(data.dueDate)}</p>
                         )}
                         {data.quotationValidUntil && (

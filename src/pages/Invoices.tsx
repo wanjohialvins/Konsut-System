@@ -16,7 +16,9 @@
  * - Search and filter capabilities
  */
 import React, { useEffect, useState, useCallback } from "react";
-import { FaFilePdf, FaTrash, FaSearch, FaEdit, FaCheck, FaExchangeAlt, FaShareAlt, FaFilter, FaSortAmountDown, FaSortAmountUp, FaFileInvoice, FaEllipsisV, FaDollarSign, FaFileSignature, FaReceipt, FaPlus, FaEnvelope } from "react-icons/fa";
+import { FiPlus, FiFilter, FiDownload, FiTrash2, FiEdit3, FiEye, FiMoreVertical, FiCopy, FiRefreshCcw, FiSend, FiFileText } from "react-icons/fi";
+import { FaFileSignature, FaFileInvoice, FaReceipt, FaSearch, FaSortAmountDown, FaSortAmountUp, FaDollarSign, FaFilePdf, FaEdit, FaEllipsisV, FaCheck, FaExchangeAlt, FaEnvelope, FaShareAlt, FaTrash, FaPlus, FaFilter } from "react-icons/fa";
+import { useModal } from "../contexts/ModalContext";
 import { useNavigate } from "react-router-dom";
 import { generateInvoicePDF } from "../utils/pdfGenerator";
 import type { Invoice as InvoiceData, InvoiceType as DocumentType } from "../types/types";
@@ -26,7 +28,8 @@ import { usePermissions } from "../hooks/usePermissions";
 import { api } from "../services/api";
 
 // --- Constants ---
-const Invoices: React.FC = () => {
+const Invoices = () => {
+  const { showConfirm } = useModal();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { can } = usePermissions();
@@ -70,31 +73,27 @@ const Invoices: React.FC = () => {
       }
 
       // Backend already provides normalized data, but we can still map for safety
-      const normalizedInvoices = data.map((inv: any) => {
-        if (!inv || typeof inv !== 'object') return null;
+      const normalizedInvoices = data.map((raw: any) => {
+        if (!raw || typeof raw !== 'object') return null;
 
-        // Ensure customer fields exist and handle flat field names from backend
-        // Use flat property names if the nested customer object is incomplete or missing
         const customer = {
-          id: inv.customer?.id || inv.customerId || inv.customer_id || '',
-          name: inv.customer?.name || inv.customerName || inv.customer_name || 'N/A',
-          phone: inv.customer?.phone || inv.customerPhone || inv.customer_phone || '',
-          email: inv.customer?.email || inv.customerEmail || inv.customer_email || '',
-          address: inv.customer?.address || inv.customerAddress || inv.customer_address || '',
-          kraPin: inv.customer?.kraPin || inv.customerKraPin || inv.customer_kra_pin || ''
+          id: raw.customer?.id || raw.customerId || raw.customer_id || '',
+          name: raw.customer?.name || raw.customerName || raw.customer_name || 'N/A',
+          phone: raw.customer?.phone || raw.customerPhone || raw.customer_phone || '',
+          email: raw.customer?.email || raw.customerEmail || raw.customer_email || '',
+          address: raw.customer?.address || raw.customerAddress || raw.customer_address || '',
+          kraPin: raw.customer?.kraPin || raw.customerKraPin || raw.customer_kra_pin || ''
         };
 
-        inv.customer = customer;
-
-        // Ensure items exist
-        if (!inv.items || !Array.isArray(inv.items)) inv.items = [];
-
-        return inv as InvoiceData;
+        return {
+          ...raw,
+          customer,
+          items: Array.isArray(raw.items) ? raw.items : []
+        } as InvoiceData;
       }).filter(Boolean) as InvoiceData[];
 
       setInvoices(normalizedInvoices);
-    } catch (error) {
-      console.error("Failed to load invoices:", error);
+    } catch {
       showToast('error', 'Failed to load cloud invoices');
       setInvoices([]);
     } finally {
@@ -108,7 +107,8 @@ const Invoices: React.FC = () => {
 
   // --- Actions ---
   const deleteInvoice = useCallback(async (id: string) => {
-    if (!confirm("Delete this document? This action cannot be undone.")) return;
+    const confirmed = await showConfirm("Delete this document? This action cannot be undone.");
+    if (!confirmed) return;
     try {
       setLoading(true);
       await api.invoices.delete(id);
@@ -119,8 +119,7 @@ const Invoices: React.FC = () => {
         next.delete(id);
         return next;
       });
-    } catch (error) {
-      console.error("Failed to delete invoice:", error);
+    } catch {
       showToast('error', 'Failed to delete from cloud');
     } finally {
       setLoading(false);
@@ -128,7 +127,8 @@ const Invoices: React.FC = () => {
   }, [loadInvoices, showToast]);
 
   const handleBulkDelete = useCallback(async () => {
-    if (!confirm(`Delete ${selectedIds.size} selected documents? This action cannot be undone.`)) return;
+    const confirmed = await showConfirm(`Delete ${selectedIds.size} selected documents? This action cannot be undone.`);
+    if (!confirmed) return;
     try {
       setLoading(true);
       for (const id of selectedIds) {
@@ -137,8 +137,7 @@ const Invoices: React.FC = () => {
       showToast('success', `${selectedIds.size} documents deleted`);
       await loadInvoices();
       setSelectedIds(new Set());
-    } catch (error) {
-      console.error("Failed to bulk delete:", error);
+    } catch {
       showToast('error', 'Failed to bulk delete from cloud');
     } finally {
       setLoading(false);
@@ -169,8 +168,8 @@ const Invoices: React.FC = () => {
           title: `${getTypeLabel(invoice.type)} ${invoice.id}`,
           text: `${getTypeLabel(invoice.type)} ${invoice.id} for ${invoice.customer?.name || "Client"}\nTotal: ${invoice.grandTotal?.toLocaleString() || 0} Ksh\nDate: ${invoice.issuedDate}`,
         });
-      } catch (error) {
-        console.log('Error sharing:', error);
+      } catch {
+        console.log('Error sharing');
       }
     } else {
       showToast('info', 'Sharing is not supported on this device/browser');
@@ -202,8 +201,7 @@ const Invoices: React.FC = () => {
       showToast('success', 'Status updated successfully');
       await loadInvoices();
       setEditingStatus(null);
-    } catch (error) {
-      console.error("Failed to update status:", error);
+    } catch {
       showToast('error', 'Failed to update status on cloud');
     } finally {
       setLoading(false);
@@ -211,7 +209,8 @@ const Invoices: React.FC = () => {
   }, [invoices, loadInvoices, showToast]);
 
   const convertDocument = useCallback(async (invoice: InvoiceData, toType: DocumentType) => {
-    if (!confirm(`Convert this ${invoice.type} to ${toType}?`)) return;
+    const confirmed = await showConfirm(`Convert this ${invoice.type} to ${toType}?`);
+    if (!confirmed) return;
 
     try {
       setLoading(true);
@@ -244,8 +243,7 @@ const Invoices: React.FC = () => {
 
       showToast('success', `Converted to ${toType}! New ID: ${newId}`);
       setActiveTab(toType);
-    } catch (error) {
-      console.error("Failed to convert document:", error);
+    } catch {
       showToast('error', 'Failed to convert document on cloud');
     } finally {
       setLoading(false);

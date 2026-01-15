@@ -1,2 +1,20 @@
-﻿src/pages/NewInvoice.tsx(657,13): error TS2741: Property 'taxAmount' is missing in type '{ id: string; type: InvoiceType; date: string; issuedDate: string; dueDate: string; quotationValidUntil: string | undefined; customer: { id: string; name: string; phone: string; email: string; address: string; kraPin: string; }; ... 10 more ...; termsAndConditions: string | undefined; }' but required in type 'Invoice'.
-src/utils/devSeeder.ts(107,5): error TS2741: Property 'taxAmount' is missing in type '{ id: string; type: "invoice"; status: InvoiceStatus; date: string; issuedDate: string; dueDate: string; customer: Customer; items: InvoiceItem[]; subtotal: number; tax: number; grandTotal: number; currencyRate: number; }' but required in type 'Invoice'.
+﻿src/components/InvoiceTemplate.tsx(66,99): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/InvoiceTemplate.tsx(69,107): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/pages/NewInvoice.tsx(220,25): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string>'.
+src/utils/devSeeder.ts(217,22): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number | Date'.
+      Type 'undefined' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
+src/utils/devSeeder.ts(217,51): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number | Date'.
+      Type 'undefined' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.

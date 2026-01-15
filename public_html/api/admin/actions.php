@@ -19,6 +19,32 @@ try {
             // For now, just a dummy success
             break;
 
+        case 'purge-logs':
+            $stmt = $pdo->prepare("DELETE FROM audit_logs WHERE timestamp < NOW() - INTERVAL 30 DAY");
+            $stmt->execute();
+            $count = $stmt->rowCount();
+            echo json_encode(['success' => true, 'message' => "Purged $count old audit logs"]);
+            exit;
+
+        case 'toggle-lock':
+            // Check current status
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'");
+            $current = $stmt->fetchColumn();
+            
+            $newState = true;
+            if ($current) {
+                $status = json_decode($current, true);
+                $newState = !$status; // Toggle
+            }
+            
+            // Save new state
+            $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('maintenance_mode', ?) ON DUPLICATE KEY UPDATE setting_value = ?");
+            $jsonVal = json_encode($newState);
+            $stmt->execute([$jsonVal, $jsonVal]);
+            
+            echo json_encode(['success' => true, 'message' => "System Maintenance Lock: " . ($newState ? "ENABLED" : "DISABLED")]);
+            exit;
+
         case 'broadcast':
             $message = $_GET['message'] ?? 'System Maintenance Triggered';
             // Insert notification for ALL users

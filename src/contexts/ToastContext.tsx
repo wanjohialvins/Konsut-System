@@ -2,17 +2,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Toast } from '../components/shared/UIComponents';
 
-type ToastType = 'success' | 'error' | 'info' | 'warning';
-
-interface ToastMessage {
-    id: string;
-    type: ToastType;
-    message: string;
-}
-
-interface ToastContextType {
-    showToast: (type: ToastType, message: string) => void;
-}
+import type { ToastType, ToastMessage, ToastContextType } from "../types/types";
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 

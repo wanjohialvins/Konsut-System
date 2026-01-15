@@ -37,8 +37,9 @@ const Login: React.FC = () => {
             } else {
                 setError(result.message || 'Invalid username or password');
             }
-        } catch (err: any) {
-            setError(err.message || 'An error occurred during login');
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'An error occurred during login';
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -50,14 +51,25 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            const result = await recoveryLogin(recoveryPhrase);
-            if (result.success) {
-                setShowRecovery(false);
-                navigate('/reset-password', { replace: true });
+            if (recoveryLogin) {
+                // The original snippet used 'email' here, but the context of this component
+                // is 'recoveryPhrase'. Assuming the intent was to use recoveryPhrase.
+                const result = await recoveryLogin(recoveryPhrase);
+                if (result?.success) {
+                    // The original snippet used showToast and setIsResetMode,
+                    // which are not defined in this component.
+                    // Reverting to existing logic for successful recovery.
+                    setShowRecovery(false);
+                    navigate('/reset-password', { replace: true });
+                } else {
+                    // The original snippet used showToast. Reverting to existing logic.
+                    setRecoveryError(result?.message || 'Invalid recovery phrase');
+                }
             } else {
-                setRecoveryError('Invalid recovery phrase');
+                // The original snippet used showToast. Reverting to existing logic.
+                setRecoveryError('Recovery service unavailable');
             }
-        } catch (err) {
+        } catch {
             setRecoveryError('Recovery failed');
         } finally {
             setLoading(false);

@@ -50,17 +50,22 @@ if ($method === 'GET') {
 } elseif ($method === 'POST') {
     requirePermission('manage_invoices');
     $data = json_decode(file_get_contents('php://input'), true);
+    file_put_contents('debug_invoice.txt', "POST Data: " . print_r($data, true) . "\n", FILE_APPEND);
+
     $pdo->beginTransaction();
     try {
+        $customerId = ensureClientExists($pdo, $data['customer'] ?? []);
+        file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . "\n", FILE_APPEND);
+
         $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['id'],
-            $data['customer']['id'] ?? null,
+            $customerId,
             $data['type'],
             $data['status'] ?? 'draft',
             $data['issuedDate'],
-            $data['dueDate'] ?? null,
-            $data['quotationValidUntil'] ?? null,
+            (!empty($data['dueDate'])) ? $data['dueDate'] : null,
+            (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
             $data['currency'] ?? 'Ksh',
             $data['currencyRate'] ?? 1.0,
             $data['subtotal'],
@@ -94,13 +99,15 @@ if ($method === 'GET') {
     $data = json_decode(file_get_contents('php://input'), true);
     $pdo->beginTransaction();
     try {
+        $customerId = ensureClientExists($pdo, $data['customer'] ?? []);
+
         $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
         $stmt->execute([
-            $data['customer']['id'] ?? null,
+            $customerId,
             $data['status'],
             $data['issuedDate'],
-            $data['dueDate'] ?? null,
-            $data['quotationValidUntil'] ?? null,
+            (!empty($data['dueDate'])) ? $data['dueDate'] : null,
+            (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
             $data['currency'] ?? 'Ksh',
             $data['currencyRate'] ?? 1.0,
             $data['subtotal'],
@@ -141,5 +148,42 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare("UPDATE documents SET deleted_at = NOW() WHERE id = ?");
     $stmt->execute([$id]);
     echo json_encode(['success' => true]);
+}
+
+function ensureClientExists($pdo, $customer)
+{
+    if (empty($customer['id']) || empty($customer['name']))
+        return null;
+
+    // Check if exists
+    $stmt = $pdo->prepare("SELECT id FROM clients WHERE id = ?");
+    $stmt->execute([$customer['id']]);
+    if ($stmt->fetch()) {
+        // Update existing client info if needed? 
+        // For now, let's just update contact info to ensure it's fresh
+        $update = $pdo->prepare("UPDATE clients SET name=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
+        $update->execute([
+            $customer['name'],
+            $customer['email'] ?? '',
+            $customer['phone'] ?? '',
+            $customer['address'] ?? '',
+            $customer['kraPin'] ?? '',
+            $customer['id']
+        ]);
+        return $customer['id'];
+    }
+
+    // Create new
+    file_put_contents('debug_invoice.txt', "Creating new client...\n", FILE_APPEND);
+    $stmt = $pdo->prepare("INSERT INTO clients (id, name, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $customer['id'],
+        $customer['name'],
+        $customer['email'] ?? '',
+        $customer['phone'] ?? '',
+        $customer['address'] ?? '',
+        $customer['kraPin'] ?? ''
+    ]);
+    return $customer['id'];
 }
 ?>

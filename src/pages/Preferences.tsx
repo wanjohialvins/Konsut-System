@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiSliders, FiSun, FiMoon, FiMonitor, FiCheckCircle } from "react-icons/fi";
+import { FiSliders, FiSun, FiMoon, FiCheckCircle } from "react-icons/fi";
 import { useTheme } from "../hooks/useTheme";
 import { api } from "../services/api";
 import { useToast } from "../contexts/ToastContext";
@@ -18,7 +18,7 @@ const Preferences = () => {
                 preferences: { theme, uiDensity, accentColor }
             });
             showToast('success', 'Atmospheric settings synchronized');
-        } catch (e) {
+        } catch {
             showToast('error', 'Cloud sync failed');
         } finally {
             setLoading(false);
@@ -105,7 +105,7 @@ const Preferences = () => {
                         ].map(c => (
                             <button
                                 key={c.value}
-                                onClick={() => setAccentColor(c.value as any)}
+                                onClick={() => setAccentColor(c.value as 'blue' | 'indigo' | 'slate' | 'emerald' | 'rose')}
                                 className={`group relative flex flex-col items-center gap-3 p-4 rounded-3xl transition-all ${accentColor === c.value ? 'bg-gray-50 dark:bg-midnight-950 scale-110' : 'hover:scale-105'}`}
                             >
                                 <div style={{ backgroundColor: c.color }} className="w-16 h-16 rounded-2xl shadow-2xl shadow-black/10 relative">

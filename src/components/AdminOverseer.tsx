@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaShieldAlt, FaExclamationTriangle, FaCheckCircle, FaUsers, FaBolt } from "react-icons/fa";
 import { api } from "../services/api";
+import type { Product } from "../types/types";
 
 interface AuditLog {
     id: number;
@@ -21,14 +22,14 @@ const AdminOverseer: React.FC = () => {
     useEffect(() => {
         const fetchAdminData = async () => {
             try {
-                const [logs, users, stock] = await Promise.all([
+                const [logs, users, stockData] = await Promise.all([
                     api.admin.getAuditLogs(),
                     api.users.getAll(),
                     api.stock.getAll()
                 ]);
 
                 // Filter for low stock
-                const lowStock = (stock as any[]).filter(item => (item.quantity || 0) < 5).length;
+                const lowStock = (stockData.products || []).filter((p: any) => !p.priceKsh).length;
 
                 // Get latest significant audits
                 const recentLogins = (logs as AuditLog[])
@@ -37,12 +38,12 @@ const AdminOverseer: React.FC = () => {
 
                 setStats({
                     databaseStatus: "Stable",
-                    activeUsers: (users as any[]).length,
+                    activeUsers: users.length,
                     lowStockAlerts: lowStock,
                     recentAudits: recentLogins
                 });
-            } catch (e) {
-                console.error("Overseer failed to fetch data:", e);
+            } catch {
+                console.error("Overseer failed to fetch data");
             }
         };
         fetchAdminData();

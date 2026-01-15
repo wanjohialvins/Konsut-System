@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FiClock, FiUser, FiActivity, FiArrowLeft, FiRotateCcw } from 'react-icons/fi';
+import { FiRotateCcw, FiFilter, FiDownload, FiSearch, FiActivity, FiClock, FiArrowLeft, FiUser } from "react-icons/fi";
+import { useModal } from '../contexts/ModalContext';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -19,10 +20,11 @@ interface AuditLog {
 }
 
 const AuditLogs = () => {
+    const { showConfirm } = useModal();
     const { user } = useAuth();
     const { showToast } = useToast();
     const isAdmin = user?.role === 'admin';
-    const [logs, setLogs] = useState<any[]>([]);
+    const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -41,19 +43,20 @@ const AuditLogs = () => {
         fetchLogs();
     }, []);
 
-    const handleRevert = async (id: number) => {
-        if (!window.confirm("Are you sure you want to REVERT this action? This will undo the changes made in this step.")) return;
+    const handleRevert = async (id: any) => {
+        const confirmed = await showConfirm("Are you sure you want to REVERT this action? This will undo the changes made in this step.");
+        if (!confirmed) return;
 
         try {
             setLoading(true);
-            const res = await api.admin.revertAudit(id);
+            const res = await api.admin.revertAudit(Number(id));
             if (res.success) {
                 showToast('success', 'Action successfully reverted!');
                 fetchLogs();
             } else {
                 showToast('error', res.message || 'Failed to revert');
             }
-        } catch (err) {
+        } catch {
             showToast('error', 'Critical error during reversal');
         } finally {
             setLoading(false);
@@ -88,7 +91,7 @@ const AuditLogs = () => {
                     </pre>
                 </div>
             );
-        } catch (e) {
+        } catch {
             return <div className="text-gray-400 text-xs break-all">{data}</div>;
         }
     };
@@ -125,7 +128,7 @@ const AuditLogs = () => {
                                             <div className="flex flex-col gap-2">
                                                 {isAdmin && log.action !== 'REVERT' && (
                                                     <button
-                                                        onClick={() => handleRevert(log.id)}
+                                                        onClick={() => handleRevert(log.id as any)}
                                                         className="px-3 py-1 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1 w-fit"
                                                     >
                                                         <FiRotateCcw size={12} /> Reverse
@@ -139,7 +142,7 @@ const AuditLogs = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <UserAvatar user={{ username: log.username, role: log.role || 'staff' } as any} size={32} />
+                                                <UserAvatar user={{ username: log.username, role: (log.role || 'staff') as any } as any} size={32} />
                                                 <span className="font-bold text-gray-900 dark:text-white capitalize">{log.username || 'System'}</span>
                                             </div>
                                         </td>

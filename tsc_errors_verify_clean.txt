@@ -1,0 +1,9 @@
+﻿src/pages/Inventory.tsx(441,26): error TS17008: JSX element 'form' has no corresponding closing tag.
+src/pages/Inventory.tsx(487,19): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/pages/Inventory.tsx(488,21): error TS1005: ')' expected.
+src/pages/Inventory.tsx(489,17): error TS1005: ')' expected.
+src/pages/Inventory.tsx(490,13): error TS1109: Expression expected.
+src/pages/Inventory.tsx(490,14): error TS1128: Declaration or statement expected.
+src/pages/Inventory.tsx(491,9): error TS1128: Declaration or statement expected.
+src/pages/Inventory.tsx(492,5): error TS1109: Expression expected.
+src/pages/Inventory.tsx(493,1): error TS1128: Declaration or statement expected.

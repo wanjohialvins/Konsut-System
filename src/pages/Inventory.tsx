@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
     FaEdit,
     FaTrash,
@@ -8,14 +9,16 @@ import {
     FaPlus,
     FaExclamationTriangle,
     FaMagic,
-    FaBroom,
-    FaCompressArrowsAlt
+    FaCompressArrowsAlt,
+    FaBroom
 } from "react-icons/fa";
-import { FiBox, FiTruck, FiTool } from "react-icons/fi";
+import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiDownload, FiUpload, FiRefreshCcw, FiTag, FiFilter, FiCheckCircle, FiXCircle, FiTrendingUp, FiBox, FiTruck, FiTool } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
+import type { Product } from "../types/types";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { useModal } from "../contexts/ModalContext";
 
 type Category = "products" | "mobilization" | "services";
 
@@ -30,6 +33,7 @@ export interface StockItem {
 }
 
 const Inventory = () => {
+    const { showConfirm } = useModal();
     const { showToast } = useToast();
 
     const [loading, setLoading] = useState(false);
@@ -41,6 +45,8 @@ const Inventory = () => {
     const [activeCategory, setActiveCategory] = useState<Category>("products");
     const [search, setSearch] = useState<string>("");
     const [currencyRate, setCurrencyRate] = useState<number>(130);
+    const [displayCurrency, setDisplayCurrency] = useState<'KSH' | 'USD'>('KSH');
+    const [showDescriptions, setShowDescriptions] = useState(false);
     const [editingItem, setEditingItem] = useState<StockItem | null>(null);
     const [showLowStock, setShowLowStock] = useState(false);
 
@@ -52,10 +58,12 @@ const Inventory = () => {
                 api.settings.get()
             ]);
 
-            const stockData = stockDataRaw.map((s: StockItem & { unitPrice: number, unitPriceUsd: number }) => ({
+            const stockData = (stockDataRaw as Product[]).map(s => ({
                 ...s,
-                priceKsh: Number(s.unitPrice || 0),
-                priceUSD: Number(s.unitPriceUsd || 0)
+                priceKsh: Number((s as any).unitPrice || s.priceKsh || 0),
+                priceUSD: Number((s as any).unitPriceUsd || s.priceUSD || 0),
+                quantity: Number(s.quantity || 0),
+                category: (s.category || 'products') as any
             }));
 
             setStock({
@@ -67,8 +75,7 @@ const Inventory = () => {
             if (settings?.invoiceSettings?.currencyRate) {
                 setCurrencyRate(Number(settings.invoiceSettings.currencyRate));
             }
-        } catch (error) {
-            console.error(error);
+        } catch {
             showToast('error', 'Failed to load inventory');
         } finally {
             setLoading(false);
@@ -92,13 +99,13 @@ const Inventory = () => {
     }, [stock]);
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this item?")) return;
+        const confirmed = await showConfirm("Delete this item?");
+        if (!confirmed) return;
         try {
             await api.stock.delete(id);
             loadData();
             showToast('success', 'Item deleted');
-        } catch (error) {
-            console.error(error);
+        } catch {
             showToast('error', 'Delete failed');
         }
     };
@@ -112,8 +119,7 @@ const Inventory = () => {
             setEditingItem(null);
             loadData();
             showToast('success', 'Item updated');
-        } catch (error) {
-            console.error(error);
+        } catch {
             showToast('error', 'Update failed');
         }
     };
@@ -121,16 +127,17 @@ const Inventory = () => {
 
 
     const handleClearAll = async () => {
-        if (!confirm("⚠️ CRITICAL WARNING ⚠️\n\nThis will permanently DELETE ALL items in your inventory.\nThis action cannot be undone.\n\nAre you sure you want to wipe everything?")) return;
-        if (!confirm("Double check: You are about to wipe the ENTIRE inventory.\n\nType 'YES' to confirm (mentally). Proceed?")) return;
+        const confirmed1 = await showConfirm("⚠️ CRITICAL WARNING ⚠️\n\nThis will permanently DELETE ALL items in your inventory.\nThis action cannot be undone.\n\nAre you sure you want to wipe everything?");
+        if (!confirmed1) return;
+        const confirmed2 = await showConfirm("Double check: You are about to wipe the ENTIRE inventory.\n\nProceed?");
+        if (!confirmed2) return;
 
         setLoading(true);
         try {
             await api.stock.deleteAll();
             loadData();
             showToast('success', 'Inventory completely wiped');
-        } catch (error) {
-            console.error(error);
+        } catch {
             showToast('error', 'Wipe failed');
         } finally {
             setLoading(false);
@@ -138,7 +145,8 @@ const Inventory = () => {
     };
 
     const handleMergeDuplicates = async () => {
-        if (!confirm("This will merge items with the exact same name (case-insensitive) within each category. Quantities will be summed up. Continue?")) return;
+        const confirmed = await showConfirm("This will merge items with the exact same name (case-insensitive) within each category. Quantities will be summed up. Continue?");
+        if (!confirmed) return;
 
         setLoading(true);
         try {
@@ -169,7 +177,7 @@ const Inventory = () => {
                     const totalQty = group.reduce((sum, i) => sum + i.quantity, 0);
 
                     // Update keeper
-                    await api.stock.update({ ...keeper, quantity: totalQty, unitPrice: keeper.priceKsh });
+                    await api.stock.update({ ...keeper, quantity: totalQty, unitPrice: keeper.priceKsh } as any);
 
                     // Delete others
                     for (const other of others) {
@@ -187,8 +195,7 @@ const Inventory = () => {
                 showToast('info', 'No duplicates found');
             }
 
-        } catch (error) {
-            console.error(error);
+        } catch {
             showToast('error', 'Merge operation failed');
         } finally {
             setLoading(false);
@@ -218,8 +225,7 @@ const Inventory = () => {
             a.click();
             window.URL.revokeObjectURL(url);
             showToast('success', 'Download started');
-        } catch (error) {
-            console.error(error);
+        } catch {
             showToast('error', 'Export failed');
         }
     };
@@ -242,11 +248,35 @@ const Inventory = () => {
                     >
                         <FaPlus /> Pre-load Stock
                     </Link>
+
+                    <button
+                        onClick={() => setShowDescriptions(!showDescriptions)}
+                        className={`p-4 rounded-2xl font-black shadow-lg flex items-center gap-2 border border-gray-100 dark:border-midnight-800 transition-all ${showDescriptions ? 'bg-brand-600 text-white' : 'bg-white dark:bg-midnight-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50'}`}
+                        title="Toggle Descriptions"
+                    >
+                        {showDescriptions ? 'Hide Details' : 'Show Details'}
+                    </button>
+
+                    <button
+                        onClick={() => setDisplayCurrency(prev => prev === 'KSH' ? 'USD' : 'KSH')}
+                        className="p-4 bg-white dark:bg-midnight-900 rounded-2xl text-gray-700 dark:text-gray-200 font-black shadow-lg hover:bg-gray-50 flex items-center gap-2 border border-gray-100 dark:border-midnight-800"
+                        title="Switch Currency"
+                    >
+                        <span className={`px-2 py-1 rounded-lg text-xs ${displayCurrency === 'KSH' ? 'bg-brand-600 text-white' : 'text-gray-400'}`}>KSH</span>
+                        <span className={`px-2 py-1 rounded-lg text-xs ${displayCurrency === 'USD' ? 'bg-brand-600 text-white' : 'text-gray-400'}`}>USD</span>
+                    </button>
+
                     <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-2xl shadow-lg shadow-purple-500/20 flex items-center gap-3">
                         <FaBoxOpen />
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Inventory Value</p>
-                            <p className="text-xl font-black">Ksh {(totalStockValue || 0).toLocaleString()}</p>
+                            <p className="text-xl font-black">
+                                {displayCurrency === 'KSH' ? 'Ksh ' : '$ '}
+                                {(displayCurrency === 'KSH'
+                                    ? totalStockValue
+                                    : (totalStockValue / currencyRate)
+                                ).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -358,8 +388,8 @@ const Inventory = () => {
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">ID Reference</th>
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">Product Specification</th>
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Available Qty</th>
-                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Base Price (Ksh)</th>
-                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Equity (Ksh)</th>
+                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Base Price ({displayCurrency})</th>
+                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Equity ({displayCurrency})</th>
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Management</th>
                             </tr>
                         </thead>
@@ -374,7 +404,19 @@ const Inventory = () => {
                                     <td className="px-8 py-6">
                                         <div>
                                             <h4 className="font-black text-gray-900 dark:text-white text-base leading-tight group-hover:text-brand-600 transition-colors">{it.name}</h4>
-                                            {it.description && <p className="text-gray-400 text-xs mt-1 font-medium truncate max-w-xs">{it.description}</p>}
+
+                                            <button
+                                                onClick={() => setShowDescriptions(!showDescriptions)}
+                                                className="text-[10px] uppercase font-bold text-brand-500 hover:text-brand-600 mt-1 flex items-center gap-1"
+                                            >
+                                                {showDescriptions ? 'Hide Details' : 'View Details'}
+                                            </button>
+
+                                            {showDescriptions && it.description && (
+                                                <p className="text-gray-500 dark:text-gray-400 text-xs mt-2 font-medium bg-gray-50 dark:bg-midnight-950 p-2 rounded-lg border border-gray-100 dark:border-midnight-800">
+                                                    {it.description}
+                                                </p>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-center">
@@ -383,10 +425,16 @@ const Inventory = () => {
                                         </span>
                                     </td>
                                     <td className="px-8 py-6 text-right font-bold text-gray-700 dark:text-gray-300">
-                                        {it.priceKsh.toLocaleString()}
+                                        {displayCurrency === 'KSH'
+                                            ? it.priceKsh.toLocaleString()
+                                            : (it.priceUSD || (it.priceKsh / currencyRate)).toFixed(2)
+                                        }
                                     </td>
                                     <td className="px-8 py-6 text-right font-black text-brand-600">
-                                        {(it.priceKsh * it.quantity).toLocaleString()}
+                                        {displayCurrency === 'KSH'
+                                            ? (it.priceKsh * it.quantity).toLocaleString()
+                                            : ((it.priceUSD || (it.priceKsh / currencyRate)) * it.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                        }
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -405,9 +453,9 @@ const Inventory = () => {
                 </div>
             </div>
 
-            {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white dark:bg-midnight-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/10">
+            {editingItem && createPortal(
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white dark:bg-midnight-900 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-white/10 custom-scrollbar">
                         <div className="px-10 py-8 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center bg-gray-50/50 dark:bg-midnight-950/50">
                             <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tight">Modify Inventory</h3>
                             <button onClick={() => setEditingItem(null)} className="p-3 rounded-2xl hover:bg-gray-200 dark:hover:bg-midnight-800 text-gray-400 transition-colors">✕</button>
@@ -422,7 +470,7 @@ const Inventory = () => {
                                     required
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Quantity</label>
                                     <input
@@ -431,6 +479,15 @@ const Inventory = () => {
                                         onChange={e => setEditingItem({ ...editingItem, quantity: Number(e.target.value) })}
                                         className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
                                         required
+                                    />
+                                </div>
+                                <div className="md:col-span-3">
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Description</label>
+                                    <textarea
+                                        value={editingItem.description || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none h-24 resize-none"
+                                        placeholder="Add details..."
                                     />
                                 </div>
                                 <div>
@@ -443,15 +500,27 @@ const Inventory = () => {
                                         required
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Price (USD)</label>
+                                    <input
+                                        type="number"
+                                        value={editingItem.priceUSD || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, priceUSD: Number(e.target.value), priceKsh: Number((Number(e.target.value) * currencyRate).toFixed(2)) })}
+                                        className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
+                                        placeholder="0.00"
+                                    />
+                                </div>
                             </div>
+
                             <div className="flex gap-4 pt-4">
                                 <button type="submit" className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-widest transition-all shadow-xl shadow-brand-500/20 active:scale-95">Update Resource</button>
                             </div>
                         </form>
                     </div>
-                </div>
+                </div >,
+                document.body
             )}
-        </div>
+        </div >
     );
 };
 

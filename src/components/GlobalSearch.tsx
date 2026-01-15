@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiFileText, FiUsers, FiX, FiArrowRight } from 'react-icons/fi';
 import { api } from '../services/api';
 import { usePermissions } from '../hooks/usePermissions';
+import type { Invoice, Customer, Product } from "../types/types";
 
 const GlobalSearch = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<any>({ invoices: [], clients: [], stock: [] });
-    const [loading, setLoading] = useState(false);
+    const [results, setResults] = useState<{
+        invoices: Invoice[];
+        clients: Customer[];
+        stock: Product[];
+    }>({ invoices: [], clients: [], stock: [] });
     const { hasRole } = usePermissions();
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>(null);
@@ -49,9 +53,9 @@ const GlobalSearch = () => {
                 ]);
 
                 setResults({
-                    invoices: inv.filter((i: any) => i.id.toLowerCase().includes(query.toLowerCase()) || i.customer?.name?.toLowerCase().includes(query.toLowerCase())).slice(0, 3),
-                    clients: cli.filter((c: any) => c.name.toLowerCase().includes(query.toLowerCase()) || c.id.toLowerCase().includes(query.toLowerCase())).slice(0, 3),
-                    stock: sto.filter((s: any) => s.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3)
+                    invoices: inv.filter((i: Invoice) => i.id.toLowerCase().includes(query.toLowerCase()) || i.customer?.name?.toLowerCase().includes(query.toLowerCase())).slice(0, 3),
+                    clients: cli.filter((c: Customer) => c.name.toLowerCase().includes(query.toLowerCase()) || c.id.toLowerCase().includes(query.toLowerCase())).slice(0, 3),
+                    stock: sto.filter((s: Product) => s.name.toLowerCase().includes(query.toLowerCase())).slice(0, 3)
                 });
             } catch (err) {
                 console.error(err);
@@ -92,7 +96,7 @@ const GlobalSearch = () => {
                             <FiFileText /> Recent Orders
                         </h3>
                         <div className="space-y-2">
-                            {results.invoices.map((inv: any) => (
+                            {results.invoices.map((inv) => (
                                 <button key={inv.id} onClick={() => { navigate(`/invoices`); setIsOpen(false); }} className="w-full text-left p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-midnight-850 flex items-center justify-between group transition-all">
                                     <div>
                                         <p className="font-bold text-gray-900 dark:text-white">{inv.id}</p>
@@ -110,7 +114,7 @@ const GlobalSearch = () => {
                             <FiUsers /> Client Base
                         </h3>
                         <div className="space-y-2">
-                            {results.clients.map((cli: any) => (
+                            {results.clients.map((cli) => (
                                 <button key={cli.id} onClick={() => { navigate(`/clients`); setIsOpen(false); }} className="w-full text-left p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-midnight-850 flex items-center justify-between group transition-all">
                                     <div>
                                         <p className="font-bold text-gray-900 dark:text-white">{cli.name}</p>

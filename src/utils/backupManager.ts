@@ -1,4 +1,5 @@
 // src/utils/backupManager.ts
+import type { Invoice, Product, Customer } from '../types/types';
 /**
  * Backup and Restore Manager
  * 
@@ -11,15 +12,17 @@ interface BackupData {
     timestamp: string;
     appName: string;
     data: {
-        invoices?: any[];
-        konsut_clients?: any[];
-        stockData?: any;
-        konsut_settings?: any;
-        konsut_newinvoice_draft_vFinal?: any;
-        konsut_pdf_history?: any[];
-        freightRate?: string;
-        usdToKshRate?: string;
-        [key: string]: any;
+        data: {
+            invoices?: Invoice[];
+            konsut_clients?: Customer[];
+            stockData?: Record<string, Product[]>;
+            konsut_settings?: Record<string, any>;
+            konsut_newinvoice_draft_vFinal?: Record<string, any>;
+            konsut_pdf_history?: Record<string, any>[];
+            freightRate?: string;
+            usdToKshRate?: string;
+            [key: string]: any;
+        };
     };
     metadata: {
         invoiceCount: number;
@@ -46,8 +49,8 @@ const BACKUP_KEYS = [
  */
 const calculateStorageSize = (): number => {
     let total = 0;
-    for (let key in localStorage) {
-        if (localStorage.hasOwnProperty(key)) {
+    for (const key in localStorage) {
+        if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
             total += localStorage[key].length + key.length;
         }
     }
@@ -70,7 +73,7 @@ const formatBytes = (bytes: number): string => {
  */
 export const exportBackup = (): void => {
     try {
-        const data: any = {};
+        const data: Record<string, any> = {};
 
         // Collect all data from localStorage
         BACKUP_KEYS.forEach(key => {
@@ -104,7 +107,7 @@ export const exportBackup = (): void => {
                 stockItemCount,
                 totalSize: formatBytes(calculateStorageSize()),
             },
-        };
+        } as any;
 
         // Create and download the backup file
         const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -128,10 +131,11 @@ export const exportBackup = (): void => {
 /**
  * Validate backup file structure
  */
-const validateBackup = (backup: any): boolean => {
+const validateBackup = (backup: unknown): backup is BackupData => {
     if (!backup || typeof backup !== 'object') return false;
-    if (!backup.version || !backup.timestamp || !backup.data) return false;
-    if (backup.appName !== 'KONSUT Invoice System') {
+    const b = backup as Record<string, any>;
+    if (!b.version || !b.timestamp || !b.data) return false;
+    if (b.appName !== 'KONSUT Invoice System') {
         console.warn('Backup is from a different application');
     }
     return true;
@@ -174,14 +178,14 @@ export const importBackup = (file: File, mode: 'replace' | 'merge' = 'replace'):
                                 if (existing) {
                                     try {
                                         const existingData = JSON.parse(existing);
-                                        const mergedData = [...existingData, ...value];
+                                        const mergedData = [...existingData, ...(value as any[])];
                                         // Remove duplicates based on id
                                         const unique = mergedData.filter((item, index, self) =>
                                             index === self.findIndex((t) => t.id === item.id)
                                         );
                                         localStorage.setItem(key, JSON.stringify(unique));
                                         return;
-                                    } catch (e) {
+                                    } catch {
                                         console.warn(`Failed to merge ${key}, replacing instead`);
                                     }
                                 }
@@ -229,7 +233,7 @@ export const getBackupInfo = () => {
         try {
             const parsed = JSON.parse(invoices);
             return Array.isArray(parsed) ? parsed.length : 0;
-        } catch (e) { return 0; }
+        } catch { return 0; }
     })();
 
     const clientCount = (() => {
@@ -237,19 +241,17 @@ export const getBackupInfo = () => {
         try {
             const parsed = JSON.parse(clients);
             return Array.isArray(parsed) ? parsed.length : 0;
-        } catch (e) { return 0; }
+        } catch { return 0; }
     })();
 
     let stockItemCount = 0;
     if (stock) {
         try {
             const stockData = JSON.parse(stock);
-            stockItemCount =
-                (Array.isArray(stockData.products) ? stockData.products.length : 0) +
-                (Array.isArray(stockData.mobilization) ? stockData.mobilization.length : 0) +
-                (Array.isArray(stockData.services) ? stockData.services.length : 0);
-        } catch (e) {
-            console.warn('Failed to parse stock data for backup info', e);
+            const stockItems = Array.isArray(stockData) ? stockData : Object.values(stockData || {}).flat();
+            stockItemCount = stockItems.length;
+        } catch {
+            console.warn('Failed to parse stock data for backup info');
         }
     }
 

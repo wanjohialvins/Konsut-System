@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getCompanySettings, getInvoiceSettings } from "../utils/config";
+import { getCompanySettings, getInvoiceSettings } from "./config";
 import logo from "../assets/logo.jpg";
 
 import type { Invoice as InvoiceData } from "../types/types";
@@ -61,7 +61,7 @@ export const generateInvoicePDF = async (
     const rate = invoice.currencyRate || 1;
 
     // Safety: Normalize customer object if it's flat or missing fields
-    const rawInv = invoice as any;
+    const rawInv = invoice as unknown as Record<string, any>;
     const customer = {
       id: invoice.customer?.id || rawInv.customerId || rawInv.customer_id || '',
       name: invoice.customer?.name || rawInv.customerName || rawInv.customer_name || 'N/A',
@@ -129,7 +129,7 @@ export const generateInvoicePDF = async (
     if (SETTINGS.includeWatermark) {
       doc.saveGraphicsState();
       const gState = (doc as any).GState ? new (doc as any).GState({ opacity: 0.1 }) : { opacity: 0.1 };
-      doc.setGState(gState as any);
+      doc.setGState(gState);
       doc.setTextColor(200, 200, 200);
       doc.setFontSize(60);
       doc.setFont(font, "bold");
@@ -508,13 +508,14 @@ export const generateInvoicePDF = async (
     }
 
     const filenameDate = new Date().toISOString().split('T')[0];
-    const filename = `${documentType} ${invoice.id}, for ${invoice.customer.name} at ${filenameDate}.pdf`;
+    const rawFilename = `${documentType} ${invoice.id}, for ${invoice.customer.name} at ${filenameDate}.pdf`;
+    // Sanitize filename for Windows
+    const filename = rawFilename.replace(/[\\/:*?"<>|]/g, '_');
     doc.save(filename);
     return true;
 
   } catch (err) {
     console.error("PDF generation failed:", err);
-    alert(`PDF generation failed: ${err instanceof Error ? err.message : String(err)}`);
     return false;
   }
 };

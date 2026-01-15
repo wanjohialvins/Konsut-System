@@ -4,7 +4,35 @@
 
 :root {
   --soft-gray: #f2f2f2;
-  --accent-blue: #1e40af;
+  --accent-blue: #2563eb;
+  
+  /* Brand Variable Defaults (Blue) */
+  --brand-primary: #2563eb;
+  --brand-50: #eff6ff;
+  --brand-100: #dbeafe;
+  --brand-200: #bfdbfe;
+  --brand-300: #93c5fd;
+  --brand-400: #60a5fa;
+  --brand-500: #3b82f6;
+  --brand-600: #2563eb;
+  --brand-700: #1d4ed8;
+  --brand-800: #1e40af;
+  --brand-900: #1e3a8a;
+
+  /* Density Defaults */
+  --ui-spacing: 1.25rem;
+  --ui-gap: 1.5rem;
+  --ui-padding: 2rem;
+  --ui-font-sm: 0.875rem;
+  --ui-font-base: 1rem;
+}
+
+.density-compact {
+  --ui-spacing: 0.75rem;
+  --ui-gap: 1rem;
+  --ui-padding: 1.25rem;
+  --ui-font-sm: 0.75rem;
+  --ui-font-base: 0.875rem;
 }
 
 body {
@@ -16,7 +44,12 @@ body {
 
 .dark body {
   background-color: #1A1A2E;
-  /* midnight-950 (Deep Navy) */
   color: #F9F9F9;
-  /* midnight-text-primary (Crisp White) */
 }
+
+/* Density Utility Application */
+.density-compact .p-8 { padding: var(--ui-padding) !important; }
+.density-compact .gap-8 { gap: var(--ui-gap) !important; }
+.density-compact .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: var(--ui-gap) !important; }
+.density-compact .text-sm { font-size: var(--ui-font-sm) !important; }
+.density-compact .text-base { font-size: var(--ui-font-base) !important; }

@@ -14,25 +14,21 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaSearch,
-  FaPhone,
-  FaEnvelope,
-  FaMapMarkerAlt,
-  FaFileInvoice,
-  FaEye,
-  FaTimes,
   FaSync,
-  FaDownload,
   FaSeedling,
   FaEraser,
   FaBuilding,
-  FaGlobeAfrica,
-  FaIdCard,
-  FaFileImport
+  FaDownload,
+  FaFileImport,
+  FaEnvelope,
+  FaPhone,
+  FaEye,
+  FaFileInvoice,
+  FaTimes,
+  FaIdCard
 } from "react-icons/fa";
+import { FiPlus, FiDownload, FiUpload, FiSearch, FiMail, FiPhone } from "react-icons/fi";
+import { useModal } from "../contexts/ModalContext";
 import { api } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
@@ -100,6 +96,7 @@ const Clients: React.FC = () => {
   const { showToast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showConfirm } = useModal();
 
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
@@ -217,8 +214,7 @@ const Clients: React.FC = () => {
       await api.clients.bulkCreateOrUpdate(unique);
       await loadData();
       showToast('success', 'Sync complete: Clients updated from invoices');
-    } catch (e) {
-      console.error(e);
+    } catch {
       showToast('error', 'Failed to sync clients from invoices');
     } finally {
       setSyncing(false);
@@ -249,8 +245,7 @@ const Clients: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       showToast('success', 'Client list downloaded');
-    } catch (e) {
-      console.error(e);
+    } catch {
       showToast('error', 'Export failed');
     }
   };
@@ -293,15 +288,15 @@ const Clients: React.FC = () => {
           return;
         }
 
-        if (!confirm(`Import ${clientsToImport.length} clients?`)) return;
+        const confirmed = await showConfirm(`Import ${clientsToImport.length} clients?`);
+        if (!confirmed) return;
 
         setLoading(true);
         await api.clients.bulkCreateOrUpdate(clientsToImport);
         await loadData();
         showToast('success', `${clientsToImport.length} clients imported`);
 
-      } catch (err) {
-        console.error(err);
+      } catch {
         showToast('error', 'Failed to parse CSV');
       } finally {
         setLoading(false);
@@ -313,7 +308,8 @@ const Clients: React.FC = () => {
   };
 
   const seedClients = async () => {
-    if (!confirm("Add sample clients to your database?")) return;
+    const confirmed = await showConfirm("Add sample clients to your database?");
+    if (!confirmed) return;
 
     const dummyClients: Client[] = [
       { id: "SEED-1", name: "Safaricom PLC", company: "Safaricom", phone: "+254 722 000 000", email: "procurement@safaricom.co.ke", address: "Safaricom House, Waiyaki Way, Nairobi", kraPin: "P051234567A", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), source: 'manual' },
@@ -330,22 +326,22 @@ const Clients: React.FC = () => {
       await api.clients.bulkCreateOrUpdate(unique);
       await loadData();
       showToast('success', 'Sample clients added successfully');
-    } catch (error) {
-      console.error("Seeding failed:", error);
+    } catch {
       showToast('error', 'Failed to seed clients');
     }
   };
 
   const deleteAllClients = async () => {
-    if (confirm("WARNING: This will delete ALL client data. This cannot be undone. Are you sure?")) {
-      if (confirm("Double check: Are you absolutely sure you want to wipe the client database?")) {
+    const confirmed1 = await showConfirm("WARNING: This will delete ALL client data. This cannot be undone. Are you sure?");
+    if (confirmed1) {
+      const confirmed2 = await showConfirm("Double check: Are you absolutely sure you want to wipe the client database?");
+      if (confirmed2) {
         setLoading(true);
         try {
           await api.clients.deleteAll();
           showToast('success', 'All clients deleted successfully');
           await loadData();
-        } catch (error) {
-          console.error("Delete all failed:", error);
+        } catch {
           showToast('error', 'Failed to delete all clients from cloud');
         } finally {
           setLoading(false);
@@ -383,8 +379,7 @@ const Clients: React.FC = () => {
       setShowForm(false);
       setEditingClient(null);
       setFormData({ name: "", phone: "", email: "", address: "", company: "", kraPin: "" });
-    } catch (error) {
-      console.error("Save failed:", error);
+    } catch {
       showToast('error', 'Failed to save to cloud');
     } finally {
       setLoading(false);
@@ -392,15 +387,15 @@ const Clients: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Delete this client? This process cannot be undone.")) {
+    const confirmed = await showConfirm("Delete this client? This process cannot be undone.");
+    if (confirmed) {
       setLoading(true);
       try {
         await api.clients.delete(id);
         showToast('success', 'Client deleted successfully');
         await loadData();
         setSelectedClient(null);
-      } catch (error) {
-        console.error("Delete failed:", error);
+      } catch {
         showToast('error', 'Failed to delete from cloud');
       } finally {
         setLoading(false);
@@ -474,7 +469,7 @@ const Clients: React.FC = () => {
               onClick={() => { setEditingClient(null); setFormData({ name: "", phone: "", email: "", address: "", company: "", kraPin: "" }); setShowForm(true); }}
               className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-600/30 font-bold text-xs uppercase tracking-widest transform hover:scale-105 active:scale-95"
             >
-              <FaPlus /> New Client
+              <FiPlus /> New Client
             </button>
           </div>
         </div>
@@ -507,7 +502,7 @@ const Clients: React.FC = () => {
 
         {/* Search */}
         <div className="relative group animate-slide-up delay-300">
-          <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-600 transition-colors" />
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors text-lg" />
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
