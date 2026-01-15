@@ -13,7 +13,11 @@ import Tasks from "./pages/Tasks";
 import Documents from "./pages/Documents";
 import Memos from "./pages/Memos";
 import Suppliers from "./pages/Suppliers";
-import Support from "./pages/Support";
+import Suppliers from "./pages/Suppliers";
+import Support from "./pages/Support"; // Keeping legacy ref if needed but prefer new ones
+import HelpCenter from "./pages/support/HelpCenter";
+import SystemGuide from "./pages/support/SystemGuide";
+import ContactSupport from "./pages/support/ContactSupport";
 import Notifications from "./pages/Notifications";
 
 // Granular Stock & Settings
@@ -87,8 +91,12 @@ const App = () => {
                     <Route path="documents" element={<Documents />} />
                     <Route path="memos" element={<Memos />} />
                     <Route path="suppliers" element={<Suppliers />} />
-                    <Route path="support" element={<Support />} />
                     <Route path="notifications" element={<Notifications />} />
+
+                    {/* Support Module */}
+                    <Route path="support" element={<HelpCenter />} />
+                    <Route path="support/guide" element={<SystemGuide />} />
+                    <Route path="support/contact" element={<ContactSupport />} />
                   </Route>
                 </Routes>
               </Router>

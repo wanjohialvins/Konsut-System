@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy, FiAward } from "react-icons/fi";
+import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy, FiAward, FiBook } from "react-icons/fi";
 import { useIsMobile } from "../hooks/useMediaQuery";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../services/api";
@@ -212,8 +212,19 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               <FiLock size={18} /> System Control
             </NavLink>
           )}
-          <NavLink to="/support" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support', isActive)}>
-            <FiLifeBuoy size={18} /> Help & Support
+        </nav>
+
+        {/* Support */}
+        <SectionHeader title="Resources & Support" />
+        <nav className="space-y-1 mb-10">
+          <NavLink to="/support" end onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support', isActive)}>
+            <FiLifeBuoy size={18} /> Help Center
+          </NavLink>
+          <NavLink to="/support/guide" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support/guide', isActive)}>
+            <FiBook size={18} /> System Manual
+          </NavLink>
+          <NavLink to="/support/contact" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support/contact', isActive)}>
+            <FiMessageSquare size={18} /> Contact Support
           </NavLink>
         </nav>
 
