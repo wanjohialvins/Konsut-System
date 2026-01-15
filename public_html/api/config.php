@@ -3,7 +3,7 @@
 
 // 1. Handle CORS immediately
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-User-Role, X-User-Permissions, X-User-Id");
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -81,8 +81,23 @@ function checkPermission($action)
 {
     // Use the robust helper instead of direct $_SERVER access
     $role = getRequestHeader('X-User-Role') ?? 'viewer';
+    $userId = getRequestHeader('X-User-Id');
     $permissionsJson = getRequestHeader('X-User-Permissions') ?? '[]';
     $permissions = json_decode($permissionsJson, true) ?? [];
+
+    // Track Activity
+    if ($userId) {
+        global $pdo;
+        // Optimization: Updating on every single request might be heavy on high load, 
+        // but for this system it ensures near real-time accuracy.
+        try {
+            $updateParams = [$userId];
+            // Simple query execution
+            $pdo->prepare("UPDATE users SET last_active = NOW() WHERE id = ?")->execute($updateParams);
+        } catch (Exception $e) {
+            // Ignore activity update errors to not block the request
+        }
+    }
 
     if ($role === 'admin')
         return true;

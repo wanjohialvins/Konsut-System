@@ -114,6 +114,7 @@ export const api = {
         create: (data: User) => request('users.php', { method: 'POST', body: JSON.stringify(data) }),
         update: (data: User) => request('users.php', { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id: string) => request(`users.php?id=${id}`, { method: 'DELETE' }),
+        resetPassword: (id: string) => request(`users.php?id=${id}&action=reset_password`, { method: 'PATCH' }),
     },
     admin: {
         getAuditLogs: () => request('admin/audit_logs.php'),

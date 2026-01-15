@@ -8,14 +8,28 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         requirePermission('view_users');
-        $stmt = $pdo->query("SELECT id, username, email, role, permissions, last_login, created_at FROM users ORDER BY username ASC");
-        echo json_encode($stmt->fetchAll());
+        $stmt = $pdo->query("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users ORDER BY username ASC");
+        $users = $stmt->fetchAll();
+
+        // Calculate Online Status
+        $now = time();
+        foreach ($users as &$user) {
+            if (!empty($user['last_active'])) {
+                $lastActive = strtotime($user['last_active']);
+                // Active if seen in last 2 minutes
+                $user['is_active'] = ($now - $lastActive) < 120;
+            } else {
+                $user['is_active'] = false;
+            }
+        }
+
+        echo json_encode($users);
         break;
 
     case 'POST':
         requirePermission('manage_users');
         $data = json_decode(file_get_contents('php://input'), true);
-        
+
         // Validation
         if (empty($data['username']) || empty($data['password'])) {
             http_response_code(400);
@@ -45,7 +59,7 @@ switch ($method) {
 
         // We don't update password here for security simplicity, usually separate endpoint
         // But if provided, we can update it
-        
+
         $fields = "email=?, role=?, permissions=?";
         $params = [
             $data['email'] ?? '',
@@ -73,7 +87,7 @@ switch ($method) {
     case 'DELETE':
         requirePermission('manage_users');
         $id = $_GET['id'] ?? '';
-        
+
         // Prevent deleting self (simple check, assuming header user_id passed or check session if used)
         // For now, raw delete
         try {
