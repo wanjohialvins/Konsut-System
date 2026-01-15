@@ -1,103 +1,139 @@
 # 📖 KONSUT System - Professional User Manual
 
-Welcome to the official user manual for the **KONSUT System**. This guide provides comprehensive instructions on how to use the system effectively, from basic setup to advanced analytics.
+Welcome to the **KONSUT Invoice System**, a professional-grade business management suite designed for high-performance teams. This manual provides exhaustive details on every module, ensuring you can leverage the full power of the system.
+
+*(System Version 2.0.1)*
 
 ---
 
 ## 📑 Table of Contents
-1. [Introduction](#introduction)
-2. [Quick Start Guide](#quick-start-guide)
-3. [Invoice & Quotation Management](#invoice--quotation-management)
-4. [Stock & Inventory Management](#stock--inventory-management)
-5. [Client Relationship Management](#client-relationship-management)
-6. [Analytics & Reporting](#analytics--reporting)
-7. [System Settings & Customization](#system-settings--customization)
-8. [Data Security & Backups](#data-security--backups)
-9. [Troubleshooting](#troubleshooting)
+1.  [Getting Started](#1-getting-started)
+2.  [The Dashboard](#2-the-dashboard)
+3.  [Invoicing & Documents](#3-invoicing--documents)
+4.  [Inventory Management](#4-inventory-management)
+5.  [Client Relationship Management (CRM)](#5-client-relationship-management-crm)
+6.  [System Configuration](#6-system-configuration)
+7.  [Admin & Data Security](#7-admin--data-security)
+8.  [Troubleshooting](#8-troubleshooting)
 
 ---
 
-## 🛡️ License Notice
-This software is **Proprietary**. Unauthorized copying, distribution, or modifications are strictly prohibited under international copyright laws. Refer to the [LICENSE](LICENSE) file for full details.
+## 1. Getting Started
+### Accessing the System
+-   **URL**: Navigate to your deployed instance (e.g., `localhost` or `your-domain.com`).
+-   **Login**: Use your administrative credentials.
+-   **First Run**:
+    1.  Go to **Settings > Company Profile**.
+    2.  The system will auto-populate defaults (KONSUT LTD). Verify your **PIN**, **Address**, and **Logo**.
+    3.  Click **Synchronize Identity** to save.
+
+### The Interface
+-   **Sidebar**: Your main navigation hub. On mobile, this collapses into a bottom or side drawer.
+-   **Dark Mode**: The system features a "Midnight" dark theme which activates automatically based on your OS settings or can be toggled manually.
+-   **Command Palette**: Press `Ctrl + K` (or `Cmd + K`) anywhere to open the global search/command tool.
 
 ---
 
-## 1. Introduction
-The KONSUT System is a professional-grade solution designed to streamline the billing, inventory, and staff management needs of modern businesses. It features a sleek "Futuristic Dark" interface, real-time analytics, and automated document generation with full backend persistence.
+## 2. The Dashboard
+Your command center provides a real-time snapshot of business health:
+-   **KPI Cards**:
+    -   **Total Revenue**: Aggregated sum of all paid invoices.
+    -   **Pending Invoices**: Value of work billed but not yet collected.
+    -   **Active Projects**: Count of ongoing engagements.
+-   **Visual Analytics**:
+    -   *Revenue Trends*: Line graph showing income over the last 6 months.
+    -   *Category Distribution*: Pie chart breaking down income by Products vs. Services.
 
 ---
 
-## 2. Quick Start Guide
-1. **Launch**: Run `npm run dev` and navigate to `localhost:5173`.
-2. **Configure**: Go to `Settings` to set your company name, logo, and PIN.
-3. **Seed**: If you're new, use the `Seed Stock` button on the Stock page to see how the system works.
-4. **Create**: Head to `New Invoice` to generate your first professional document.
+## 3. Invoicing & Documents
+The core engine of the KONSUT system. The document editor (`/new-invoice`) acts as a unified interface for three document types: **Quotations**, **Proforma Invoices**, and **Tax Invoices**.
+
+### Workflow: Creation to Payment
+1.  **Drafting**:
+    -   Select **Document Type** (Invoice, Quotation, Proforma).
+    -   **Client**: Select an existing client from the dropdown or type a new name. *Note: For Tax Invoices, a valid KRA PIN fits is mandatory.*
+    -   **Items**: Add items from **Products**, **Services**, or **Mobilization** categories.
+        -   *Search*: Use the search bar to find inventory items instantly.
+        -   *Math*: VAT (16%) is calculated automatically if enabled in Settings.
+2.  **Saving**:
+    -   The system **auto-saves** your draft to your local device every few seconds.
+    -   Click **Save to Cloud** to persist the document to the database.
+3.  **Conversion**:
+    -   A **Quotation** can be converted to a **Proforma** or **Invoice** with one click.
+    -   *Smart ID*: converting `QUO-001` automatically generates `INV-001` (preserving the sequence number).
+4.  **PDF Generation**:
+    -   Click the **PDF Icon** to generate a high-resolution print-ready file.
+    -   The PDF includes your Logo, Watermark (if draft), QR Code, and Bank Details.
+
+### Advanced Features
+-   **Currency Toggle**: Switch the entire view between **KES** and **USD**. The exchange rate is managed in Settings.
+-   **Client Responsibilities**: Toggle this section to include legal disclaimers about site access, permits, etc.
+-   **Terms & Conditions**: Auto-filled from global settings but editable per-invoice.
 
 ---
 
-## 3. Invoice & Quotation Management
-### Creating an Invoice
-- **Select Client**: Start by entering customer details.
-- **Add Items**: Choose from your Stock categories (Products, Services, Mobilization).
-- **Automated Math**: The system handles VAT (16%), Freight, and Currency conversion (USD/KSH) automatically.
-- **Download**: Click the "Download PDF" button to get a ready-to-print professional document.
+## 4. Inventory Management
+Manage your assets with precision in the **Inventory Control** module (`/stock/inventory`).
 
-### Quotations vs. Invoices
-The system allows you to save drafts as "Quotations" with validity dates, which can later be converted into finalized invoices.
+### Categories
+-   **Products**: Physical goods. Tracks quantity and unit price.
+-   **Mobilization**: Logistics, transport, and setup fees.
+-   **Services**: Labor, consultancy, and intangible hours.
 
----
+### Smart Tools
+Found in the "Smart Tools" menu:
+-   **Merge Duplicates**: Scans your inventory for items with identical names (case-insensitive) and merges them into a single entry, summing their quantities.
+-   **Wipe Inventory**: A dangerous tool to clear all data (Admin only).
+-   **Export CSV**: Download your stock list for Excel/Backup.
 
-## 4. Stock & Inventory Management
-### Managing Categories
-The system splits inventory into three distinct modules:
-- **Products**: Physical items (includes weight-based freight calculation).
-- **Services**: Intangible offerings (no weight calculation).
-- **Mobilization**: Logistics and setup costs.
-
-### Bulk Operations
-Use the **Import from CSV/Excel** feature to add hundreds of items in seconds. The system intelligently detects duplicates during import to maintain data cleanlines.
+### Low Stock Alerts
+-   Items with quantity **5 or less** are flagged.
+-   Click the **Low Stock** filter button to see only these critical items.
 
 ---
 
-## 5. Client Relationship Management
-Stay organized with the built-in CRM:
-- **Client Profiles**: Automatic ID generation and color-coded avatars.
-- **Spending History**: Track which clients generate the most revenue.
-- **Exporting**: Download your entire client database to CSV for marketing or external backup.
+## 5. Client Relationship Management (CRM)
+Located at `/clients`, this module builds a profile for every customer you interact with.
+
+-   **Automatic Capture**: When you create an invoice for a new name, a Client Profile is created automatically.
+-   **Spending History**: View "Lifetime Value" for each client.
+-   **Search**: Filter clients by Name, Phone, or KRA PIN.
 
 ---
 
-## 6. Analytics & Reporting
-The system provides two levels of data visualization:
-- **Dashboard**: High-level KPIs (Total Revenue, Monthly Trends, Recent Activity).
-- **Advanced Analytics**: Detailed breakdowns using high-end charts (Revenue Trends, Category Distribution, Payment Status).
+## 6. System Configuration
+Customize the logic of your system at `/settings/system`.
+
+1.  **Company Profile**: Legal entity details appearing on PDFs.
+2.  **Invoice Settings**:
+    -   **Global VAT**: Toggle 16% tax on/off.
+    -   **Exchange Rate**: Set the USD/KES rate (Default: 130).
+    -   **Bank Details**: Text area for your payment instructions (M-Pesa, Bank Account).
+3.  **System Health**: View server status, database size, and error logs (`/system-health`).
 
 ---
 
-## 7. System Settings & Customization
-Tailor the system to your specific needs:
-- **PDF Styling**: Manage watermarks, barcodes, custom footers, and page orientation.
-- **Regional Settings**: Configure VAT rates, currency conversion factors, and default units.
-- **Branding**: Upload your company logo to be used globally across all generated documents.
+## 7. Admin & Data Security
+### Data Persistence
+-   All core data (Invoices, Clients, Stock) is stored in a **MariaDB Database**.
+-   Drafts and UI preferences are stored in **Browser LocalStorage**.
+
+### Document Vault
+-   Upload sensitive files (contracts, LPOs) to the secure vault (`/documents`).
+-   Files are renamed with a unique hash to prevent overwriting.
+
+### Support & Tasks
+-   Use the **Support** section to file tickets.
+-   These tickets become actionable items in the **Tasks** module for Admins to track.
 
 ---
 
-## 8. Data Security & Backups
-### Local Storage
-All data is stored **securely in a centralized MariaDB database**. This ensures that multiple users can access the system from different devices without data loss. UI preferences and themes are stored in your browser's local storage for a personalized experience.
-
-### Backup Strategy
-1. **Manual Export**: Regularly export Stock and Client data to CSV.
-2. **System Backup**: Use the "Backup Data" feature in Settings to generate a JSON snapshot of your entire system.
+## 8. Troubleshooting
+-   **White Screen?** This usually means a React Error. Check the console (F12) or try a hard refresh (Ctrl+F5).
+-   **PDF Layout Issues**: Ensure your Company Logo is a square or landscape image under 2MB.
+-   **Missing Data**: If you switched browsers, your "Drafts" won't transfer (they are local), but saved Invoices (Cloud) will appear.
 
 ---
 
-## 9. Troubleshooting
-- **Images not showing**: Ensure your uploaded logo is under 2MB for optimal performance.
-- **PDF layout issues**: Reset your "PDF Settings" to default in the Settings page.
-- **Data missing**: Check if you are using a different browser or "Incognito Mode", as data is tied to the specific browser instance.
-
----
-
-**KONSUT System** - Professional Management Suite  
-*Version 1.1.0 // Developed by Alvins Wanjohi*
+*© 2024 KONSUT LTD. Proprietary Software.*
