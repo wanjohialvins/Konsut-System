@@ -40,6 +40,10 @@ apache file cntents
 tsc_errors.txt
 *tsc*.txt
 
+# All text files (logs, debug, etc.)
+*.txt
+!package-lock.txt
+
 # OS files
 .DS_Store
 Thumbs.db
