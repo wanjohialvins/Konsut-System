@@ -7,6 +7,26 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
+        $action = $_GET['action'] ?? '';
+        if ($action === 'get_self') {
+            $userId = getRequestHeader('X-User-Id');
+            if (!$userId) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Authentication required']);
+                exit;
+            }
+            $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch();
+            if ($user) {
+                echo json_encode($user);
+            } else {
+                http_response_code(404);
+                echo json_encode(['error' => 'User not found']);
+            }
+            exit;
+        }
+
         requirePermission('view_users');
         $stmt = $pdo->query("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users ORDER BY username ASC");
         $users = $stmt->fetchAll();

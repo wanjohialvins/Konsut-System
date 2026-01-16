@@ -118,6 +118,7 @@ export const api = {
     },
     users: {
         getAll: () => request('users.php'),
+        getSelf: () => request('users.php?action=get_self'),
         create: (data: User) => request('users.php', { method: 'POST', body: JSON.stringify(data) }),
         update: (data: User) => request('users.php', { method: 'PUT', body: JSON.stringify(data) }),
         updateSelf: (data: Partial<User>) => request('users.php?action=update_self', { method: 'PUT', body: JSON.stringify(data) }),

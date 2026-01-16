@@ -1101,3 +1101,311 @@
     [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
 )
 
+2026-01-16 02:09:01 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:01 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:01 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:01 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:29 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:29 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:29 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:29 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:35 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:35 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:35 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:35 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:35 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+
+2026-01-16 02:09:35 | Array
+(
+    [Host] => localhost
+    [Connection] => keep-alive
+    [X-User-Permissions] => ["/","/new-invoice","/invoices","/clients","/stock/inventory","/stock/add","/analytics","/audit-logs","/system-health","/settings/profile","/settings/invoice","/settings/preferences","/settings/system","/users","/support"]
+    [sec-ch-ua-platform] => "Windows"
+    [X-User-Id] => 3
+    [sec-ch-ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [sec-ch-ua-mobile] => ?0
+    [X-User-Role] => admin
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Content-Type] => application/json
+    [Accept] => */*
+    [Origin] => http://localhost:5173
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:5173/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => en-GB,en-US;q=0.9,en;q=0.8
+)
+

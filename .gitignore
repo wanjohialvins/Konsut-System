@@ -31,6 +31,11 @@ exclude_list.txt
 apache file cntents
 *.log
 
+# Backend debug and error logs
+/public_html/api/debug_*.txt
+/public_html/api/php_errors.txt
+/public_html/api/*_output.txt
+
 # OS files
 .DS_Store
 Thumbs.db

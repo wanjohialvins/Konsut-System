@@ -119,8 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const refreshUser = useCallback(async () => {
         if (!user) return;
         try {
-            const data = await api.users.getAll(); // Get all to find self
-            const self = data.find((u: any) => u.id === user.id);
+            const self = await api.users.getSelf();
             if (self) {
                 const parsePermissions = (perms: unknown) => {
                     if (!perms) return [];
@@ -153,7 +152,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const handleUpdate = () => refreshUser();
         window.addEventListener('permission-update', handleUpdate);
-        return () => window.removeEventListener('permission-update', handleUpdate);
+
+        // Pseudo-live updates: Refresh when user returns to tab
+        window.addEventListener('focus', handleUpdate);
+
+        // Periodic background refresh (every 5 mins)
+        const interval = setInterval(handleUpdate, 5 * 60 * 1000);
+
+        return () => {
+            window.removeEventListener('permission-update', handleUpdate);
+            window.removeEventListener('focus', handleUpdate);
+            clearInterval(interval);
+        };
     }, [refreshUser]);
 
     return (

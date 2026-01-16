@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiUserPlus, FiTrash2, FiShield, FiUser, FiActivity, FiKey, FiMail, FiEdit2, FiX, FiCheckCircle, FiPlus } from "react-icons/fi";
+import { FiUserPlus, FiTrash2, FiShield, FiUser, FiActivity, FiKey, FiMail, FiEdit2, FiX, FiCheckCircle, FiPlus, FiBriefcase, FiAward, FiTag, FiShoppingBag } from "react-icons/fi";
 import { useModal } from "../contexts/ModalContext";
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -257,18 +257,32 @@ const Users = () => {
                                         </div>
                                     </td>
                                     <td className="p-5 text-center">
-                                        <span className={`px-3 py-1.5 rounded-xl font-bold border capitalize text-[11px] tracking-tight
-                      ${u.role.toLowerCase() === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800' :
-                                                u.role.toLowerCase() === 'ceo' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800' :
-                                                    u.role.toLowerCase() === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' :
-                                                        u.role.toLowerCase() === 'sales' ? 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800' :
-                                                            u.role.toLowerCase() === 'storekeeper' ? 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800' :
-                                                                u.role.toLowerCase() === 'accountant' ? 'bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800' :
-                                                                    u.role.toLowerCase() === 'staff' ? 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-800' :
-                                                                        'bg-slate-50 text-slate-700 border-slate-100 dark:bg-midnight-800 dark:text-slate-400 dark:border-midnight-700'
-                                            }`}>
-                                            {u.role}
-                                        </span>
+                                        <div className="flex justify-center flex-col items-center gap-1">
+                                            <span className={`px-3 py-1.5 rounded-xl font-bold border capitalize text-[11px] tracking-tight flex items-center gap-2
+                      ${(u.role || '').toLowerCase() === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800' :
+                                                    (u.role || '').toLowerCase() === 'ceo' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800' :
+                                                        (u.role || '').toLowerCase() === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' :
+                                                            (u.role || '').toLowerCase() === 'sales' ? 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800' :
+                                                                (u.role || '').toLowerCase() === 'storekeeper' ? 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800' :
+                                                                    (u.role || '').toLowerCase() === 'accountant' ? 'bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800' :
+                                                                        (u.role || '').toLowerCase() === 'staff' ? 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-800' :
+                                                                            'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700'
+                                                }`}>
+                                                {(u.role || '').toLowerCase() === 'admin' && <FiShield size={12} />}
+                                                {(u.role || '').toLowerCase() === 'ceo' && <FiAward size={12} />}
+                                                {(u.role || '').toLowerCase() === 'manager' && <FiBriefcase size={12} />}
+                                                {(u.role || '').toLowerCase() === 'sales' && <FiTag size={12} />}
+                                                {(u.role || '').toLowerCase() === 'storekeeper' && <FiShoppingBag size={12} />}
+                                                {(u.role || '').toLowerCase() === 'accountant' && <FiKey size={12} />}
+                                                {((u.role || '').toLowerCase() === 'staff' || (u.role || '').toLowerCase() === 'viewer') && <FiUser size={12} />}
+                                                {u.role || 'No Role'}
+                                            </span>
+                                            {u.permissions && Array.isArray(u.permissions) && u.permissions.length > 0 && (
+                                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 dark:bg-midnight-950 px-2 py-0.5 rounded-lg border border-gray-100 dark:border-midnight-800">
+                                                    {u.permissions.length} Custom Gates
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="p-5">
                                         <div className="flex items-center justify-center gap-2">

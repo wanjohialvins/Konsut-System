@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100),
-    role ENUM('admin', 'staff', 'viewer') DEFAULT 'staff',
+    role VARCHAR(50) DEFAULT 'staff',
     permissions JSON DEFAULT NULL,
     last_login DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -119,6 +119,19 @@ CREATE TABLE IF NOT EXISTS document_items (
     unitPrice DECIMAL(15, 2) DEFAULT 0.00,
     total DECIMAL(15, 2) DEFAULT 0.00,
     FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Cloud Sync Compatibility Table
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id VARCHAR(50) NOT NULL,
+    product_id VARCHAR(50),
+    name VARCHAR(255),
+    description TEXT,
+    quantity INT DEFAULT 1,
+    unitPrice DECIMAL(15, 2) DEFAULT 0.00,
+    total DECIMAL(15, 2) DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS settings (

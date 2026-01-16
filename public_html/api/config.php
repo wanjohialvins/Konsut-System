@@ -113,6 +113,8 @@ function checkPermission($action)
                 $role = $u['role'] ?? 'viewer';
                 $permissionsJson = $u['permissions'] ?? '[]';
                 $permissions = json_decode($permissionsJson, true) ?? [];
+            } else {
+                $permissionsJson = '[]';
             }
         } catch (Exception $e) {
             // Fallback to headers if DB fails or ignore activity update errors
@@ -123,6 +125,7 @@ function checkPermission($action)
     } else {
         // Not logged in or no ID sent
         $role = 'viewer';
+        $permissionsJson = '[]';
         $permissions = [];
     }
 
@@ -144,52 +147,47 @@ function checkPermission($action)
     $permissionMap = [
         // Personal Settings (Always Allowed)
         'view_profile' => ['*'],
+        'get_self' => ['*'],
         'view_preferences' => ['*'],
 
         // Support (Always Allowed)
         'view_support' => ['*'],
 
-        // Stock (Universal for non-viewers)
-        'view_stock' => ['*', '/stock/inventory', '/new-invoice', '/stock/add'],
-        'manage_stock' => ['/stock/add', '/stock/inventory'],
+        // Intelligence
+        'view_dashboard' => ['*', '/', '/dashboard'],
+        'view_reports' => ['/analytics'],
+        'view_accountability' => ['/accountability'],
+        'view_audit_logs' => ['/audit-logs'],
+        'view_system_health' => ['/system-health'],
 
-        // Invoices
+        // Sales & Operations
         'view_invoices' => ['/invoices', '/new-invoice', '/clients'],
         'manage_invoices' => ['/new-invoice'],
         'delete_invoice' => ['/invoices'],
-
-        // Clients
         'view_clients' => ['/clients', '/new-invoice', '/invoices'],
         'manage_clients' => ['/clients', '/new-invoice'],
 
-        // Users
-        'view_users' => ['/users'],
-        'manage_users' => ['/users'],
+        // Resource Hub
+        'view_stock' => ['*', '/stock/inventory', '/new-invoice', '/stock/add'],
+        'manage_stock' => ['/stock/add', '/stock/inventory'],
+        'view_suppliers' => ['*', '/suppliers', '/stock/inventory'],
+        'manage_suppliers' => ['/suppliers'],
+        'view_documents' => ['*', '/documents'],
+        'manage_documents' => ['/documents'],
 
-        // Settings
-        'view_settings' => ['/settings/profile', '/settings/invoice', '/settings/preferences', '/settings/system', '/', '/dashboard'],
-        'manage_settings' => ['/settings/system'],
-
-        // Suppliers
-        'view_suppliers' => ['*', '/stock/inventory', '/stock/add'],
-        'manage_suppliers' => ['/stock/add'],
-
-        // Dashboard & Notifications (Everyone with dashboard access)
-        'view_dashboard' => ['*', '/', '/dashboard'],
+        // Team & Tasks
+        'view_tasks' => ['*', '/tasks', '/dashboard'],
+        'manage_tasks' => ['/tasks'],
+        'view_memos' => ['*', '/memos', '/dashboard'],
+        'manage_memos' => ['/memos'],
         'view_notifications' => ['*', '/', '/dashboard', '/notifications'],
         'manage_notifications' => ['/', '/dashboard', '/notifications'],
 
-        // Tasks
-        'view_tasks' => ['*', '/tasks', '/dashboard'],
-        'manage_tasks' => ['/tasks'],
-
-        // Memos
-        'view_memos' => ['*', '/memos', '/dashboard'],
-        'manage_memos' => ['/memos'],
-
-        // Vault / Documents
-        'view_documents' => ['*', '/documents'],
-        'manage_documents' => ['/documents'],
+        // Governance
+        'view_users' => ['/users'],
+        'manage_users' => ['/users'],
+        'manage_settings' => ['/settings/system', '/settings/company', '/settings/invoice'],
+        'view_settings' => ['/settings/profile', '/settings/invoice', '/settings/preferences', '/settings/system', '/', '/dashboard'],
     ];
 
     $r = strtolower($role);
@@ -204,7 +202,7 @@ function checkPermission($action)
         foreach ($allowedRoutes as $route) {
             // Universal access for non-viewers (if route is '*')
             if ($route === '*') {
-                if ($isNotViewer || $action === 'view_profile' || $action === 'view_preferences') {
+                if ($isNotViewer || $action === 'view_profile' || $action === 'view_preferences' || $action === 'get_self') {
                     $hasPermission = true;
                     break;
                 }
