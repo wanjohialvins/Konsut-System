@@ -186,4 +186,3 @@ function ensureClientExists($pdo, $customer)
     ]);
     return $customer['id'];
 }
-?>

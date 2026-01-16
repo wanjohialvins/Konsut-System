@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiFileText, FiUsers, FiBox, FiSettings, FiActivity, FiX } from 'react-icons/fi';
+import { FiSearch, FiFileText, FiUsers, FiBox, FiSettings, FiActivity, FiX, FiTruck, FiBarChart2, FiCheckSquare, FiBell, FiHeart, FiShield, FiFilePlus } from 'react-icons/fi';
 import { usePermissions } from '../hooks/usePermissions';
 
 const CommandPalette = () => {
@@ -29,11 +29,25 @@ const CommandPalette = () => {
     }, [isOpen]);
 
     const actions = [
-        { id: 'inv', label: 'Create New Invoice', path: '/new-invoice', icon: FiFileText, perm: '/' },
+        // Creation
+        { id: 'new-inv', label: 'Create New Invoice', path: '/new-invoice', icon: FiFilePlus, perm: '/' },
+        { id: 'new-quote', label: 'Create New Quotation', path: '/new-invoice?type=quotation', icon: FiFileText, perm: '/' },
+        { id: 'new-prof', label: 'Create New Proforma', path: '/new-invoice?type=proforma', icon: FiFileText, perm: '/' },
+
+        // Core Modules
+        { id: 'clients', label: 'Manage Clients', path: '/clients', icon: FiUsers, perm: '/clients' },
+        { id: 'stock', label: 'Check Inventory', path: '/stock/inventory', icon: FiBox, perm: '/stock/inventory' },
+        { id: 'suppliers', label: 'Manage Suppliers', path: '/suppliers', icon: FiTruck, perm: '/suppliers' },
+        { id: 'analytics', label: 'View Analytics & Reports', path: '/analytics', icon: FiBarChart2, perm: '/analytics' },
+        { id: 'tasks', label: 'My Tasks', path: '/tasks', icon: FiCheckSquare, perm: '/tasks' },
+
+        // Admin & System
+        { id: 'notifs', label: 'Notifications', path: '/notifications', icon: FiBell, perm: '/notifications' },
         { id: 'users', label: 'Manage Users', path: '/users', icon: FiUsers, perm: '/users' },
-        { id: 'stock', label: 'Check Inventory', path: '/stock', icon: FiBox, perm: '/stock' },
-        { id: 'audit', label: 'Security Audit', path: '/audit-logs', icon: FiActivity, perm: '/audit-logs' },
-        { id: 'settings', label: 'System Settings', path: '/settings', icon: FiSettings, perm: '/settings' },
+        { id: 'audit', label: 'Security Audit Logs', path: '/audit-logs', icon: FiActivity, perm: '/audit-logs' },
+        { id: 'health', label: 'System Health Status', path: '/system-health', icon: FiHeart, perm: '/system-health' },
+        { id: 'accountability', label: 'Accountability Reports', path: '/accountability', icon: FiShield, perm: '/accountability' },
+        { id: 'settings', label: 'System Settings', path: '/settings/system', icon: FiSettings, perm: '/settings/system' },
     ].filter(a => can(a.perm));
 
     const filteredActions = actions.filter(a =>

@@ -508,7 +508,7 @@ export const generateInvoicePDF = async (
     }
 
     const filenameDate = new Date().toISOString().split('T')[0];
-    const rawFilename = `${documentType} ${invoice.id}, for ${invoice.customer.name} at ${filenameDate}.pdf`;
+    const rawFilename = `${documentType} for ${invoice.customer.name} at ${filenameDate}, ${invoice.id}.pdf`;
     // Sanitize filename for Windows
     const filename = rawFilename.replace(/[\\/:*?"<>|]/g, '_');
     doc.save(filename);

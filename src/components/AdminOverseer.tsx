@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaShieldAlt, FaExclamationTriangle, FaCheckCircle, FaUsers, FaBolt } from "react-icons/fa";
 import { api } from "../services/api";
-import type { Product } from "../types/types";
 
 interface AuditLog {
     id: number;
@@ -23,27 +22,43 @@ const AdminOverseer: React.FC = () => {
         const fetchAdminData = async () => {
             try {
                 const [logs, users, stockData] = await Promise.all([
-                    api.admin.getAuditLogs(),
-                    api.users.getAll(),
-                    api.stock.getAll()
+                    api.admin.getAuditLogs().catch(() => []), // Fallback to empty array on fail
+                    api.users.getAll().catch(() => []),       // Fallback to empty array
+                    api.stock.getAll().catch(() => [])        // Fallback to empty array
                 ]);
 
-                // Filter for low stock
-                const lowStock = (stockData.products || []).filter((p: any) => !p.priceKsh).length;
+                // Safely handle stock - check if it's flat array or object
+                let stockItems: any[] = [];
+                if (Array.isArray(stockData)) {
+                    stockItems = stockData;
+                } else if (stockData && typeof stockData === 'object') {
+                    stockItems = (stockData as any).products || [];
+                }
 
-                // Get latest significant audits
-                const recentLogins = (logs as AuditLog[])
-                    .filter(log => log.action === 'login')
+                // Filter for low stock safely
+                const lowStock = stockItems.filter((p: any) => {
+                    if (!p) return false;
+                    // Logic: price missing OR quantity < 5
+                    return !p.priceKsh || (p.quantity !== undefined && Number(p.quantity) < 5);
+                }).length;
+
+                // Safely handle logs
+                const logArray = Array.isArray(logs) ? logs : [];
+                const recentLogins = (logArray as AuditLog[])
+                    .filter(log => log && (log.action === 'login' || log.action?.includes('login')))
                     .slice(0, 3);
+
+                const userCount = Array.isArray(users) ? users.length : 0;
 
                 setStats({
                     databaseStatus: "Stable",
-                    activeUsers: users.length,
+                    activeUsers: userCount,
                     lowStockAlerts: lowStock,
                     recentAudits: recentLogins
                 });
-            } catch {
-                console.error("Overseer failed to fetch data");
+            } catch (err) {
+                console.error("Overseer failed to fetch data", err);
+                // Keep default state or set error state - preventing crash
             }
         };
         fetchAdminData();
@@ -83,12 +98,16 @@ const AdminOverseer: React.FC = () => {
 
             <div className="space-y-3">
                 <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Recent Access</p>
-                {stats.recentAudits.map((audit: AuditLog, i: number) => (
-                    <div key={i} className="flex justify-between items-center text-xs p-2 bg-white/5 rounded-lg border border-white/5">
-                        <span className="font-bold text-gray-300">{audit.user_name || 'System'}</span>
-                        <span className="text-gray-500">{new Date(audit.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                ))}
+                {stats.recentAudits.length > 0 ? (
+                    stats.recentAudits.map((audit: AuditLog, i: number) => (
+                        <div key={i} className="flex justify-between items-center text-xs p-2 bg-white/5 rounded-lg border border-white/5">
+                            <span className="font-bold text-gray-300">{audit.user_name || 'System'}</span>
+                            <span className="text-gray-500">{audit.timestamp ? new Date(audit.timestamp).toLocaleTimeString() : '--:--'}</span>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-xs text-slate-600 italic">No recent login activity.</p>
+                )}
             </div>
         </div>
     );

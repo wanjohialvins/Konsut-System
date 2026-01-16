@@ -73,8 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = $data['username'] ?? '';
         $password = password_hash($data['password'] ?? '', PASSWORD_DEFAULT);
         $role = $data['role'] ?? 'staff';
-        $email = $data['email'] ?? '';
-        $permissions = json_encode($data['permissions'] ?? []);
+        $permsInput = $data['permissions'] ?? [];
+        if (empty($permsInput)) {
+            $permsInput = getDefaultPermissions($role);
+        }
+        $permissions = json_encode($permsInput);
 
         try {
             $stmt = $pdo->prepare("INSERT INTO users (username, password, email, role, permissions) VALUES (?, ?, ?, ?, ?)");

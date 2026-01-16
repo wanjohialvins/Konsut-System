@@ -1,0 +1,3 @@
+2026-01-16 01:43:57 | Action: view_dashboard | Required: ["*","\/","\/dashboard"] | Role: staff | Perms: ["\/","\/stock\/inventory","\/stock\/add","\/invoices","\/suppliers","\/memos"] | Result: PASS
+2026-01-16 01:44:27 | Action: view_dashboard | Required: ["*","\/","\/dashboard"] | Role: staff | Perms: ["\/","\/stock\/inventory","\/stock\/add","\/invoices","\/suppliers","\/memos"] | Result: PASS
+2026-01-16 01:44:38 | Action: view_dashboard | Required: ["*","\/","\/dashboard"] | Role: staff | Perms: ["\/","\/stock\/inventory","\/stock\/add","\/invoices","\/suppliers","\/memos"] | Result: PASS

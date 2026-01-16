@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { FiBell, FiCheck, FiInfo, FiAlertTriangle, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 
 interface Notification {
@@ -12,6 +11,8 @@ interface Notification {
 }
 
 const Notifications = () => {
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -134,12 +135,14 @@ const Notifications = () => {
                                             Mark Read
                                         </button>
                                     )}
-                                    <button
-                                        onClick={() => deleteNotification(n.id)}
-                                        className="text-xs font-black text-red-500 uppercase tracking-widest hover:underline underline-offset-4"
-                                    >
-                                        Dismiss
-                                    </button>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => deleteNotification(n.id)}
+                                            className="text-xs font-black text-red-500 uppercase tracking-widest hover:underline underline-offset-4"
+                                        >
+                                            Dismiss
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

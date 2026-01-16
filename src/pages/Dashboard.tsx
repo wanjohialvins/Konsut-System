@@ -1,12 +1,6 @@
 // src/pages/Dashboard.tsx
 /**
  * Dashboard Component - The "Command Center"
- * 
- * Features:
- * - "Financial Suite" standardized UI.
- * - Real-time Revenue Chart using Recharts.
- * - Live Activity Feed simulating system events.
- * - Smart Alerts for business intelligence.
  */
 import React, { useEffect, useState, useMemo } from "react";
 import {
@@ -83,15 +77,26 @@ const Dashboard: React.FC = () => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [stock, setStock] = useState<Record<string, StockItem[]>>({ products: [], mobilization: [], services: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // --- Data Loading ---
   useEffect(() => {
+    let mounted = true;
     const loadData = async () => {
       try {
-        const [invoicesData, stockData] = await Promise.all([
-          api.invoices.getAll(),
-          api.stock.getAll()
+        // Enforce a timeout to prevent infinite loading state
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timed out")), 10000)
+        );
+
+        const fetchData = Promise.all([
+          api.invoices.getAll().catch(() => []), // Fallback to empty
+          api.stock.getAll().catch(() => [])     // Fallback to empty
         ]);
+
+        const [invoicesData, stockData] = await Promise.race([fetchData, timeoutPromise]) as [any[], any[]];
+
+        if (!mounted) return;
 
         if (Array.isArray(invoicesData)) {
           setInvoices(invoicesData);
@@ -99,11 +104,13 @@ const Dashboard: React.FC = () => {
 
         if (Array.isArray(stockData)) {
           // Map Backend (unitPrice) -> Frontend (priceKsh)
-          const mappedStock = (stockData as any[]).map(s => ({
-            ...s,
-            priceKsh: Number(s.unitPrice || s.priceKsh || 0),
-            priceUSD: Number(s.unitPriceUsd || s.priceUSD || 0)
-          }));
+          const mappedStock = (stockData as any[])
+            .filter(item => item && typeof item === 'object') // Filter out nulls/invalid
+            .map(s => ({
+              ...s,
+              priceKsh: Number(s.unitPrice || s.priceKsh || 0),
+              priceUSD: Number(s.unitPriceUsd || s.priceUSD || 0)
+            }));
 
           // Normalize stock data into categories
           const organizedStock: Record<string, StockItem[]> = { products: [], mobilization: [], services: [] };
@@ -119,13 +126,18 @@ const Dashboard: React.FC = () => {
           });
           setStock(organizedStock);
         }
-      } catch {
-        console.error("Failed to load data");
+      } catch (err) {
+        if (mounted) {
+          console.error("Dashboard data load failed", err);
+          setError(err instanceof Error ? err.message : "Failed to load dashboard data");
+        }
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
     loadData();
+
+    return () => { mounted = false; };
   }, []);
 
   // --- Metrics & Intelligence ---
@@ -225,8 +237,8 @@ const Dashboard: React.FC = () => {
           <div>
             <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Command Center</h1>
             <p className="text-slate-500 dark:text-midnight-text-secondary mt-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              System Operational • {new Date().toLocaleDateString()}
+              <span className={`w-2 h-2 rounded-full ${error ? 'bg-red-500' : 'bg-emerald-500'} animate-pulse`}></span>
+              {error ? `System Alert: ${error}` : `System Operational • ${new Date().toLocaleDateString()}`}
             </p>
           </div>
           <Link

@@ -3,6 +3,7 @@
 require_once 'config.php';
 
 $pdo = getDbConnection();
+file_put_contents('debug_stock.txt', date('Y-m-d H:i:s') . " | ACCESSED\n", FILE_APPEND);
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
@@ -75,4 +76,3 @@ switch ($method) {
         }
         break;
 }
-?>

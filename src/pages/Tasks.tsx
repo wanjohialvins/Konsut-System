@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiSearch, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2, FiEdit2, FiCalendar, FiCheckSquare, FiUser } from 'react-icons/fi';
 import { useModal } from "../contexts/ModalContext";
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 
@@ -16,6 +17,8 @@ interface Task {
 const Tasks = () => {
     const { showConfirm } = useModal();
     const { showToast } = useToast();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -131,9 +134,11 @@ const Tasks = () => {
                         <div className="space-y-4">
                             {filteredTasks.filter(t => t.status === status).map(task => (
                                 <div key={task.id} className="bg-white dark:bg-midnight-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-midnight-800 hover:shadow-md transition-all group relative cursor-pointer" onClick={() => handleStatusChange(task)}>
-                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }} className="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                        <FiTrash2 />
-                                    </button>
+                                    {isAdmin && (
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }} className="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <FiTrash2 />
+                                        </button>
+                                    )}
                                     <h4 className="font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-600 transition-colors pr-6">{task.title}</h4>
                                     <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter">
                                         <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>

@@ -1,6 +1,6 @@
-import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AccessDenied from '../pages/AccessDenied';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -22,7 +22,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
     // Maintenance Mode Guard
     const isMaintenance = localStorage.getItem('system_maintenance') === 'true';
-    const isAdmin = user?.role === 'admin' || user?.role === 'ceo';
+    const userRole = (user?.role || '').toLowerCase();
+    const isAdmin = userRole === 'admin' || userRole === 'ceo';
 
     if (isMaintenance && !isAdmin) {
         return <Navigate to="/maintenance" replace />;
@@ -34,13 +35,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         // Also allow sub-paths (e.g. /settings/profile allowed if /settings is allowed? No, usually specific)
         // Adjust logic matches my previous understanding: strict path or startsWith check
         const path = location.pathname;
-        const isAllowed = user.permissions.some(permPath => path === permPath || path.startsWith(permPath + '/'));
+        const role = (user?.role || '').toLowerCase();
+        const isNotViewer = role !== 'viewer' && role !== '';
+
+        const universalPaths = [
+            '/settings/profile', '/settings/preferences',
+            '/stock/inventory', '/suppliers', '/documents',
+            '/tasks', '/memos', '/notifications',
+            '/support', '/support/guide', '/support/contact'
+        ];
+
+        const isAlwaysAllowed = universalPaths.some(p => path === p || path.startsWith(p + '/')) && (isNotViewer || path.includes('settings/profile') || path.includes('settings/preferences'));
+
+        const isAllowed = isAlwaysAllowed || user.permissions.some(permPath => path === permPath || path.startsWith(permPath + '/'));
 
         if (!isAllowed && path !== '/') {
-            const firstAllowed = user.permissions[0];
-            if (firstAllowed) {
-                return <Navigate to={firstAllowed} replace />;
-            }
+            return <AccessDenied />;
         }
 
         // If at root '/' and it's not strictly allowed, also redirect to first allowed

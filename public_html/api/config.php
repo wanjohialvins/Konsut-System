@@ -22,6 +22,8 @@ define('DB_PASS', '');
 // 4. Error Handling
 ini_set('display_errors', 0);
 ini_set('display_startup_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/php_errors.txt');
 error_reporting(E_ALL);
 
 function getDbConnection()
@@ -59,6 +61,16 @@ function getRequestHeader($name)
         return $_SERVER[$key];
     }
 
+    // Fallback: Scan $_SERVER for case-insensitive match (rare edge case)
+    foreach ($_SERVER as $k => $v) {
+        if (substr($k, 0, 5) === 'HTTP_') {
+            $headerKey = str_replace('_', '-', substr($k, 5));
+            if (strtolower($headerKey) === strtolower($name)) {
+                return $v;
+            }
+        }
+    }
+
     // 2. Try getallheaders() (Apache mod_php)
     if (function_exists('getallheaders')) {
         $headers = getallheaders();
@@ -79,64 +91,132 @@ function getRequestHeader($name)
  */
 function checkPermission($action)
 {
-    // Use the robust helper instead of direct $_SERVER access
-    $role = getRequestHeader('X-User-Role') ?? 'viewer';
-    $userId = getRequestHeader('X-User-Id');
-    $permissionsJson = getRequestHeader('X-User-Permissions') ?? '[]';
-    $permissions = json_decode($permissionsJson, true) ?? [];
+    // PROBE: Dump headers
+    $allHeaders = function_exists('getallheaders') ? getallheaders() : $_SERVER;
+    file_put_contents('debug_headers.txt', date('Y-m-d H:i:s') . " | " . print_r($allHeaders, true) . "\n", FILE_APPEND);
 
-    // Track Activity
+    $userId = getRequestHeader('X-User-Id');
+    $role = 'viewer';
+    $permissions = [];
+
     if ($userId) {
-        global $pdo;
-        // Optimization: Updating on every single request might be heavy on high load, 
-        // but for this system it ensures near real-time accuracy.
+        $db = getDbConnection();
         try {
-            $updateParams = [$userId];
-            // Simple query execution
-            $pdo->prepare("UPDATE users SET last_active = NOW() WHERE id = ?")->execute($updateParams);
+            // Track Activity
+            $db->prepare("UPDATE users SET last_active = NOW() WHERE id = ?")->execute([$userId]);
+
+            // Fetch LATEST role and permissions for instant reflection
+            $stmt = $db->prepare("SELECT role, permissions FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $u = $stmt->fetch();
+            if ($u) {
+                $role = $u['role'] ?? 'viewer';
+                $permissionsJson = $u['permissions'] ?? '[]';
+                $permissions = json_decode($permissionsJson, true) ?? [];
+            }
         } catch (Exception $e) {
-            // Ignore activity update errors to not block the request
+            // Fallback to headers if DB fails or ignore activity update errors
+            $role = getRequestHeader('X-User-Role') ?? 'viewer';
+            $permissionsJson = getRequestHeader('X-User-Permissions') ?? '[]';
+            $permissions = json_decode($permissionsJson, true) ?? [];
         }
+    } else {
+        // Not logged in or no ID sent
+        $role = 'viewer';
+        $permissions = [];
     }
 
-    if ($role === 'admin')
+    $r = strtolower($role);
+    // Allow 'admin' and 'ceo' to bypass permissions
+    if ($r === 'admin' || $r === 'ceo')
         return true;
 
+    // Root permission wildcard check - REMOVED to allow granular dashboard access
+    /*
+    if (in_array('/', $permissions)) {
+        return true;
+    }
+    */
+
     // Map Backend Actions -> Frontend Route Permissions
+    // Key = Backend Action
+    // Value = Array of Frontend Routes that allow this action (Logical OR)
     $permissionMap = [
-        // Stock
-        'view_stock' => '/stock/inventory',
-        'manage_stock' => '/stock/add',
+        // Personal Settings (Always Allowed)
+        'view_profile' => ['*'],
+        'view_preferences' => ['*'],
+
+        // Support (Always Allowed)
+        'view_support' => ['*'],
+
+        // Stock (Universal for non-viewers)
+        'view_stock' => ['*', '/stock/inventory', '/new-invoice', '/stock/add'],
+        'manage_stock' => ['/stock/add', '/stock/inventory'],
 
         // Invoices
-        'view_invoices' => '/invoices',
-        'manage_invoices' => '/new-invoice',
-        'delete_invoice' => '/invoices',
+        'view_invoices' => ['/invoices', '/new-invoice', '/clients'],
+        'manage_invoices' => ['/new-invoice'],
+        'delete_invoice' => ['/invoices'],
 
         // Clients
-        'view_clients' => '/clients',
-        'manage_clients' => '/clients',
+        'view_clients' => ['/clients', '/new-invoice', '/invoices'],
+        'manage_clients' => ['/clients', '/new-invoice'],
 
         // Users
-        'view_users' => '/users',
-        'manage_users' => '/users',
+        'view_users' => ['/users'],
+        'manage_users' => ['/users'],
 
         // Settings
-        'view_settings' => '/settings/profile',
-        'manage_settings' => '/settings/system',
+        'view_settings' => ['/settings/profile', '/settings/invoice', '/settings/preferences', '/settings/system', '/', '/dashboard'],
+        'manage_settings' => ['/settings/system'],
 
         // Suppliers
-        'view_suppliers' => '/stock/inventory',
-        'manage_suppliers' => '/stock/add',
+        'view_suppliers' => ['*', '/stock/inventory', '/stock/add'],
+        'manage_suppliers' => ['/stock/add'],
+
+        // Dashboard & Notifications (Everyone with dashboard access)
+        'view_dashboard' => ['*', '/', '/dashboard'],
+        'view_notifications' => ['*', '/', '/dashboard', '/notifications'],
+        'manage_notifications' => ['/', '/dashboard', '/notifications'],
+
+        // Tasks
+        'view_tasks' => ['*', '/tasks', '/dashboard'],
+        'manage_tasks' => ['/tasks'],
+
+        // Memos
+        'view_memos' => ['*', '/memos', '/dashboard'],
+        'manage_memos' => ['/memos'],
+
+        // Vault / Documents
+        'view_documents' => ['*', '/documents'],
+        'manage_documents' => ['/documents'],
     ];
+
+    $r = strtolower($role);
+    $isNotViewer = $r !== 'viewer' && !empty($r);
 
     // If the action is in the map, check for the mapped route
     if (isset($permissionMap[$action])) {
-        $requiredRoute = $permissionMap[$action];
-        $hasPermission = in_array($requiredRoute, $permissions);
+        $allowedRoutes = $permissionMap[$action];
+        $hasPermission = false;
+
+        // Check if user has ANY of the allowed routes
+        foreach ($allowedRoutes as $route) {
+            // Universal access for non-viewers (if route is '*')
+            if ($route === '*') {
+                if ($isNotViewer || $action === 'view_profile' || $action === 'view_preferences') {
+                    $hasPermission = true;
+                    break;
+                }
+            }
+            if (in_array($route, $permissions)) {
+                $hasPermission = true;
+                break;
+            }
+        }
 
         // DEBUG LOGGING
-        $logData = date('Y-m-d H:i:s') . " | Action: $action | Required: $requiredRoute | Role: $role | Perms: $permissionsJson | Result: " . ($hasPermission ? 'PASS' : 'FAIL') . "\n";
+        $logData = date('Y-m-d H:i:s') . " | Action: $action | Required: " . json_encode($allowedRoutes) . " | Role: $role | Perms: $permissionsJson | Result: " . ($hasPermission ? 'PASS' : 'FAIL') . "\n";
         file_put_contents('debug_auth.txt', $logData, FILE_APPEND);
 
         return $hasPermission;
@@ -158,4 +238,122 @@ function requirePermission($action)
 // Start session last, as it's less critical for API than headers
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+/**
+ * Helper: Get default permissions for a role
+ * Used when creating/updating users if specific permissions aren't provided
+ */
+function getDefaultPermissions($role)
+{
+    $r = strtolower($role);
+
+    // Admin/CEO: Full Access Root
+    if ($r === 'admin' || $r === 'ceo') {
+        return ['/'];
+    }
+
+    // Manager: High operational access + Analytics
+    if ($r === 'manager') {
+        return [
+            '/',
+            '/analytics',
+            '/new-invoice',
+            '/invoices',
+            '/clients',
+            '/stock/inventory',
+            '/suppliers',
+            '/documents',
+            '/tasks',
+            '/memos',
+            '/notifications',
+            '/support',
+            '/support/guide',
+            '/support/contact',
+            '/settings/profile',
+            '/settings/company',
+            '/settings/invoice',
+            '/settings/preferences'
+        ];
+    }
+
+    // Sales: Focused on Invoices and Clients
+    if ($r === 'sales') {
+        return [
+            '/',
+            '/new-invoice',
+            '/invoices',
+            '/clients',
+            '/stock/inventory',
+            '/tasks',
+            '/memos',
+            '/notifications',
+            '/support',
+            '/settings/profile',
+            '/settings/preferences'
+        ];
+    }
+
+    // Storekeeper: Focused on Stock and Suppliers
+    if ($r === 'storekeeper') {
+        return [
+            '/',
+            '/stock/inventory',
+            '/suppliers',
+            '/invoices',
+            '/tasks',
+            '/memos',
+            '/notifications',
+            '/support',
+            '/settings/profile',
+            '/settings/preferences'
+        ];
+    }
+
+    // Accountant: Focused on Financials and Reporting
+    if ($r === 'accountant') {
+        return [
+            '/',
+            '/analytics',
+            '/invoices',
+            '/clients',
+            '/tasks',
+            '/memos',
+            '/notifications',
+            '/support',
+            '/settings/profile',
+            '/settings/company',
+            '/settings/invoice',
+            '/settings/preferences'
+        ];
+    }
+
+    // Staff: General Operational access
+    if ($r === 'staff') {
+        return [
+            '/',
+            '/new-invoice',
+            '/invoices',
+            '/clients',
+            '/stock/inventory',
+            '/suppliers',
+            '/documents',
+            '/tasks',
+            '/memos',
+            '/notifications',
+            '/support',
+            '/support/guide',
+            '/support/contact',
+            '/settings/profile',
+            '/settings/preferences'
+        ];
+    }
+
+    // Viewer: Read-only access to basic data
+    if ($r === 'viewer') {
+        return ['/', '/invoices', '/clients', '/settings/profile'];
+    }
+
+    // Default Fallback
+    return ['/', '/settings/profile'];
 }

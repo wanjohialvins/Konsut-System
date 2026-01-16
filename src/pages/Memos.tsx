@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiMessageSquare, FiPlus, FiStar, FiClock } from 'react-icons/fi';
+import { FiMessageSquare, FiPlus, FiStar, FiClock, FiTrash2 } from 'react-icons/fi';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
 interface Memo {
@@ -14,6 +15,8 @@ interface Memo {
 
 const Memos = () => {
     const { showToast } = useToast();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
     const [memos, setMemos] = useState<Memo[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -59,6 +62,17 @@ const Memos = () => {
             loadMemos();
         } catch {
             showToast('error', 'Failed to post memo');
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this memo?')) return;
+        try {
+            await api.memos.delete(id);
+            showToast('success', 'Memo deleted');
+            loadMemos();
+        } catch {
+            showToast('error', 'Failed to delete memo');
         }
     };
 
@@ -110,7 +124,18 @@ const Memos = () => {
                                         <span className="flex items-center gap-1"><FiClock size={12} /> {memo.date}</span>
                                     </div>
                                 </div>
-                                <button className="text-gray-300 hover:text-amber-500 transition-colors"><FiStar size={20} /></button>
+                                <div className="flex items-center gap-2">
+                                    <button className="text-gray-300 hover:text-amber-500 transition-colors"><FiStar size={20} /></button>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleDelete(memo.id)}
+                                            className="text-gray-300 hover:text-red-500 transition-colors"
+                                            title="Delete Memo"
+                                        >
+                                            <FiTrash2 size={20} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{memo.content}</p>
                         </div>

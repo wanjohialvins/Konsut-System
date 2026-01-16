@@ -10,12 +10,12 @@ const CompanyProfile = () => {
     // Initial state moved to below DEFAULT_COMPANY definition
 
     const DEFAULT_COMPANY = {
-        name: "Konsut Ltd",
-        address: "P.O. Box 12345, Nairobi, Kenya\nWestlands, Mirage Tower 2",
-        phone: "+254 700 000 000",
-        email: "info@konsut.com",
-        website: "www.konsut.com",
-        pin: "P051234567Z",
+        name: "KONSUT LTD",
+        address: "P.O BOX 21162-00100\nG.P.O NAIROBI",
+        phone: "+254 700 420 897",
+        email: "info@konsut.co.ke",
+        website: "www.konsut.co.ke",
+        pin: "P052435869T",
         logo: logoUrl
     };
 

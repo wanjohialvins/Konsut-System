@@ -9,7 +9,7 @@ import type { User } from "../types/types";
 
 const Users = () => {
     const { showConfirm } = useModal();
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, updateUser, refreshUser } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -26,32 +26,76 @@ const Users = () => {
 
 
     const ALL_PERMISSIONS = [
+        // Intelligence
         { id: '/', label: 'Overview', desc: 'Main business dashboard' },
+        { id: '/analytics', label: 'Analytics & Reports', desc: 'Revenue & accounting reports' },
+
+        // Sales & Operations
         { id: '/new-invoice', label: 'Create Order', desc: 'Generate invoices & quotes' },
         { id: '/invoices', label: 'Order History', desc: 'View and manage all documents' },
         { id: '/clients', label: 'Client Base', desc: 'Manage customer records' },
+
+        // Resource Hub
         { id: '/stock/inventory', label: 'Inventory', desc: 'View and manage stock items' },
-        { id: '/stock/add', label: 'Add Stock', desc: 'Initialize new resources' },
-        { id: '/analytics', label: 'Financials', desc: 'Revenue & accounting reports' },
-        { id: '/audit-logs', label: 'Security Logs', desc: 'Audit trails & activity history' },
-        { id: '/system-health', label: 'Server Health', desc: 'System monitoring (Admin Only)' },
-        { id: '/settings/profile', label: 'Company Profile', desc: 'Business identity settings' },
-        { id: '/settings/invoice', label: 'Invoice Engine', desc: 'PDF & layout configuration' },
-        { id: '/settings/preferences', label: 'Preferences', desc: 'User UI/UX settings' },
-        { id: '/settings/system', label: 'System Control', desc: 'Administrative state management' },
+        { id: '/suppliers', label: 'Suppliers', desc: 'Manage vendor relations' },
+        { id: '/documents', label: 'Document Vault', desc: 'Secure document storage' },
+
+        // Team & Tasks
+        { id: '/tasks', label: 'Task Board', desc: 'Operational task management' },
+        { id: '/memos', label: 'Internal Memos', desc: 'Company-wide communication' },
+        { id: '/notifications', label: 'Notifications', desc: 'System and alert center' },
+
+        // Governance
         { id: '/users', label: 'User Control', desc: 'Manage accounts & permissions' },
-        { id: '/support', label: 'Support Center', desc: 'Access Help Center & Manuals' },
+        { id: '/audit-logs', label: 'Security Logs', desc: 'Audit trails & activity history' },
+        { id: '/accountability', label: 'Accountability', desc: 'System accountability reports' },
+        { id: '/system-health', label: 'Server Health', desc: 'System monitoring & state' },
+
+        // Configuration
+        { id: '/settings/profile', label: 'My Account', desc: 'Personal account settings' },
+        { id: '/settings/company', label: 'Business Identity', desc: 'Global organization settings' },
+        { id: '/settings/invoice', label: 'Invoice Engine', desc: 'PDF & layout configuration' },
+        { id: '/settings/preferences', label: 'UI Preferences', desc: 'Personal UI/UX settings' },
+        { id: '/settings/system', label: 'System Control', desc: 'Critical system overrides' },
+
+        // Resources & Support
+        { id: '/support', label: 'Help Center', desc: 'Main support dashboard' },
+        { id: '/support/guide', label: 'System Manual', desc: 'Complete operation guide' },
+        { id: '/support/contact', label: 'Contact Support', desc: 'Direct technical help' },
     ];
 
     const ROLE_PRESETS: Record<string, string[]> = {
-        admin: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/stock/add', '/analytics', '/audit-logs', '/system-health', '/settings/profile', '/settings/invoice', '/settings/preferences', '/settings/system', '/users', '/support'],
-        ceo: ['/', '/invoices', '/clients', '/analytics', '/audit-logs', '/settings/profile', '/settings/preferences', '/support'],
-        manager: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/stock/add', '/analytics', '/support'],
-        sales: ['/', '/new-invoice', '/invoices', '/clients', '/stock/inventory', '/support'],
-        storekeeper: ['/', '/stock/inventory', '/stock/add', '/invoices'],
-        accountant: ['/', '/invoices', '/analytics', '/settings/invoice', '/support'],
-        staff: ['/', '/new-invoice', '/invoices', '/clients', '/support'],
-        viewer: ['/', '/invoices', '/clients', '/support'],
+        admin: ['/'],
+        ceo: ['/'],
+        manager: [
+            '/', '/analytics', '/new-invoice', '/invoices', '/clients',
+            '/stock/inventory', '/suppliers', '/documents',
+            '/tasks', '/memos', '/notifications', '/support', '/support/guide', '/support/contact',
+            '/settings/profile', '/settings/company', '/settings/invoice', '/settings/preferences'
+        ],
+        sales: [
+            '/', '/new-invoice', '/invoices', '/clients',
+            '/stock/inventory', '/tasks', '/memos', '/notifications',
+            '/support', '/settings/profile', '/settings/preferences'
+        ],
+        storekeeper: [
+            '/', '/stock/inventory', '/suppliers', '/invoices',
+            '/tasks', '/memos', '/notifications',
+            '/support', '/settings/profile', '/settings/preferences'
+        ],
+        accountant: [
+            '/', '/analytics', '/invoices', '/clients',
+            '/tasks', '/memos', '/notifications',
+            '/support', '/settings/profile', '/settings/company', '/settings/invoice', '/settings/preferences'
+        ],
+        staff: [
+            '/', '/new-invoice', '/invoices', '/clients',
+            '/stock/inventory', '/suppliers', '/documents',
+            '/tasks', '/memos', '/notifications',
+            '/support', '/support/guide', '/support/contact',
+            '/settings/profile', '/settings/preferences'
+        ],
+        viewer: ['/', '/invoices', '/clients', '/settings/profile'],
     };
 
     const showMessage = useCallback((type: 'success' | 'error', text: string) => {
@@ -128,6 +172,11 @@ const Users = () => {
             if (isEditing && editingId) {
                 await api.users.update({ ...formData, id: editingId } as any);
                 showMessage('success', 'User updated successfully');
+
+                // Instant reflection: If editing self, refresh from DB
+                if (currentUser && currentUser.id === editingId && refreshUser) {
+                    await refreshUser();
+                }
             } else {
                 await api.users.create(formData as any);
                 showMessage('success', 'User created successfully');
@@ -208,11 +257,16 @@ const Users = () => {
                                         </div>
                                     </td>
                                     <td className="p-5 text-center">
-                                        <span className={`px - 3 py - 1.5 rounded - xl font - bold border
-                      ${u.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800' :
-                                                u.role === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' :
-                                                    'bg-slate-100 text-slate-700 border-slate-200 dark:bg-midnight-800 dark:text-midnight-text-secondary dark:border-midnight-700'
-                                            } `}>
+                                        <span className={`px-3 py-1.5 rounded-xl font-bold border capitalize text-[11px] tracking-tight
+                      ${u.role.toLowerCase() === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800' :
+                                                u.role.toLowerCase() === 'ceo' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800' :
+                                                    u.role.toLowerCase() === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' :
+                                                        u.role.toLowerCase() === 'sales' ? 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800' :
+                                                            u.role.toLowerCase() === 'storekeeper' ? 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800' :
+                                                                u.role.toLowerCase() === 'accountant' ? 'bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800' :
+                                                                    u.role.toLowerCase() === 'staff' ? 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-800' :
+                                                                        'bg-slate-50 text-slate-700 border-slate-100 dark:bg-midnight-800 dark:text-slate-400 dark:border-midnight-700'
+                                            }`}>
                                             {u.role}
                                         </span>
                                     </td>
@@ -301,10 +355,9 @@ const Users = () => {
                                                 <input
                                                     type="text"
                                                     required
-                                                    readOnly={isEditing}
+                                                    // username is now editable
                                                     placeholder="e.g. jdoe"
-                                                    className={`w-full px-5 py-4 rounded-xl border bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-bold text-sm
-                                                        ${isEditing ? 'opacity-60 cursor-not-allowed border-gray-200 dark:border-midnight-800' : 'border-gray-200 dark:border-midnight-800'}`}
+                                                    className="w-full px-5 py-4 rounded-xl border border-gray-200 dark:border-midnight-800 bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-bold text-sm"
                                                     value={formData.username}
                                                     onChange={e => setFormData({ ...formData, username: e.target.value })}
                                                 />

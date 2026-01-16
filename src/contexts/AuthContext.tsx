@@ -103,8 +103,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = useCallback(() => {
-        setUser(null);
         localStorage.removeItem(STORAGE_KEY);
+        setUser(null);
+        // Force full reload to verify clean state and dump any pending requests
+        window.location.href = '/login';
     }, []);
 
     const updateUser = (data: Partial<User>) => {
@@ -114,8 +116,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     };
 
+    const refreshUser = useCallback(async () => {
+        if (!user) return;
+        try {
+            const data = await api.users.getAll(); // Get all to find self
+            const self = data.find((u: any) => u.id === user.id);
+            if (self) {
+                const parsePermissions = (perms: unknown) => {
+                    if (!perms) return [];
+                    if (Array.isArray(perms)) return perms;
+                    try {
+                        const parsed = typeof perms === 'string' ? JSON.parse(perms) : perms;
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch { return []; }
+                };
+
+                const role = self.role || 'viewer';
+                const updatedUser: User = {
+                    ...user,
+                    ...self,
+                    displayRole: role === 'ceo' ? 'CEO' :
+                        role === 'admin' ? 'Administrator' :
+                            role.charAt(0).toUpperCase() + role.slice(1),
+                    permissions: parsePermissions(self.permissions),
+                    name: self.name || self.username || user.name
+                };
+                setUser(updatedUser);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+            }
+        } catch (error) {
+            console.error("Failed to refresh user auth state", error);
+        }
+    }, [user]);
+
+    // Handle global permission updates (e.g. from 403 errors)
+    useEffect(() => {
+        const handleUpdate = () => refreshUser();
+        window.addEventListener('permission-update', handleUpdate);
+        return () => window.removeEventListener('permission-update', handleUpdate);
+    }, [refreshUser]);
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, recoveryLogin, logout, updateUser, isAuthenticated: !!user, loading: isLoading }}>
+        <AuthContext.Provider value={{ user, isLoading, login, recoveryLogin, logout, updateUser, refreshUser, isAuthenticated: !!user, loading: isLoading }}>
             {children}
         </AuthContext.Provider>
     );

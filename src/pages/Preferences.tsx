@@ -99,9 +99,11 @@ const Preferences = () => {
                         {[
                             { name: 'Classic Blue', color: '#2563eb', value: 'blue' },
                             { name: 'Royal Indigo', color: '#4f46e5', value: 'indigo' },
-                            { name: 'Tech Slate', color: '#0f172a', value: 'slate' },
+                            { name: 'Enthusiast Orange', color: '#f97316', value: 'orange' },
                             { name: 'Emerald', color: '#10b981', value: 'emerald' },
-                            { name: 'Rose', color: '#f43f5e', value: 'rose' }
+                            { name: 'Rose', color: '#f43f5e', value: 'rose' },
+                            { name: 'Royal Purple', color: '#a855f7', value: 'purple' },
+                            { name: 'Tech Slate', color: '#0f172a', value: 'slate' }
                         ].map(c => (
                             <button
                                 key={c.value}

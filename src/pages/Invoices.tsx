@@ -250,6 +250,24 @@ const Invoices = () => {
     }
   }, [loadInvoices, showToast]);
 
+  const handleDownloadPdf = async (id: string, currency: 'Ksh' | 'USD', type: DocumentType) => {
+    try {
+      showToast('info', 'Preparing PDF...');
+      const fullInvoice = await api.invoices.getOne(id);
+
+      // Safety check for items
+      if (!fullInvoice) throw new Error('Invoice not found');
+      if (!fullInvoice.items) fullInvoice.items = [];
+
+      const docTypeLabel = type === 'quotation' ? 'QUOTATION' : type === 'proforma' ? 'PROFORMA' : 'INVOICE';
+      await generateInvoicePDF(fullInvoice, docTypeLabel, { includeDescriptions: true, currency });
+      showToast('success', 'PDF Downloaded');
+    } catch (error) {
+      console.error(error);
+      showToast('error', 'Failed to generate PDF. Data might be missing.');
+    }
+  };
+
   // --- Filtering & Sorting ---
   const filteredByType = invoices.filter(inv => inv.type === activeTab);
 
@@ -507,14 +525,14 @@ const Invoices = () => {
                           <div className="flex justify-center gap-2">
                             {/* Primary Actions */}
                             <button
-                              onClick={(e) => { e.stopPropagation(); generateInvoicePDF(inv, inv.type === 'quotation' ? 'QUOTATION' : inv.type === 'proforma' ? 'PROFORMA' : 'INVOICE', { includeDescriptions: true, currency: 'USD' }); }}
+                              onClick={(e) => { e.stopPropagation(); handleDownloadPdf(inv.id, 'USD', inv.type); }}
                               className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-lg transition-colors"
                               title="Download PDF (USD)"
                             >
                               <FaDollarSign size={14} />
                             </button>
                             <button
-                              onClick={(e) => { e.stopPropagation(); generateInvoicePDF(inv, inv.type === 'quotation' ? 'QUOTATION' : inv.type === 'proforma' ? 'PROFORMA' : 'INVOICE', { includeDescriptions: true, currency: 'Ksh' }); }}
+                              onClick={(e) => { e.stopPropagation(); handleDownloadPdf(inv.id, 'Ksh', inv.type); }}
                               className="text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 p-2 rounded-lg transition-colors"
                               title="Download PDF (Ksh)"
                             >

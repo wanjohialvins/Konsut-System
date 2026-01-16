@@ -80,9 +80,10 @@ export interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
-  recoveryLogin?: (email: string) => Promise<any>; // Added based on usage in Login.tsx
-  isLoading?: boolean; // Added based on usage
-  updateUser?: (user: User) => void; // Added
+  recoveryLogin?: (email: string) => Promise<any>;
+  isLoading?: boolean;
+  updateUser?: (data: Partial<User>) => void;
+  refreshUser?: () => Promise<void>;
 }
 
 export type ThemeMode = 'light' | 'dark' | 'auto';

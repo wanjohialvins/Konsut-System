@@ -22,6 +22,7 @@ import Notifications from "./pages/Notifications";
 // Granular Stock & Settings
 import Inventory from "./pages/Inventory";
 import AddStock from "./pages/AddStock";
+import UserProfile from "./pages/UserProfile";
 import CompanyProfile from "./pages/CompanyProfile";
 import InvoiceSettings from "./pages/InvoiceSettings";
 import Preferences from "./pages/Preferences";
@@ -76,7 +77,8 @@ const App = () => {
                     <Route path="stock/add" element={<AddStock />} />
 
                     {/* Configuration Module */}
-                    <Route path="settings/profile" element={<CompanyProfile />} />
+                    <Route path="settings/profile" element={<UserProfile />} />
+                    <Route path="settings/company" element={<CompanyProfile />} />
                     <Route path="settings/invoice" element={<InvoiceSettings />} />
                     <Route path="settings/preferences" element={<Preferences />} />
                     <Route path="settings/system" element={<SystemControl />} />

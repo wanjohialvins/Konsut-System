@@ -5,7 +5,7 @@
 :root {
   --soft-gray: #f2f2f2;
   --accent-blue: #2563eb;
-  
+
   /* Brand Variable Defaults (Blue) */
   --brand-primary: #2563eb;
   --brand-50: #eff6ff;
@@ -48,14 +48,87 @@ body {
 }
 
 /* Density Utility Application */
-.density-compact .p-8 { padding: var(--ui-padding) !important; }
-.density-compact .gap-8 { gap: var(--ui-gap) !important; }
-.density-compact .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: var(--ui-gap) !important; }
-.density-compact .text-sm { font-size: var(--ui-font-sm) !important; }
-.density-compact .text-base { font-size: var(--ui-font-base) !important; }
+.density-compact .p-10 {
+  padding: var(--ui-padding) !important;
+}
 
-/* Custom Animations */
+.density-compact .p-8 {
+  padding: var(--ui-padding) !important;
+}
+
+.density-compact .p-6 {
+  padding: var(--ui-spacing) !important;
+}
+
+.density-compact .p-5 {
+  padding: var(--ui-spacing) !important;
+}
+
+.density-compact .gap-8 {
+  gap: var(--ui-gap) !important;
+}
+
+.density-compact .gap-6 {
+  gap: var(--ui-spacing) !important;
+}
+
+.density-compact .space-y-8> :not([hidden])~ :not([hidden]) {
+  margin-top: var(--ui-gap) !important;
+}
+
+.density-compact .space-y-6> :not([hidden])~ :not([hidden]) {
+  margin-top: var(--ui-spacing) !important;
+}
+
+.density-compact .text-sm {
+  font-size: var(--ui-font-sm) !important;
+}
+
+.density-compact .text-base {
+  font-size: var(--ui-font-base) !important;
+}
+
+.density-compact .text-lg {
+  font-size: var(--ui-font-base) !important;
+}
+
+.density-compact .text-4xl {
+  font-size: 1.875rem !important;
+}
+
+/* Reduced from 2.25rem */
+.density-compact .py-5 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.density-compact .py-4 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.density-compact .rounded-2xl {
+  border-radius: 0.75rem !important;
+}
+
+.density-compact .rounded-[2rem] {
+  border-radius: 1rem !important;
+}
+
+.density-compact .rounded-[3rem] {
+  border-radius: 1.5rem !important;
+}
+
+/* Custom Animations & Utilities */
 @layer utilities {
+  .shadow-brand {
+    box-shadow: 0 10px 15px -3px rgba(var(--brand-primary-rgb), 0.1), 0 4px 6px -4px rgba(var(--brand-primary-rgb), 0.1);
+  }
+
+  .shadow-brand-lg {
+    box-shadow: 0 20px 25px -5px rgba(var(--brand-primary-rgb), 0.2), 0 8px 10px -6px rgba(var(--brand-primary-rgb), 0.2);
+  }
+
   .animate-modal-enter {
     animation: modalEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
@@ -66,6 +139,7 @@ body {
     opacity: 0;
     transform: scale(0.92) translateY(8px);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);

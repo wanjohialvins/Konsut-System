@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy, FiAward, FiBook } from "react-icons/fi";
+import { useState, useEffect, useMemo } from "react";
+import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity, FiCheckSquare, FiFolder, FiMessageSquare, FiTruck, FiBriefcase, FiPlus, FiBell, FiSliders, FiGrid, FiSettings, FiLock, FiLifeBuoy, FiAward, FiBook, FiUser } from "react-icons/fi";
 import { useIsMobile } from "../hooks/useMediaQuery";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../services/api";
@@ -34,28 +34,39 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     return () => clearInterval(interval);
   }, []);
 
-  const isAdmin = user?.role === 'admin';
-  const isCEO = user?.role === 'ceo';
+  const userRole = (user?.role || '').toLowerCase();
+  const isAdmin = userRole === 'admin';
+  const isCEO = userRole === 'ceo';
 
-  // Base permission check - simplistic for now
   const isAllowed = (path: string) => {
-    // Admin and CEO can access everything
+    // Always allow personal settings
+    if (path === '/settings/profile' || path === '/settings/preferences') return true;
+
+    // Admin and CEO bypass
     if (isAdmin || isCEO) return true;
 
-    // Default staff restrictions (can be expanded based on user.permissions)
-    // For now, restrict system control and audit logs
-    if (path.includes('audit') || path.includes('system-control')) return false;
+    const role = (user?.role || '').toLowerCase();
+    const isNotViewer = role !== 'viewer' && role !== '';
 
-    return true;
+    // Universal access for non-viewers
+    const universalPaths = [
+      '/stock/inventory', '/suppliers', '/documents',
+      '/tasks', '/memos', '/notifications',
+      '/support', '/support/guide', '/support/contact'
+    ];
+
+    if (isNotViewer && universalPaths.some(p => path === p || path.startsWith(p + '/'))) {
+      return true;
+    }
+
+    if (user?.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.includes(path);
+    }
+    return false;
   };
 
   const getLinkClasses = (path: string, isActive: boolean) => {
-    const allowed = isAllowed(path);
     const baseClasses = "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden font-medium text-sm";
-
-    if (!allowed) {
-      return `${baseClasses} opacity-40 cursor-not-allowed grayscale pointer-events-none hidden`; // Hide restricted items for cleanliness
-    }
 
     if (isActive) {
       const activeBg = isAdmin
@@ -75,6 +86,76 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">{title}</h3>
     </div>
   );
+
+  const sections = useMemo(() => [
+    {
+      title: "Intelligence",
+      items: [
+        { path: '/', label: 'Dashboard', icon: <FiGrid size={18} />, exact: true },
+        { path: '/analytics', label: 'Analytics & Reports', icon: <FiBarChart2 size={18} /> },
+      ]
+    },
+    {
+      title: "Sales & Operations",
+      items: [
+        { path: '/new-invoice', label: 'Create New', icon: <FiPlus size={18} /> },
+        { path: '/invoices', label: 'Invoices & Quotes', icon: <FiFileText size={18} /> },
+        { path: '/clients', label: 'Clients CRM', icon: <FiUsers size={18} /> },
+      ]
+    },
+    {
+      title: "Resource Hub",
+      items: [
+        { path: '/stock/inventory', label: 'Product Inventory', icon: <FiPackage size={18} /> },
+        { path: '/suppliers', label: 'Suppliers', icon: <FiTruck size={18} /> },
+        { path: '/documents', label: 'Document Vault', icon: <FiFolder size={18} /> },
+      ]
+    },
+    {
+      title: "Team & Tasks",
+      items: [
+        { path: '/tasks', label: 'Task Board', icon: <FiCheckSquare size={18} /> },
+        { path: '/memos', label: 'Internal Memos', icon: <FiMessageSquare size={18} /> },
+        {
+          path: '/notifications',
+          label: 'Notifications',
+          icon: (
+            <div className="relative">
+              <FiBell size={18} />
+              {unreadCount > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-midnight-900"></span>}
+            </div>
+          )
+        },
+      ]
+    },
+    {
+      title: "Governance",
+      items: [
+        { path: '/users', label: 'User Management', icon: <FiUsers size={18} /> },
+        { path: '/audit-logs', label: 'Audit Logs', icon: <FiShield size={18} /> },
+        { path: '/accountability', label: 'Accountability Reports', icon: <FiAward size={18} /> },
+        { path: '/system-health', label: 'System Health', icon: <FiActivity size={18} /> },
+      ]
+    },
+    {
+      title: "Configuration",
+      items: [
+        { path: '/settings/profile', label: 'My Account', icon: <FiUser size={18} /> },
+        { path: '/settings/company', label: 'Business Identity', icon: <FiBriefcase size={18} /> },
+        { path: '/settings/invoice', label: 'Invoice Engine', icon: <FiSliders size={18} /> },
+        { path: '/settings/preferences', label: 'Preferences', icon: <FiSettings size={18} /> },
+        { path: '/settings/system', label: 'System Control', icon: <FiLock size={18} /> },
+      ]
+    },
+    {
+      title: "Resources & Support",
+      items: [
+        { path: '/support', label: 'Help Center', icon: <FiLifeBuoy size={18} />, exact: true },
+        { path: '/support/guide', label: 'System Manual', icon: <FiBook size={18} /> },
+        { path: '/support/contact', label: 'Contact Support', icon: <FiMessageSquare size={18} /> },
+      ]
+    }
+  ], [unreadCount]);
 
   return (
     <aside
@@ -103,7 +184,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </div>
         </div>
 
-        {/* Close button - only visible on mobile */}
         {isMobile && (
           <button
             onClick={onClose}
@@ -116,125 +196,37 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar space-y-1">
+        {sections.map((section, idx) => {
+          const visibleItems = section.items.filter(item => isAllowed(item.path));
 
-        {/* Intelligence Hub */}
-        <SectionHeader title="Intelligence" />
-        <nav className="space-y-1">
-          <NavLink to="/" end onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/', isActive)}>
-            <FiGrid size={18} /> Dashboard
-          </NavLink>
-          <NavLink to="/analytics" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/analytics', isActive)}>
-            <FiBarChart2 size={18} /> Analytics & Reports
-          </NavLink>
-        </nav>
+          if (visibleItems.length === 0) return null;
 
-        {/* Sales & Clients */}
-        <SectionHeader title="Sales & Operations" />
-        <nav className="space-y-1">
-          <NavLink to="/new-invoice" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/new-invoice', isActive)}>
-            <FiPlus size={18} /> Create New
-          </NavLink>
-          <NavLink to="/invoices" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/invoices', isActive)}>
-            <FiFileText size={18} /> Invoices & Quotes
-          </NavLink>
-          <NavLink to="/clients" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/clients', isActive)}>
-            <FiUsers size={18} /> Clients CRM
-          </NavLink>
-        </nav>
-
-        {/* Resource Hub */}
-        <SectionHeader title="Inventory & Supply" />
-        <nav className="space-y-1">
-          <NavLink to="/stock/inventory" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/stock/inventory', isActive)}>
-            <FiPackage size={18} /> Product Inventory
-          </NavLink>
-          <NavLink to="/suppliers" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/suppliers', isActive)}>
-            <FiTruck size={18} /> Suppliers
-          </NavLink>
-          <NavLink to="/documents" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/documents', isActive)}>
-            <FiFolder size={18} /> Document Vault
-          </NavLink>
-        </nav>
-
-        {/* Collaboration */}
-        <SectionHeader title="Team & Tasks" />
-        <nav className="space-y-1">
-          <NavLink to="/tasks" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/tasks', isActive)}>
-            <FiCheckSquare size={18} /> Task Board
-          </NavLink>
-          <NavLink to="/memos" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/memos', isActive)}>
-            <FiMessageSquare size={18} /> Internal Memos
-          </NavLink>
-          <NavLink to="/notifications" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/notifications', isActive)}>
-            <div className="relative">
-              <FiBell size={18} />
-              {unreadCount > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-midnight-900"></span>}
+          return (
+            <div key={idx} className="pb-4">
+              <SectionHeader title={section.title} />
+              <nav className="space-y-1">
+                {visibleItems.map(item => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.exact}
+                    onClick={isMobile ? onClose : undefined}
+                    className={({ isActive }) => getLinkClasses(item.path, isActive)}
+                  >
+                    {item.icon} {item.label}
+                  </NavLink>
+                ))}
+              </nav>
             </div>
-            Notifications
-          </NavLink>
-        </nav>
-
-        {/* Governance - Admin Only */}
-        {(isAdmin || isCEO) && (
-          <>
-            <SectionHeader title="Governance" />
-            <nav className="space-y-1">
-              <NavLink to="/users" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/users', isActive)}>
-                <FiUsers size={18} /> User Management
-              </NavLink>
-              <NavLink to="/audit-logs" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/audit-logs', isActive)}>
-                <FiShield size={18} /> Audit Logs
-              </NavLink>
-              <NavLink to="/accountability" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/accountability', isActive)}>
-                <FiAward size={18} /> Accountability Reports
-              </NavLink>
-              <NavLink to="/system-health" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/system-health', isActive)}>
-                <FiActivity size={18} /> System Health
-              </NavLink>
-            </nav>
-          </>
-        )}
-
-        {/* Configuration */}
-        <SectionHeader title="Configuration" />
-        <nav className="space-y-1 mb-10">
-          <NavLink to="/settings/profile" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/settings/profile', isActive)}>
-            <FiBriefcase size={18} /> Company Profile
-          </NavLink>
-          <NavLink to="/settings/invoice" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/settings/invoice', isActive)}>
-            <FiSliders size={18} /> Invoice Engine
-          </NavLink>
-          <NavLink to="/settings/preferences" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/settings/preferences', isActive)}>
-            <FiSettings size={18} /> Preferences
-          </NavLink>
-          {(isAdmin || isCEO) && (
-            <NavLink to="/settings/system" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/settings/system', isActive)}>
-              <FiLock size={18} /> System Control
-            </NavLink>
-          )}
-        </nav>
-
-        {/* Support */}
-        <SectionHeader title="Resources & Support" />
-        <nav className="space-y-1 mb-10">
-          <NavLink to="/support" end onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support', isActive)}>
-            <FiLifeBuoy size={18} /> Help Center
-          </NavLink>
-          <NavLink to="/support/guide" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support/guide', isActive)}>
-            <FiBook size={18} /> System Manual
-          </NavLink>
-          <NavLink to="/support/contact" onClick={isMobile ? onClose : undefined} className={({ isActive }) => getLinkClasses('/support/contact', isActive)}>
-            <FiMessageSquare size={18} /> Contact Support
-          </NavLink>
-        </nav>
-
+          );
+        })}
       </div>
 
       {/* Footer User Profile */}
       <div className="p-4 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 font-bold shrink-0">
-            {user?.username?.charAt(0).toUpperCase() || 'U'}
+            {user?.username?.[0]?.toUpperCase() || 'U'}
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-bold text-slate-900 dark:text-white truncate">{user?.username || 'Guest'}</span>

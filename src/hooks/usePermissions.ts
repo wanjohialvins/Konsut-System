@@ -6,7 +6,7 @@ export const usePermissions = () => {
     const can = (path: string) => {
         if (!user) return false;
         if (user.role === 'admin') return true;
-        if (!user.permissions) return false;
+        if (!user.permissions || !Array.isArray(user.permissions)) return false;
         return user.permissions.includes(path);
     };
 

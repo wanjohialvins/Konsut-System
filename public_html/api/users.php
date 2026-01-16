@@ -37,11 +37,24 @@ switch ($method) {
             exit;
         }
 
+        // Check for duplicate username
         $username = $data['username'];
+        $check = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+        $check->execute([$username]);
+        if ($check->fetch()) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Username already taken']);
+            exit;
+        }
+
         $password = password_hash($data['password'], PASSWORD_DEFAULT);
         $email = $data['email'] ?? '';
         $role = $data['role'] ?? 'staff';
-        $permissions = json_encode($data['permissions'] ?? []);
+        $permsInput = $data['permissions'] ?? [];
+        if (empty($permsInput)) {
+            $permsInput = getDefaultPermissions($role);
+        }
+        $permissions = json_encode($permsInput);
 
         try {
             $stmt = $pdo->prepare("INSERT INTO users (username, password, email, role, permissions) VALUES (?, ?, ?, ?, ?)");
@@ -54,28 +67,81 @@ switch ($method) {
         break;
 
     case 'PUT':
-        requirePermission('manage_users');
+        $action = $_GET['action'] ?? '';
         $data = json_decode(file_get_contents('php://input'), true);
 
-        // We don't update password here for security simplicity, usually separate endpoint
-        // But if provided, we can update it
+        // Security logic: Users can update themselves WITHOUT manage_users permission
+        if ($action === 'update_self') {
+            $userIdHeader = getRequestHeader('X-User-Id');
+            if (empty($userIdHeader)) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Authentication required']);
+                exit;
+            }
+            $id = $userIdHeader;
+        } else {
+            requirePermission('manage_users');
+            $id = $data['id'];
+        }
 
-        $fields = "email=?, role=?, permissions=?";
-        $params = [
-            $data['email'] ?? '',
-            $data['role'] ?? 'staff',
-            json_encode($data['permissions'] ?? [])
-        ];
+        if (empty($id)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'User ID required']);
+            exit;
+        }
+
+        // Check for duplicate username if changed
+        $newUsername = $data['username'] ?? '';
+        if (!empty($newUsername)) {
+            $check = $pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
+            $check->execute([$newUsername, $id]);
+            if ($check->fetch()) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Username already taken']);
+                exit;
+            }
+        }
+
+        $fields = [];
+        $params = [];
+
+        if (!empty($newUsername)) {
+            $fields[] = "username=?";
+            $params[] = $newUsername;
+        }
+
+        if (isset($data['email'])) {
+            $fields[] = "email=?";
+            $params[] = $data['email'];
+        }
 
         if (!empty($data['password'])) {
-            $fields .= ", password=?";
+            $fields[] = "password=?";
             $params[] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
-        $params[] = $data['id']; // For WHERE clause
+        // Role/Permissions can ONLY be updated by manager_users (action != update_self)
+        if ($action !== 'update_self') {
+            if (isset($data['role'])) {
+                $fields[] = "role=?";
+                $params[] = $data['role'];
+            }
+            if (isset($data['permissions'])) {
+                $fields[] = "permissions=?";
+                $params[] = json_encode($data['permissions']);
+            }
+        }
+
+        if (empty($fields)) {
+            echo json_encode(['success' => true, 'message' => 'No changes made']);
+            exit;
+        }
+
+        $params[] = $id; // For WHERE clause
+        $sql = "UPDATE users SET " . implode(', ', $fields) . " WHERE id=?";
 
         try {
-            $stmt = $pdo->prepare("UPDATE users SET $fields WHERE id=?");
+            $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
@@ -88,8 +154,7 @@ switch ($method) {
         requirePermission('manage_users');
         $id = $_GET['id'] ?? '';
 
-        // Prevent deleting self (simple check, assuming header user_id passed or check session if used)
-        // For now, raw delete
+        // Prevent deleting self (simple check, assuming user_id mechanism if implemented)
         try {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $stmt->execute([$id]);
@@ -100,4 +165,3 @@ switch ($method) {
         }
         break;
 }
-?>

