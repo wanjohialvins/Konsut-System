@@ -36,6 +36,10 @@ apache file cntents
 /public_html/api/php_errors.txt
 /public_html/api/*_output.txt
 
+# TypeScript compilation errors
+tsc_errors.txt
+*tsc*.txt
+
 # OS files
 .DS_Store
 Thumbs.db

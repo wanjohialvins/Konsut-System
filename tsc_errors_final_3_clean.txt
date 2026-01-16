@@ -1,3 +1,0 @@
-﻿src/components/ProtectedRoute.tsx(64,9): error TS1128: Declaration or statement expected.
-src/components/ProtectedRoute.tsx(73,5): error TS1128: Declaration or statement expected.
-src/components/ProtectedRoute.tsx(76,1): error TS1128: Declaration or statement expected.

@@ -1,1 +1,0 @@
-﻿src/contexts/ThemeContext.tsx(110,13): error TS2353: Object literal may only specify known properties, and 'steel' does not exist in type 'Record<AccentColor, Record<string, string>>'.
