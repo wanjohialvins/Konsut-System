@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiShield, FiDatabase, FiRefreshCcw, FiTrash2, FiLock, FiSearch, FiCheck, FiX, FiActivity } from "react-icons/fi";
+import { FiShield, FiDatabase, FiRefreshCcw, FiTrash2, FiLock, FiSearch, FiCheck, FiX, FiActivity, FiCopy } from "react-icons/fi";
 import { api } from "../services/api";
 import { useToast } from "../contexts/ToastContext";
 import { useModal } from "../contexts/ModalContext";
@@ -67,6 +67,78 @@ const SystemControl = () => {
                 showAlert(JSON.stringify(res, null, 2), { title: "System Analytics" });
             } else if (action === 'debug_login') {
                 setDebugModalOpen(true);
+            } else if (action === 'cleanup_duplicates') {
+                const confirmed = await showAlert(
+                    "This will scan and merge duplicate stock items, clients, and invoices based on name matching. Continue?",
+                    { title: "Cleanup Duplicates", confirmText: "Yes, Clean Up", cancelText: "Cancel" }
+                );
+                if (!confirmed) return;
+
+                try {
+                    // Cleanup duplicate stock items
+                    const stock = await api.stock.getAll();
+                    const stockMap = new Map<string, any[]>();
+                    stock.forEach((item: any) => {
+                        const key = item.name.toLowerCase().trim();
+                        if (!stockMap.has(key)) stockMap.set(key, []);
+                        stockMap.get(key)!.push(item);
+                    });
+
+                    let stockMerged = 0;
+                    for (const [, items] of stockMap) {
+                        if (items.length > 1) {
+                            const primary = items[0];
+                            const totalQty = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
+                            await api.stock.update(primary.id, { ...primary, quantity: totalQty });
+                            for (let i = 1; i < items.length; i++) {
+                                await api.stock.delete(items[i].id);
+                            }
+                            stockMerged += items.length - 1;
+                        }
+                    }
+
+                    // Cleanup duplicate clients
+                    const clients = await api.clients.getAll();
+                    const clientMap = new Map<string, any[]>();
+                    clients.forEach((client: any) => {
+                        const key = client.name.toLowerCase().trim();
+                        if (!clientMap.has(key)) clientMap.set(key, []);
+                        clientMap.get(key)!.push(client);
+                    });
+
+                    let clientsMerged = 0;
+                    for (const [, items] of clientMap) {
+                        if (items.length > 1) {
+                            const primary = items[0];
+                            for (let i = 1; i < items.length; i++) {
+                                await api.clients.delete(items[i].id);
+                            }
+                            clientsMerged += items.length - 1;
+                        }
+                    }
+
+                    // Cleanup duplicate invoices (by ID)
+                    const invoices = await api.invoices.getAll();
+                    const invoiceMap = new Map<string, any[]>();
+                    invoices.forEach((inv: any) => {
+                        if (!invoiceMap.has(inv.id)) invoiceMap.set(inv.id, []);
+                        invoiceMap.get(inv.id)!.push(inv);
+                    });
+
+                    let invoicesMerged = 0;
+                    for (const [, items] of invoiceMap) {
+                        if (items.length > 1) {
+                            for (let i = 1; i < items.length; i++) {
+                                await api.invoices.delete(items[i].id);
+                            }
+                            invoicesMerged += items.length - 1;
+                        }
+                    }
+
+                    showToast('success', `Cleanup complete: ${stockMerged} stock, ${clientsMerged} clients, ${invoicesMerged} invoices merged`);
+                } catch (error) {
+                    showToast('error', 'Cleanup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+                }
             } else {
                 await api.admin.runAction(action);
                 showToast('success', 'Protocol executed successfully');
@@ -223,6 +295,12 @@ const SystemControl = () => {
                     title="Security Audit"
                     desc="Rotate system sessions and force-clear sensitive temporary data pools. Recommended after high-volume operations."
                     action="purge-sessions"
+                />
+                <ActionCard
+                    icon={FiCopy}
+                    title="Cleanup Duplicates"
+                    desc="Scan and merge duplicate stock items, clients, and invoices. Consolidates entries with identical names."
+                    action="cleanup_duplicates"
                 />
                 <div className={`p-8 rounded-[2.5rem] border-2 border-dashed flex flex-col justify-between transition-all ${maintenanceMode ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-500' : 'bg-gray-50 dark:bg-midnight-900 border-gray-200 dark:border-midnight-800'} h-full shadow-sm`}>
                     <div>
