@@ -1,115 +1,146 @@
-# KONSUT System - Professional Management Suite
+# KONSUT System - Enterprise Business Management Platform
 
-![Deploy to cPanel](https://github.com/wanjohialvins/Invoice-system/actions/workflows/deploy.yml/badge.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
+![License](https://img.shields.io/badge/license-Proprietary-red.svg)
+![Status](https://img.shields.io/badge/status-Production-green.svg)
 
-A professional, feature-rich business management system built with React, TypeScript, and a PHP/MariaDB backend. This comprehensive application provides tools for creating quotations, managing invoices, tracking inventory, maintaining client databases, and generating professional PDF documents with full backend persistence.
+A professional-grade, full-stack business management system built with React 19, TypeScript, and PHP/MariaDB. KONSUT provides comprehensive tools for invoice management, inventory control, client relationship management, and enterprise-level security with role-based access control.
 
-![KONSUT Ltd](./public/konsut-banner.png)
+---
 
-## 🌟 Features
+## 🎯 Core Capabilities
 
-### Invoice & Quotation Management
-- **Create Professional Invoices**: Generate detailed invoices with customer information, itemized products/services, and automatic calculations
-- **Quotation System**: Create price quotes with validity periods and convert them to invoices
-- **PDF Generation**: Export invoices and quotations as professionally formatted PDF documents with:
-  - Bordered tables and sections
-  - Company branding and logo
-  - Itemized pricing with VAT calculations (16%)
-  - Payment details and terms
-  - Professional styling and layout
-  - Customizable watermarks and barcodes
-  - Configurable headers and footers
-- **Auto-save Drafts**: Automatically save invoice drafts to prevent data loss
-- **Invoice Status Tracking**: Monitor paid, pending, and overdue invoices
+### 📄 Document Management
+- **Multi-Format Invoicing**: Create Quotations, Proforma Invoices, and Tax Invoices
+- **Professional PDF Generation**: Export documents with company branding, QR codes, and watermarks
+- **Smart Conversion**: Convert quotations to invoices with preserved numbering
+- **Auto-Save Drafts**: Never lose work with automatic local and cloud persistence
+- **Status Tracking**: Monitor paid, pending, and overdue invoices in real-time
 
-### Stock Management
-- **Multi-Category Inventory**: Manage products, mobilization equipment, and services
-- **Real-time Stock Tracking**: Monitor inventory levels and values
-- **Pricing in Multiple Currencies**: Support for KSH and USD with automatic conversion
-- **Weight-Based Freight Calculation**: Automatic freight cost calculation for products
-- **CSV Import/Export**: Bulk import stock from CSV/Excel files and export inventory data
-- **Merge-on-Add**: Intelligent duplicate detection when adding stock items
-- **Seed Sample Data**: Quick-start with pre-populated sample inventory
+### 📦 Inventory Control
+- **Multi-Category System**: Products, Services, and Mobilization equipment
+- **Dual Currency Support**: KES and USD with automatic conversion
+- **CSV Import/Export**: Bulk operations for inventory management
+- **Low Stock Alerts**: Automatic flagging of items below threshold
+- **Smart Merge**: Intelligent duplicate detection and consolidation
 
-### Client Management
-- **Client Database**: Store and manage customer information with CRUD operations
-- **Auto-generated Customer IDs**: Unique identification for each customer
-- **Contact Information**: Track phone, email, address, company, and notes
-- **Client Avatars**: Color-coded initials for visual identification
-- **Purchase History**: View all invoices associated with each client
-- **Client Statistics**: Track total spent, invoice count, and last purchase date
-- **CSV Export**: Export client data with statistics.
-- **Seed & Delete**: Populate test data or perform hard resets.
-- **Multi-source Tracking**: Distinguish between manually added clients and invoice-generated entries
+### 👥 Client Relationship Management
+- **Comprehensive Profiles**: Store contact details, company info, and KRA PINs
+- **Purchase History**: Track lifetime value and transaction count
+- **Auto-Generation**: Client profiles created automatically from invoices
+- **Advanced Search**: Filter by name, phone, email, or PIN
+- **Export Capabilities**: CSV export with complete statistics
 
-### Analytics & Reporting
-- **Dashboard Overview**: Real-time metrics and KPIs including:
-  - Total revenue with monthly trends and growth percentages
-  - Invoice metrics and average invoice value
-  - Stock valuation
-  - Status breakdown (paid, pending, overdue)
-  - Top customers by revenue
-  - Recent invoices with quick actions
-- **Advanced Analytics**: Comprehensive visual reports with:
-  - Revenue trends over time (line charts)
-  - Category-wise sales breakdown (bar charts)
-  - Payment status distribution (pie charts)
-  - Monthly comparisons
-  - Top customers and products
-  - Stock value analysis
-- **Data Export**: Export analytics data to CSV
+### 📊 Analytics & Reporting
+- **Real-Time Dashboard**: KPIs, revenue trends, and status breakdowns
+- **Visual Analytics**: Line charts, bar graphs, and pie charts powered by Recharts
+- **Category Analysis**: Sales breakdown by product type
+- **Top Performers**: Identify best customers and products
+- **Data Export**: Download analytics data as CSV
 
-### Comprehensive Settings
-- **Company Profile**:
-  - Customize company name, address, phone, email, and PIN
-  - Upload and manage company logo
-- **Invoice Configuration**:
-  - Number and date formatting options
-  - Toggle freight, descriptions, customer details, and payment details
-  - Default currency (KSH/USD) and conversion rates
-  - Freight rate configuration
-  - PDF customization (watermark, barcode, header/footer)
-  - Page orientation, size, font family, and font size
-  - Custom footer text
-- **User Preferences**:
-  - Theme support (Light/Dark/Auto)
-  - Language selection
-  - Auto-save drafts toggle
-  - Notification preferences
-- **System Settings**:
-  - Data backup and restore
-  - Reset to defaults
-  - Clear all data
+### 🔐 Enterprise Security & Access Control
 
-### Advanced Features
-- **VAT Calculations**: Automatic 16% VAT calculation
-- **Freight Management**: Product-based and manual freight charges
-- **Currency Conversion**: Real-time USD to KSH conversion with configurable rates
-- **Data Persistence**: Full backend synchronization with a MariaDB database for reliability and multi-user access.
-- **Enterprise RBAC**: Role-based access control (Admin, CEO, Manager, Sales, etc.) with granular permissions.
-- **Professional UI**: Clean, modern interface with intuitive navigation
-- **Search & Filter**: Quick search across invoices, clients, and stock
-- **Comprehensive Comments**: Well-documented codebase for maintainability
+#### 8-Tier Role System
+1. **Admin** - Full system access, configuration, and user management
+2. **CEO** - Business intelligence, analytics, and strategic oversight
+3. **Manager** - Operations, team management, and comprehensive reporting
+4. **Sales** - Invoice creation, client management, and basic inventory
+5. **Storekeeper** - Inventory control, suppliers, and order tracking
+6. **Accountant** - Financial analytics, invoices, and client financials
+7. **Staff** - General operations and support tasks
+8. **Viewer** - Read-only access to invoices and clients
 
-## 📖 Documentation & Security
+#### Advanced Security Features
+- **Live Permission Updates**: Changes apply instantly without re-login
+- **Session Management**: Secure refresh with automatic synchronization
+- **Granular Permissions**: Fine-tune access at the route level
+- **Activity Tracking**: Monitor user actions and last active timestamps
+- **Instant Enforcement**: Backend validates permissions on every request
 
-- **[USER_MANUAL.md](USER_MANUAL.md)**: Comprehensive guide for operators and developers.
-- **[LICENSE](LICENSE)**: Proprietary license and copyright information.
+---
 
-## 🚀 Getting Started
+## 🛠️ Technology Stack
+
+### Frontend
+- **Framework**: React 19.1.1 with TypeScript 5.9.3
+- **Build Tool**: Vite 7.1.7 with SWC
+- **Styling**: Tailwind CSS 3.4.13
+- **Routing**: React Router DOM 7.9.4
+- **State Management**: Context API with custom hooks
+- **Animations**: Framer Motion 12.24.7
+- **Charts**: Recharts 3.2.1
+- **PDF Generation**: jsPDF 2.5.2 + jspdf-autotable 5.0.2
+- **Icons**: React Icons 5.5.0, Lucide React 0.546.0
+
+### Backend
+- **Server**: PHP 8.x with Apache/XAMPP
+- **Database**: MariaDB 10.x
+- **API**: RESTful architecture with CORS support
+- **Security**: Role-based access control with header-based authentication
+
+---
+
+## 📁 Project Structure
+
+```
+konsut-system/
+├── public_html/
+│   └── api/                    # PHP Backend
+│       ├── config.php          # Database & RBAC engine
+│       ├── users.php           # User management endpoints
+│       ├── invoices.php        # Invoice CRUD operations
+│       ├── clients.php         # Client management
+│       ├── stock.php           # Inventory control
+│       ├── suppliers.php       # Supplier management
+│       ├── tasks.php           # Task tracking
+│       ├── memos.php           # Internal communications
+│       ├── notifications.php   # Notification system
+│       ├── vault.php           # Document storage
+│       └── database.sql        # Schema definition
+├── src/
+│   ├── components/             # Reusable React components
+│   │   ├── Layout.tsx          # Main application layout
+│   │   ├── Sidebar.tsx         # Navigation with role filtering
+│   │   ├── ProtectedRoute.tsx  # Route-level security
+│   │   └── ...
+│   ├── contexts/               # React Context providers
+│   │   ├── AuthContext.tsx     # Authentication & session
+│   │   ├── ThemeContext.tsx    # Dark/Light mode
+│   │   ├── ToastContext.tsx    # Notifications
+│   │   └── ModalContext.tsx    # Modal dialogs
+│   ├── pages/                  # Application pages (26 pages)
+│   │   ├── Dashboard.tsx       # Main overview
+│   │   ├── NewInvoice.tsx      # Document creator
+│   │   ├── Invoices.tsx        # Invoice management
+│   │   ├── Clients.tsx         # CRM interface
+│   │   ├── Inventory.tsx       # Stock control
+│   │   ├── Analytics.tsx       # Advanced reporting
+│   │   ├── Users.tsx           # User management (Admin)
+│   │   ├── SystemHealth.tsx    # Server monitoring
+│   │   └── ...
+│   ├── services/
+│   │   └── api.ts              # Centralized API client
+│   ├── types/
+│   │   └── types.ts            # TypeScript definitions
+│   └── hooks/                  # Custom React hooks
+└── docs/                       # Documentation
+```
+
+---
+
+## 🚀 Installation & Setup
 
 ### Prerequisites
+- **Node.js** 18.0+ and npm 9.0+
+- **XAMPP** (Apache + MariaDB) or equivalent
+- **Git** for version control
 
-Before you begin, ensure you have the following installed:
-- **Node.js** (version 18.0 or higher)
-- **npm** (version 9.0 or higher) or **yarn**
-
-### Installation
+### Quick Start
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/konsut-invoice-sys.git
-   cd konsut-invoice-sys
+   git clone https://github.com/wanjohialvins/Konsut-System.git
+   cd Konsut-System
    ```
 
 2. **Install dependencies**
@@ -117,257 +148,122 @@ Before you begin, ensure you have the following installed:
    npm install
    ```
 
-3. **Set up the Backend**
-   Follow the instructions in the [backend/README.md](backend/README.md) to set up the XAMPP/MariaDB database.
+3. **Configure the database**
+   - Start XAMPP and ensure Apache + MySQL are running
+   - Create database: `invoice_system`
+   - Import schema: `public_html/api/database.sql`
+   - Update `public_html/api/config.php` with your database credentials
 
-4. **Start the development server**
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
-   
-   Navigate to `http://localhost:5173` (or the port shown in your terminal)
+5. **Access the application**
+   - Frontend: `http://localhost:5173`
+   - Backend API: `http://localhost/public_html/api`
 
-### Building for Production
+### Default Login
+- **Username**: `eragondevs`
+- **Password**: `Drottastar21`
+- **Role**: Admin
 
-To create a production-ready build:
+---
 
-```bash
-npm run build
-```
+## 📖 Key Features Explained
 
-The optimized files will be generated in the `dist` directory.
+### Live Permission System
+When an admin updates a user's role or permissions:
+1. Changes are saved to the database immediately
+2. The affected user's session refreshes automatically on:
+   - Window focus (switching back to the tab)
+   - Every 5 minutes (background sync)
+   - Any 403 Forbidden response from the API
+3. The UI updates instantly to show/hide restricted features
 
-To preview the production build locally:
+### Database Schema Highlights
+- **Users Table**: Stores roles as `VARCHAR(50)` to support all 8 role types
+- **Permissions**: JSON array of allowed routes per user
+- **Activity Tracking**: `last_active` timestamp updated on every request
+- **Invoice Items**: Separate table for cloud sync compatibility
 
-```bash
-npm run preview
-```
+### PDF Generation
+- Company logo and branding
+- QR codes for invoice verification
+- Watermarks for draft documents
+- Customizable headers and footers
+- VAT calculations (16%)
+- Bank details and payment terms
 
-## 📖 Usage Guide
-
-### Creating Your First Invoice
-
-1. **Navigate to "New Invoice"** from the sidebar
-2. **Add Stock Items** (if not already added):
-   - Click "Seed Stock" to add sample items, or
-   - Go to "Stock" page to manually add products, mobilization, or services
-   - Import from CSV/Excel for bulk additions
-3. **Fill in Customer Details**:
-   - Customer name, phone, email, and address
-   - Set the "Valid Till" date for quotations
-4. **Add Items to Invoice**:
-   - Select category (Products, Mobilization, or Services)
-   - Choose items from the dropdown
-   - Set quantity and add to invoice
-5. **Review Totals**:
-   - Subtotal, VAT (16%), and Grand Total are calculated automatically
-   - Freight charges are added for products based on weight
-6. **Generate PDF** or **Save Quotation**:
-   - Click "Download PDF" to generate a professional invoice document
-   - Click "Save Quotation" to store it in the system
-
-### Managing Stock
-
-1. **Go to Stock Page** from the sidebar
-2. **Add New Items**:
-   - Click "Add New Item"
-   - Fill in item details (name, category, price, weight, etc.)
-   - Prices sync between KSH and USD automatically
-   - Save the item
-3. **Import from CSV/Excel**:
-   - Click "Import from CSV/Excel"
-   - Select your file (CSV or Excel format)
-   - Items are automatically parsed and added
-4. **Edit or Delete Items**:
-   - Use the action buttons in the stock table
-   - Update quantities, prices, or descriptions as needed
-5. **Export Data**:
-   - Click "Export CSV" to download your inventory
-
-### Managing Clients
-
-1. **Navigate to "Clients"** from the sidebar
-2. **Add New Client**:
-   - Click "Add Client"
-   - Fill in contact details (name, phone, email, address, company, notes)
-   - Save the client
-3. **View Client Statistics**:
-   - See total spent, number of invoices, and last purchase date
-   - Color-coded avatars for quick identification
-4. **Export Client Data**:
-   - Click "Export CSV" to download client database with statistics
-5. **Seed or Delete**:
-   - Use "Seed Clients" for test data
-   - Use "Delete All" for hard reset
-
-### Viewing Invoices
-
-1. **Navigate to "Invoices"** from the sidebar
-2. **Search and Filter**:
-   - Use the search bar to find specific invoices or customers
-   - View invoice status (Paid, Pending, Overdue)
-3. **Manage Invoices**:
-   - Generate PDF for any invoice
-   - Update invoice status
-   - Delete invoices if needed
-
-### Dashboard Analytics
-
-The dashboard provides:
-- **Total Revenue**: All-time and monthly revenue with growth percentage
-- **Invoice Metrics**: Total invoices, average invoice value
-- **Stock Value**: Current inventory valuation
-- **Status Breakdown**: Count of paid, pending, and overdue invoices
-- **Top Customers**: Your best customers by revenue
-- **Recent Invoices**: Quick access to latest invoices with view and download actions
-
-### Advanced Analytics
-
-The Analytics page offers:
-- **Revenue Trends**: Line charts showing revenue over time
-- **Category Analysis**: Bar charts for sales by category
-- **Payment Status**: Pie charts for invoice status distribution
-- **Monthly Comparisons**: Track performance month-over-month
-- **Top Performers**: Identify best customers and products
-- **Stock Insights**: Analyze inventory value by category
-- **Data Export**: Download analytics data as CSV
-
-### Customizing Settings
-
-1. **Navigate to Settings** from the sidebar
-2. **Company Info**: Update name, address, phone, email, PIN, and logo
-3. **Invoice Settings**: Configure default rates (Freight, Currency), toggle header/footer visibility, and manage PDF options (Watermark, Barcode)
-4. **User Preferences**: Set theme, language, and notification preferences
-5. **System**: Manage data persistence, backup, and reset options
-
-Changes made in the Settings page are saved locally and will be reflected in all new invoices and PDF documents.
-
-## 🛠️ Technology Stack
-
-- **Frontend Framework**: React 19.1.1
-- **Language**: TypeScript 5.9.3
-- **Build Tool**: Vite 7.1.7
-- **Styling**: Tailwind CSS 3.4.13
-- **PDF Generation**: jsPDF 2.5.2 + jspdf-autotable 5.0.2
-- **Routing**: React Router DOM 7.9.4
-- **Icons**: React Icons 5.5.0, Lucide React 0.546.0
-- **Charts**: Recharts 3.2.1
-- **Form Components**: React Datepicker 8.7.0, React Phone Input 2.15.1
-- **Utilities**: classnames 2.5.1, html2canvas 1.4.1
-
-## 📁 Project Structure
-
-```
-konsut-invoice-sys/
-├── public/                 # Static assets
-│   └── src/
-│       └── assets/
-│           └── logo.jpg   # Company logo
-├── src/
-│   ├── assets/            # Images and static files
-│   │   └── logo.jpg
-│   ├── components/        # Reusable React components
-│   │   ├── Layout.tsx     # Main layout wrapper
-│   │   ├── Sidebar.tsx    # Navigation sidebar
-│   │   └── Topbar.tsx     # Top navigation bar
-│   ├── constants/         # App constants and configuration
-│   │   └── index.ts       # Storage keys, company info, default rates
-│   ├── pages/             # Page components
-│   │   ├── Dashboard.tsx  # Main dashboard with KPIs
-│   │   ├── NewInvoice.tsx # Invoice/quotation creator
-│   │   ├── Invoices.tsx   # Invoice list and management
-│   │   ├── Clients.tsx    # Client database management
-│   │   ├── Stock.tsx      # Inventory management
-│   │   ├── Settings.tsx   # Application settings
-│   │   └── Analytics.tsx  # Advanced analytics and charts
-│   ├── types/             # TypeScript type definitions
-│   │   └── types.ts
-│   ├── utils/             # Utility functions
-│   │   ├── pdfGenerator.ts # PDF generation logic
-│   │   └── config.ts      # Configuration utilities
-│   ├── App.tsx            # Main app component with routing
-│   ├── main.tsx           # App entry point
-│   └── index.css          # Global styles
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── tailwind.config.js
-```
-
-## 💾 Data Storage
-
-**Note**: While the system utilizes a central database, certain UI preferences are still cached locally for performance. Regular database backups are recommended.
+---
 
 ## 🔧 Development
 
 ### Available Scripts
+```bash
+npm run dev      # Start development server with host access
+npm run build    # TypeScript compilation + Vite production build
+npm run preview  # Preview production build locally
+npm run lint     # Run ESLint for code quality
+```
 
-- `npm run dev` - Start development server with host access
-- `npm run build` - Build for production (TypeScript compilation + Vite build)
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-### Code Quality
-
-The project uses:
-- **ESLint**: For code linting with React hooks and refresh plugins
-- **TypeScript**: For type safety and better developer experience
-- **Comprehensive Comments**: All files include detailed documentation explaining purpose, features, and implementation details
-
-### Development Features
-
-- **Hot Module Replacement**: Instant updates during development
-- **Type Safety**: Full TypeScript support with strict type checking
-- **Component-Based Architecture**: Modular, reusable components
-- **Centralized Constants**: Shared configuration in `constants/index.ts`
-- **Utility Functions**: Reusable helpers for common operations
-
-## 🎨 Customization
-
-### Company Information & Rates
-
-You can easily configure company details, freight rates, and currency conversion rates directly from the **Settings** page in the application.
-
-1. Navigate to Settings from the sidebar
-2. Update company information, logo, and branding
-3. Configure invoice defaults and PDF options
-4. Set freight rates and currency conversion rates
-5. Customize user preferences and system settings
-
-All changes are saved to localStorage and applied immediately.
-
-### Adding New Features
-
-The codebase is well-structured for extensibility:
-- Add new pages in `src/pages/`
-- Create reusable components in `src/components/`
-- Define types in `src/types/types.ts`
-- Add utilities in `src/utils/`
-- Update constants in `src/constants/index.ts`
-
-## 📝 License
-
-This project is proprietary software developed for KONSUT Ltd.
-
-## 🤝 Support
-
-For support, email info@konsutltd.co.ke or call +254 700 420 897.
-
-## 🙏 Acknowledgments
-
-- Built with modern React and TypeScript
-- PDF generation powered by jsPDF and jspdf-autotable
-- UI components styled with Tailwind CSS
-- Icons from React Icons and Lucide React
-- Charts powered by Recharts
-- Form components from React Datepicker and React Phone Input
+### Environment Configuration
+Update `src/services/api.ts` to change the API base URL:
+```typescript
+const API_BASE_URL = 'http://localhost/public_html/api';
+```
 
 ---
 
-**KONSUT Ltd** - Professional Invoice Management System  
-*Ruiru, Kenya*
+## 📝 Documentation
 
-**Version**: 1.0.0  
-**Last Updated**: December 2025
+- **[USER_MANUAL.md](USER_MANUAL.md)** - Comprehensive operator guide
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Developer reference
+- **[CORE_PRINCIPLES.md](CORE_PRINCIPLES.md)** - Architecture philosophy
+
+---
+
+## 🔒 Security Notes
+
+- All API endpoints validate permissions via `config.php`
+- User sessions include `X-User-Id`, `X-User-Role`, and `X-User-Permissions` headers
+- Admin and CEO roles bypass granular permission checks
+- Debug logs are excluded from version control (`.gitignore`)
+- Database credentials should never be committed
+
+---
+
+## 📊 System Requirements
+
+### Production
+- **Server**: Apache 2.4+ with PHP 8.0+
+- **Database**: MariaDB 10.5+ or MySQL 8.0+
+- **Storage**: 500MB minimum
+- **RAM**: 2GB minimum
+
+### Development
+- **Node.js**: 18.0+
+- **Browser**: Chrome 90+, Firefox 88+, Edge 90+
+
+---
+
+## 🤝 Support
+
+**KONSUT Ltd**  
+Ruiru, Kenya
+
+- **Email**: info@konsutltd.co.ke
+- **Phone**: +254 700 420 897
+- **Website**: [konsutltd.co.ke](https://konsutltd.co.ke)
+
+---
+
+## 📜 License
+
+Proprietary software © 2024-2025 KONSUT Ltd. All rights reserved.
+
+---
+
+**Version**: 2.1.0  
+**Last Updated**: January 2026  
+**Maintained by**: KONSUT Development Team
