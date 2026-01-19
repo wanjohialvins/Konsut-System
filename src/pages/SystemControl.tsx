@@ -35,7 +35,7 @@ const SystemControl = () => {
         setLoading(true);
         try {
             if (action === 'backup') {
-                const data = await api.settings.get();
+                const data = await api.admin.backup();
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -68,9 +68,9 @@ const SystemControl = () => {
             } else if (action === 'debug_login') {
                 setDebugModalOpen(true);
             } else if (action === 'cleanup_duplicates') {
-                const confirmed = await showAlert(
+                const confirmed = await showConfirm(
                     "This will scan and merge duplicate stock items, clients, and invoices based on name matching. Continue?",
-                    { title: "Cleanup Duplicates", confirmText: "Yes, Clean Up", cancelText: "Cancel" }
+                    { title: "Cleanup Duplicates", confirmLabel: "Yes, Clean Up", cancelLabel: "Cancel" }
                 );
                 if (!confirmed) return;
 
@@ -89,7 +89,7 @@ const SystemControl = () => {
                         if (items.length > 1) {
                             const primary = items[0];
                             const totalQty = items.reduce((sum, i) => sum + (i.quantity || 0), 0);
-                            await api.stock.update(primary.id, { ...primary, quantity: totalQty });
+                            await api.stock.update({ ...primary, quantity: totalQty });
                             for (let i = 1; i < items.length; i++) {
                                 await api.stock.delete(items[i].id);
                             }
@@ -136,7 +136,7 @@ const SystemControl = () => {
                     }
 
                     showToast('success', `Cleanup complete: ${stockMerged} stock, ${clientsMerged} clients, ${invoicesMerged} invoices merged`);
-                } catch (error) {
+                } catch (error: unknown) {
                     showToast('error', 'Cleanup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
                 }
             } else {
