@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(50) DEFAULT 'staff',
     permissions JSON DEFAULT NULL,
     last_login DATETIME DEFAULT NULL,
+    last_active DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -104,9 +105,11 @@ CREATE TABLE IF NOT EXISTS documents (
     grandTotal DECIMAL(15, 2) DEFAULT 0.00,
     clientResponsibilities TEXT,
     termsAndConditions TEXT,
+    created_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATETIME DEFAULT NULL,
-    FOREIGN KEY (customer_id) REFERENCES clients(id) ON DELETE SET NULL
+    FOREIGN KEY (customer_id) REFERENCES clients(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS document_items (

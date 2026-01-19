@@ -6,7 +6,7 @@ import { useModal } from "../contexts/ModalContext";
 
 const SystemControl = () => {
     const { showToast } = useToast();
-    const { showAlert, showPrompt } = useModal();
+    const { showAlert, showConfirm, showPrompt } = useModal();
     const [debugModalOpen, setDebugModalOpen] = useState(false);
     const [debugUsername, setDebugUsername] = useState("");
     const [debugPassword, setDebugPassword] = useState("");

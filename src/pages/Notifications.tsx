@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { FiBell, FiCheckCircle, FiAlertTriangle, FiInfo, FiCheck, FiClock } from 'react-icons/fi';
 
 interface Notification {
     id: string;

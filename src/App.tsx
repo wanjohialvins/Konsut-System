@@ -16,8 +16,12 @@ import Suppliers from "./pages/Suppliers";
 import Support from "./pages/Support"; // Keeping legacy ref if needed but prefer new ones
 import HelpCenter from "./pages/support/HelpCenter";
 import SystemGuide from "./pages/support/SystemGuide";
-import ContactSupport from "./pages/support/ContactSupport";
 import Notifications from "./pages/Notifications";
+
+// Ticket System
+import Tickets from "./pages/tickets/Tickets";
+import CreateTicket from "./pages/tickets/CreateTicket";
+import TicketDetails from "./pages/tickets/TicketDetails";
 
 // Granular Stock & Settings
 import Inventory from "./pages/Inventory";
@@ -94,10 +98,12 @@ const App = () => {
                     <Route path="suppliers" element={<Suppliers />} />
                     <Route path="notifications" element={<Notifications />} />
 
-                    {/* Support Module */}
+                    {/* Support & Ticket Module */}
                     <Route path="support" element={<HelpCenter />} />
                     <Route path="support/guide" element={<SystemGuide />} />
-                    <Route path="support/contact" element={<ContactSupport />} />
+                    <Route path="tickets" element={<Tickets />} />
+                    <Route path="tickets/new" element={<CreateTicket />} />
+                    <Route path="tickets/:id" element={<TicketDetails />} />
                   </Route>
                 </Routes>
               </Router>

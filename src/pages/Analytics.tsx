@@ -16,46 +16,14 @@ import { api } from "../services/api";
 import { usePermissions } from "../hooks/usePermissions";
 
 
-// Types
-interface InvoiceItem {
-  name: string;
-  category: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  freight?: number;
-}
+import type { Invoice, Product as StockItem, InvoiceItem as BaseInvoiceItem } from "../types/types";
 
-interface Customer {
-  id?: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-}
-
-interface InvoiceData {
-  id: string;
-  date?: string;
-  issuedDate?: string;
-  dueDate?: string;
-  customer?: Customer;
+// Extended interface to handle analytics specific fields and optional compatibility
+interface InvoiceData extends Omit<Invoice, 'items' | 'status'> {
   clientName?: string;
-  items?: InvoiceItem[];
-  subtotal?: number;
-  grandTotal?: number;
   total?: number;
-  status: "Paid" | "Pending" | "Overdue";
-}
-
-interface StockItem {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  priceKsh: number;
-  priceUSD?: number;
-  weight?: number;
+  items?: (BaseInvoiceItem & { totalPrice?: number })[];
+  status: string;
 }
 
 // Constants
@@ -93,8 +61,37 @@ const Analytics: React.FC = () => {
           api.invoices.getAll(),
           api.stock.getAll()
         ]);
-        if (Array.isArray(invoicesData)) setInvoices(invoicesData);
-        if (Array.isArray(stockData)) setStock(stockData as StockItem[]);
+
+        if (invoicesData && Array.isArray(invoicesData)) {
+          const normalized = invoicesData.map((raw) => {
+            if (!raw || typeof raw !== 'object') return null;
+
+            const customer = {
+              id: raw.customer?.id || raw.customerId || raw.customer_id || '',
+              name: raw.customer?.name || raw.customerName || raw.customer_name || 'Unknown Client',
+              phone: raw.customer?.phone || raw.customerPhone || raw.customer_phone || '',
+              email: raw.customer?.email || raw.customerEmail || raw.customer_email || '',
+              address: raw.customer?.address || raw.customerAddress || raw.customer_address || '',
+              kraPin: raw.customer?.kraPin || raw.customerKraPin || raw.customer_kra_pin || ''
+            };
+
+            return {
+              ...raw,
+              customer,
+              items: Array.isArray(raw.items) ? raw.items : []
+            };
+          }).filter((inv) => inv !== null);
+
+          setInvoices(normalized);
+        }
+
+        if (stockData && Array.isArray(stockData)) {
+          const normalizedStock = (stockData).map((s) => ({
+            ...s,
+            priceKsh: s.priceKsh || s.unitPrice || 0
+          }));
+          setStock(normalizedStock);
+        }
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -167,7 +164,7 @@ const Analytics: React.FC = () => {
       inv.items?.forEach(item => {
         const cat = item.category || "General";
         if (!catMap[cat]) catMap[cat] = { name: cat, total: 0, count: 0 };
-        catMap[cat].total += item.totalPrice || 0;
+        catMap[cat].total += item.lineTotal || item.totalPrice || 0;
         catMap[cat].count += (item.quantity || 1);
       });
     });
@@ -194,7 +191,7 @@ const Analytics: React.FC = () => {
       topCustomers,
       categories: Object.values(catMap),
       trend,
-      stockValue: stock.reduce((s, i) => s + (i.priceKsh * i.quantity), 0)
+      stockValue: stock.reduce((s, i) => s + ((i.priceKsh || 0) * (i.quantity || 0)), 0)
     };
   }, [invoices, filteredInvoices, stock, dateRange]);
 

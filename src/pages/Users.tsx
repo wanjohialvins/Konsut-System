@@ -96,6 +96,11 @@ const Users = () => {
             '/settings/profile', '/settings/preferences'
         ],
         viewer: ['/', '/invoices', '/clients', '/settings/profile'],
+        it: [
+            '/', '/users', '/audit-logs', '/system-health',
+            '/settings/profile', '/settings/company', '/settings/invoice', '/settings/preferences', '/settings/system',
+            '/notifications', '/support', '/documents'
+        ]
     };
 
     const showMessage = useCallback((type: 'success' | 'error', text: string) => {
@@ -266,14 +271,17 @@ const Users = () => {
                                                                 (u.role || '').toLowerCase() === 'storekeeper' ? 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800' :
                                                                     (u.role || '').toLowerCase() === 'accountant' ? 'bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800' :
                                                                         (u.role || '').toLowerCase() === 'staff' ? 'bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-800' :
-                                                                            'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700'
+                                                                            (u.role || '').toLowerCase() === 'it' ? 'bg-cyan-50 text-cyan-700 border-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400 dark:border-cyan-800' :
+                                                                                'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700'
                                                 }`}>
                                                 {(u.role || '').toLowerCase() === 'admin' && <FiShield size={12} />}
                                                 {(u.role || '').toLowerCase() === 'ceo' && <FiAward size={12} />}
                                                 {(u.role || '').toLowerCase() === 'manager' && <FiBriefcase size={12} />}
                                                 {(u.role || '').toLowerCase() === 'sales' && <FiTag size={12} />}
                                                 {(u.role || '').toLowerCase() === 'storekeeper' && <FiShoppingBag size={12} />}
+                                                {(u.role || '').toLowerCase() === 'storekeeper' && <FiShoppingBag size={12} />}
                                                 {(u.role || '').toLowerCase() === 'accountant' && <FiKey size={12} />}
+                                                {(u.role || '').toLowerCase() === 'it' && <FiActivity size={12} />}
                                                 {((u.role || '').toLowerCase() === 'staff' || (u.role || '').toLowerCase() === 'viewer') && <FiUser size={12} />}
                                                 {u.role || 'No Role'}
                                             </span>
@@ -416,7 +424,7 @@ const Users = () => {
                                         <div>
                                             <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Role Presets</label>
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                                {['admin', 'ceo', 'manager', 'sales', 'storekeeper', 'accountant', 'staff', 'viewer'].map((role) => (
+                                                {['admin', 'ceo', 'manager', 'sales', 'storekeeper', 'accountant', 'staff', 'it', 'viewer'].map((role) => (
                                                     <button
                                                         type="button"
                                                         key={role}

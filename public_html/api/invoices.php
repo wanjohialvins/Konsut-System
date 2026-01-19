@@ -55,9 +55,10 @@ if ($method === 'GET') {
     $pdo->beginTransaction();
     try {
         $customerId = ensureClientExists($pdo, $data['customer'] ?? []);
-        file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . "\n", FILE_APPEND);
+        $userId = getRequestHeader('X-User-Id');
+        file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . " | User ID: " . var_export($userId, true) . "\n", FILE_APPEND);
 
-        $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['id'],
             $customerId,
@@ -72,7 +73,8 @@ if ($method === 'GET') {
             $data['taxAmount'] ?? 0,
             $data['grandTotal'],
             $data['clientResponsibilities'] ?? '',
-            $data['termsAndConditions'] ?? ''
+            $data['termsAndConditions'] ?? '',
+            $userId
         ]);
 
         $itemStmt = $pdo->prepare("INSERT INTO document_items (document_id, product_id, name, description, quantity, unitPrice, total) VALUES (?, ?, ?, ?, ?, ?, ?)");

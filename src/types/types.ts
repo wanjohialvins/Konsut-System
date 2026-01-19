@@ -72,7 +72,7 @@ export interface User {
   displayRole?: string; // Optional for compatibility
 }
 
-export type UserRole = 'admin' | 'manager' | 'staff' | 'storekeeper' | 'accountant' | 'ceo' | 'sales' | 'viewer';
+export type UserRole = 'admin' | 'manager' | 'staff' | 'storekeeper' | 'accountant' | 'ceo' | 'sales' | 'it' | 'viewer';
 
 export interface AuthContextType {
   user: User | null;

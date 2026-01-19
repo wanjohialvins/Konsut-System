@@ -141,6 +141,7 @@ export const api = {
         getNotifications: () => request('notifications.php'),
         markNotificationRead: (id: string) => request(`notifications.php?id=${id}`, { method: 'PUT' }),
         deleteNotification: (id: string) => request(`notifications.php?id=${id}`, { method: 'DELETE' }),
+        backup: () => request('admin/backup.php'),
     },
     suppliers: {
         getAll: () => request('suppliers.php'),
@@ -173,6 +174,17 @@ export const api = {
             });
         },
         delete: (id: string) => request(`vault.php?id=${id}`, { method: 'DELETE' }),
+    },
+    tickets: {
+        getAll: () => request('tickets.php'),
+        getById: (id: string) => request(`/tickets.php?id=${id}`),
+        create: (data: { subject: string; category: string; priority: string; message: string }) =>
+            request('tickets.php', { method: 'POST', body: JSON.stringify(data) }),
+        addMessage: (data: { ticket_id: string; message: string; is_internal?: boolean }) =>
+            request('tickets.php', { method: 'POST', body: JSON.stringify({ action: 'add_message', ...data }) }),
+        updateStatus: (id: string, status: string) =>
+            request(`tickets.php?id=${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
+        delete: (id: string) => request(`tickets.php?id=${id}`, { method: 'DELETE' }),
     },
     tasks: {
         getAll: () => request('tasks.php'),

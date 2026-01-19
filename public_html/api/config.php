@@ -352,6 +352,24 @@ function getDefaultPermissions($role)
         return ['/', '/invoices', '/clients', '/settings/profile'];
     }
 
+    // IT: System Administration
+    if ($r === 'it') {
+        return [
+            '/',
+            '/users',
+            '/audit-logs',
+            '/system-health',
+            '/settings/profile',
+            '/settings/company',
+            '/settings/invoice',
+            '/settings/preferences',
+            '/settings/system',
+            '/notifications',
+            '/support',
+            '/documents'
+        ];
+    }
+
     // Default Fallback
     return ['/', '/settings/profile'];
 }

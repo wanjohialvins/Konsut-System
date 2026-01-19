@@ -60,6 +60,15 @@ const NewInvoice: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<Category>("products");
   const [activeDocumentType, setActiveDocumentType] = useState<InvoiceType>("quotation"); // NEW: Document Type
 
+  // Quick Stock Add Modal State
+  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
+  const [newStockItem, setNewStockItem] = useState<{ name: string, price: number, category: Category, description: string }>({
+    name: "",
+    price: 0,
+    category: "products",
+    description: ""
+  });
+
   const [search, setSearch] = useState<Record<Category, string>>({
     products: "",
     mobilization: "",
@@ -710,84 +719,120 @@ const NewInvoice: React.FC = () => {
   };
 
   /* ----------------------------
+     Stock Management Functions
+     ---------------------------- */
+  const handleSaveToStock = async (line: InvoiceLine) => {
+    try {
+      setLoading(true);
+      const isNew = line.id.startsWith('TEMP-');
+      const payload = {
+        id: isNew ? undefined : line.id,
+        name: line.name,
+        category: line.category,
+        description: line.description,
+        unitPrice: line.unitPrice,
+        quantity: 0 // Don't affect quantity when just saving info
+      };
+
+      if (isNew) {
+        await api.stock.create(payload as Product);
+        showToast('success', 'Added to stock library');
+      } else {
+        await api.stock.update(payload as Product);
+        showToast('success', 'Stock description updated');
+      }
+
+      // Refresh stock data silently
+      const stockData = await api.stock.getAll();
+      if (stockData) {
+        const mappedStock: Product[] = stockData.map((s: Record<string, any>) => ({
+          ...s,
+          id: String(s.id || ''),
+          name: String(s.name || ''),
+          category: String(s.category || ''),
+          description: typeof s.description === 'string' ? s.description : undefined,
+          priceKsh: Number(s.unitPrice || s.unit_price || 0),
+          priceUSD: Number(s.unitPriceUsd || s.unit_price_usd || 0)
+        }));
+        setProducts(mappedStock.filter((i) => i.category === 'products'));
+        setMobilization(mappedStock.filter((i) => i.category === 'mobilization'));
+        setServices(mappedStock.filter((i) => i.category === 'services'));
+      }
+    } catch (e: any) {
+      showToast('error', e.message || 'Failed to save to stock');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateCustomItem = (name: string) => {
+    const tempId = `TEMP-${Date.now()}`;
+    const newLine: InvoiceLine = {
+      id: tempId,
+      name: name,
+      category: activeCategory,
+      quantity: 1,
+      unitPrice: 0,
+      lineTotal: 0,
+      description: ''
+    };
+    setLines(prev => [...prev, newLine]);
+    setIsSearchMode(false);
+    setItemSearch("");
+    showToast('info', 'Custom item added. Set price and click "+" to save to stock.');
+  };
+
+  const handleQuickAddStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!newStockItem.name.trim()) return showToast('error', 'Name is required');
+      setLoading(true);
+
+      const payload: Product = {
+        id: '', // Backend generates ID
+        name: newStockItem.name,
+        category: newStockItem.category,
+        description: newStockItem.description,
+        // Backend expects unitPrice (Ksh) or unitPriceUsd
+        // simplified for quick add: assumed Ksh default or handling in backend
+        priceKsh: newStockItem.price,
+        quantity: 0
+      };
+
+      // Map for API payload structure if needed, but api.stock.create handles Product
+      await api.stock.create(payload as any);
+
+      showToast('success', 'Stock item created successfully');
+      setIsStockModalOpen(false);
+      setNewStockItem({ name: "", price: 0, category: "products", description: "" });
+
+      // Refresh stock
+      const stockData = await api.stock.getAll();
+      if (stockData) {
+        const mappedStock: Product[] = stockData.map((s: Record<string, any>) => ({
+          ...s,
+          id: String(s.id || ''),
+          name: String(s.name || ''),
+          category: String(s.category || ''),
+          description: typeof s.description === 'string' ? s.description : undefined,
+          priceKsh: Number(s.unitPrice || s.unit_price || 0),
+          priceUSD: Number(s.unitPriceUsd || s.unit_price_usd || 0)
+        }));
+        setProducts(mappedStock.filter((i) => i.category === 'products'));
+        setMobilization(mappedStock.filter((i) => i.category === 'mobilization'));
+        setServices(mappedStock.filter((i) => i.category === 'services'));
+      }
+
+    } catch (e: any) {
+      showToast('error', e.message || 'Failed to create item');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ----------------------------
      Render Component
      ---------------------------- */
-  const Toolbar = () => (
-    <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none mb-8 border border-gray-100 dark:border-midnight-800 flex flex-col gap-6 animate-slide-up">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
-        {/* Title & Type Toggles */}
-        <div className="flex items-center justify-between w-full md:w-auto">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3 uppercase tracking-tight">
-              {isEditing ? `Edit ${activeDocumentType}` : `New ${activeDocumentType}`}
-              {editId && <span className="text-xs font-bold text-gray-500 bg-gray-100 dark:bg-midnight-800 px-3 py-1 rounded-full border border-gray-200 dark:border-midnight-700">#{editId}</span>}
-            </h1>
-          </div>
-
-          {/* Mobile Action Buttons (Visible only on mobile) */}
-          <div className="flex md:hidden items-center gap-2">
-            <button onClick={saveDocument} title="Save Draft" className="p-3 rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
-              <FaSave />
-            </button>
-            <button onClick={generatePDF} title="Download PDF" className="p-3 rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-600/20">
-              <FaFilePdf />
-            </button>
-          </div>
-        </div>
-
-        {/* Search & Desktop Actions */}
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          {/* Search */}
-          <div className="relative group w-full md:w-80">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-600 transition-colors" />
-            <input
-              type="text"
-              placeholder={`Search ${activeCategory}...`}
-              value={search[activeCategory]}
-              onChange={(e) => setSearch((s) => ({ ...s, [activeCategory]: e.target.value }))}
-              className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl py-3 pl-10 pr-4 font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 transition-all placeholder-gray-400 shadow-inner"
-            />
-          </div>
-
-          {/* Desktop Buttons */}
-          <div className="hidden md:flex items-center gap-2">
-            {/* ADMIN ONLY: Stock Tools */}
-            {user?.role === 'admin' && (
-              <>
-                <button onClick={handleClearStock} title="Clear all stock items" className="px-5 py-3 rounded-xl bg-white dark:bg-midnight-800 border border-red-100 dark:border-red-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-sm">
-                  <FaEraser size={14} /> Clear Stock
-                </button>
-                <button onClick={seedSampleStock} title="Add sample stock items" className="px-5 py-3 rounded-xl bg-white dark:bg-midnight-800 border border-purple-100 dark:border-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/10 font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-sm">
-                  <FaSeedling size={14} /> Seed Stock
-                </button>
-              </>
-            )}
-
-            {/* Workflow Actions */}
-            {activeDocumentType === 'quotation' && isEditing && (
-              <button
-                onClick={() => handleConvert('proforma')}
-                title="Convert to Proforma Invoice"
-                className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 transform hover:scale-105"
-              >
-                <FaExchangeAlt size={14} /> Convert
-              </button>
-            )}
-
-            {activeDocumentType === 'proforma' && isEditing && (
-              <button
-                onClick={() => handleConvert('invoice')}
-                title="Convert to Final Invoice"
-                className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 transform hover:scale-105"
-              >
-                <FaExchangeAlt size={14} /> Convert
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -801,7 +846,146 @@ const NewInvoice: React.FC = () => {
   return (
     <div className="p-4 md:p-8 bg-slate-50 dark:bg-midnight-950 min-h-screen font-sans text-slate-900 dark:text-gray-100 transition-colors duration-300">
       <div className="max-w-[1600px] mx-auto">
-        <Toolbar />
+        {/* Quick Add Stock Modal */}
+        {isStockModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="bg-white dark:bg-midnight-800 w-full max-w-md rounded-3xl p-8 shadow-2xl border border-gray-700 space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                  <FiBox /> Quick Add Stock
+                </h2>
+                <button onClick={() => setIsStockModalOpen(false)} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-gray-500 dark:text-white transition-colors">
+                  <FaTimes />
+                </button>
+              </div>
+
+              <form onSubmit={handleQuickAddStock} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 block">Item Name</label>
+                  <input
+                    value={newStockItem.name}
+                    onChange={e => setNewStockItem({ ...newStockItem, name: e.target.value })}
+                    required
+                    placeholder="E.g. Wireless Mouse"
+                    className="w-full bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-midnight-700 rounded-xl p-3 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 block">Category</label>
+                    <select
+                      value={newStockItem.category}
+                      onChange={e => setNewStockItem({ ...newStockItem, category: e.target.value as Category })}
+                      className="w-full bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-midnight-700 rounded-xl p-3 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none appearance-none"
+                    >
+                      <option value="products">Products</option>
+                      <option value="mobilization">Mobilization</option>
+                      <option value="services">Services</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 block">Price (Ksh)</label>
+                    <input
+                      type="number"
+                      value={newStockItem.price}
+                      onChange={e => setNewStockItem({ ...newStockItem, price: Number(e.target.value) })}
+                      min="0"
+                      className="w-full bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-midnight-700 rounded-xl p-3 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 block">Description</label>
+                  <textarea
+                    value={newStockItem.description}
+                    onChange={e => setNewStockItem({ ...newStockItem, description: e.target.value })}
+                    rows={3}
+                    placeholder="Optional details..."
+                    className="w-full bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-midnight-700 rounded-xl p-3 font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none resize-none"
+                  />
+                </div>
+                <button type="submit" disabled={loading} className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest rounded-xl shadow-lg shadow-brand-500/30 transition-all active:scale-95 disabled:opacity-50">
+                  {loading ? 'Adding...' : 'Add to Inventory'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none mb-8 border border-gray-100 dark:border-midnight-800 flex flex-col gap-6 animate-slide-up">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
+            {/* Title & Type Toggles */}
+            <div className="flex items-center justify-between w-full md:w-auto">
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3 uppercase tracking-tight">
+                  {isEditing ? `Edit ${activeDocumentType}` : `New ${activeDocumentType}`}
+                  {editId && <span className="text-xs font-bold text-gray-500 bg-gray-100 dark:bg-midnight-800 px-3 py-1 rounded-full border border-gray-200 dark:border-midnight-700">#{editId}</span>}
+                </h1>
+              </div>
+
+              {/* Mobile Action Buttons (Visible only on mobile) */}
+              <div className="flex md:hidden items-center gap-2">
+                <button onClick={saveDocument} title="Save Draft" className="p-3 rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
+                  <FaSave />
+                </button>
+                <button onClick={generatePDF} title="Download PDF" className="p-3 rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-600/20">
+                  <FaFilePdf />
+                </button>
+              </div>
+            </div>
+
+            {/* Search & Desktop Actions */}
+            <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+              {/* Search */}
+              <div className="relative group w-full md:w-80">
+                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-600 transition-colors" />
+                <input
+                  type="text"
+                  placeholder={`Search ${activeCategory}...`}
+                  value={search[activeCategory]}
+                  onChange={(e) => setSearch((s) => ({ ...s, [activeCategory]: e.target.value }))}
+                  className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl py-3 pl-10 pr-4 font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 transition-all placeholder-gray-400 shadow-inner"
+                />
+              </div>
+
+              {/* Desktop Buttons */}
+              <div className="hidden md:flex items-center gap-2">
+                {/* ADMIN ONLY: Stock Tools */}
+                {user?.role === 'admin' && (
+                  <>
+                    <button onClick={handleClearStock} title="Clear all stock items" className="px-5 py-3 rounded-xl bg-white dark:bg-midnight-800 border border-red-100 dark:border-red-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-sm">
+                      <FaEraser size={14} /> Clear Stock
+                    </button>
+                    <button onClick={seedSampleStock} title="Add sample stock items" className="px-5 py-3 rounded-xl bg-white dark:bg-midnight-800 border border-purple-100 dark:border-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/10 font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-sm">
+                      <FaSeedling size={14} /> Seed Stock
+                    </button>
+                  </>
+                )}
+
+                {/* Workflow Actions */}
+                {activeDocumentType === 'quotation' && isEditing && (
+                  <button
+                    onClick={() => handleConvert('proforma')}
+                    title="Convert to Proforma Invoice"
+                    className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 transform hover:scale-105"
+                  >
+                    <FaExchangeAlt size={14} /> Convert
+                  </button>
+                )}
+
+                {activeDocumentType === 'proforma' && isEditing && (
+                  <button
+                    onClick={() => handleConvert('invoice')}
+                    title="Convert to Final Invoice"
+                    className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 transform hover:scale-105"
+                  >
+                    <FaExchangeAlt size={14} /> Convert
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* LEFT: Customer & Items */}
@@ -954,7 +1138,16 @@ const NewInvoice: React.FC = () => {
                       {itemSearch && (
                         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-midnight-900 border border-gray-100 dark:border-midnight-800 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto w-full animate-fade-in custom-scrollbar">
                           {filteredStock.length === 0 ? (
-                            <div className="p-4 text-xs font-bold text-gray-400 text-center uppercase tracking-wide">No items found</div>
+                            <button
+                              onClick={() => handleCreateCustomItem(itemSearch)}
+                              className="w-full p-4 text-left text-sm font-bold text-brand-600 hover:bg-brand-50 flex items-center gap-2 group"
+                            >
+                              <div className="p-2 bg-brand-100 rounded-lg group-hover:bg-brand-200"><FaPlus /></div>
+                              <div>
+                                <div>Create "{itemSearch}"</div>
+                                <div className="text-xs text-gray-500 font-normal">Add as new custom item</div>
+                              </div>
+                            </button>
                           ) : (
                             filteredStock.map(item => (
                               <button
@@ -1010,7 +1203,18 @@ const NewInvoice: React.FC = () => {
             {/* Selected Items Table */}
             <div className="bg-white dark:bg-midnight-900 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800 overflow-hidden">
               <div className="p-6 bg-gray-50/50 dark:bg-midnight-950/50 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center">
-                <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tight">Line Items <span className="text-gray-400 ml-2 text-sm font-bold">({lines.length})</span></h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tight">Line Items <span className="text-gray-400 ml-2 text-sm font-bold">({lines.length})</span></h3>
+                  {(user?.role === 'admin' || user?.role === 'ceo') && (
+                    <button
+                      onClick={() => setIsStockModalOpen(true)}
+                      title="Quick Add to Inventory"
+                      className="bg-brand-600 hover:bg-brand-700 text-white p-2 rounded-lg transition-colors shadow-lg shadow-brand-500/20"
+                    >
+                      <FaPlus size={12} />
+                    </button>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -1094,6 +1298,9 @@ const NewInvoice: React.FC = () => {
                           <td className="p-6 text-center">
                             <button onClick={() => removeLine(idx)} title="Remove Item" className="text-gray-300 hover:text-rose-500 dark:hover:text-rose-400 bg-transparent hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-lg transition-colors">
                               <FaTrash size={14} />
+                            </button>
+                            <button onClick={() => handleSaveToStock(item)} title="Save to Stock Library" className="text-gray-300 hover:text-emerald-500 dark:hover:text-emerald-400 bg-transparent hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-lg transition-colors ml-1">
+                              <FaPlus size={14} />
                             </button>
                           </td>
                         </tr>

@@ -152,7 +152,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       items: [
         { path: '/support', label: 'Help Center', icon: <FiLifeBuoy size={18} />, exact: true },
         { path: '/support/guide', label: 'System Manual', icon: <FiBook size={18} /> },
-        { path: '/support/contact', label: 'Contact Support', icon: <FiMessageSquare size={18} /> },
+        { path: '/tickets', label: 'Support Tickets', icon: <FiMessageSquare size={18} /> },
       ]
     }
   ], [unreadCount]);
