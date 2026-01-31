@@ -1,2 +1,0 @@
-go through the system file by file ..everyone of them inside each of the folders...and make sure the system is optimized all the functionalities work and the system works as intended also...smooth out the comments...also make everything best you can and fix the errors..also make sure all the comments in each of the pages look like a senior developer not an AI and also remove the ones that are not needed ..file by file on everything 
-

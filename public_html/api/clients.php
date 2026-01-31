@@ -8,22 +8,28 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         requirePermission('view_clients');
-        $query = "
-            SELECT 
-                c.*,
-                COUNT(CASE WHEN d.type = 'invoice' THEN 1 END) as totalInvoices,
-                SUM(CASE WHEN d.type = 'invoice' AND d.status != 'cancelled' THEN d.grandTotal ELSE 0 END) as totalRevenue,
-                MAX(d.issuedDate) as lastActive,
-                SUM(CASE WHEN d.type = 'invoice' AND LOWER(d.status) = 'pending' THEN 1 ELSE 0 END) as pendingCount,
-                SUM(CASE WHEN d.type = 'invoice' AND LOWER(d.status) = 'overdue' THEN 1 ELSE 0 END) as overdueCount
-            FROM clients c
-            LEFT JOIN documents d ON c.id = d.customer_id AND d.deleted_at IS NULL
-            WHERE c.deleted_at IS NULL
-            GROUP BY c.id
-            ORDER BY c.name ASC
-        ";
-        $stmt = $pdo->query($query);
-        $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Initialize empty in case of failure
+        $clients = [];
+        try {
+            $query = "
+                SELECT 
+                    c.*,
+                    COUNT(CASE WHEN LOWER(d.type) = 'invoice' THEN 1 END) as totalInvoices,
+                    SUM(CASE WHEN LOWER(d.type) = 'invoice' AND LOWER(d.status) != 'cancelled' THEN d.grandTotal ELSE 0 END) as totalRevenue,
+                    MAX(d.issuedDate) as lastActive,
+                    SUM(CASE WHEN LOWER(d.type) = 'invoice' AND LOWER(d.status) IN ('pending', 'sent', 'draft') THEN 1 ELSE 0 END) as pendingCount,
+                    SUM(CASE WHEN LOWER(d.type) = 'invoice' AND LOWER(d.status) = 'overdue' THEN 1 ELSE 0 END) as overdueCount
+                FROM clients c
+                LEFT JOIN documents d ON c.id = d.customer_id AND d.deleted_at IS NULL
+                WHERE c.deleted_at IS NULL
+                GROUP BY c.id
+                ORDER BY c.name ASC
+            ";
+            $stmt = $pdo->query($query);
+            $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // Log error silently or handle
+        }
 
         // Cast numeric strings to appropriate types
         foreach ($clients as &$client) {

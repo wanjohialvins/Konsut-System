@@ -166,7 +166,7 @@ const Invoices = () => {
           text: `${getTypeLabel(invoice.type)} ${invoice.id} for ${invoice.customer?.name || "Client"}\nTotal: ${invoice.grandTotal?.toLocaleString() || 0} Ksh\nDate: ${invoice.issuedDate}`,
         });
       } catch {
-        console.log('Error sharing');
+
       }
     } else {
       showToast('info', 'Sharing is not supported on this device/browser');

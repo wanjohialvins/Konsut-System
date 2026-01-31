@@ -57,7 +57,7 @@ if ($method === 'GET') {
 } elseif ($method === 'POST') {
     requirePermission('manage_invoices');
     $data = json_decode(file_get_contents('php://input'), true);
-    file_put_contents('debug_invoice.txt', "POST Data: " . print_r($data, true) . "\n", FILE_APPEND);
+    // file_put_contents('debug_invoice.txt', "POST Data: " . print_r($data, true) . "\n", FILE_APPEND);
 
     $pdo->beginTransaction();
     try {

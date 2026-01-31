@@ -224,6 +224,8 @@ const API_BASE_URL = 'http://localhost/public_html/api';
 - **[USER_MANUAL.md](USER_MANUAL.md)** - Comprehensive operator guide
 - **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Developer reference
 - **[CORE_PRINCIPLES.md](CORE_PRINCIPLES.md)** - Architecture philosophy
+- **[CPANEL_DEPLOYMENT.md](CPANEL_DEPLOYMENT.md)** - Production deployment walkthrough
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
 
 ---
 

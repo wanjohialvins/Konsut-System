@@ -121,7 +121,7 @@ export const exportBackup = (): void => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
 
-        console.log('Backup created successfully:', backup.metadata);
+
     } catch (error) {
         console.error('Backup failed:', error);
         throw new Error('Failed to create backup. Please try again.');
@@ -196,7 +196,7 @@ export const importBackup = (file: File, mode: 'replace' | 'merge' = 'replace'):
                     }
                 });
 
-                console.log('Backup restored successfully:', backup.metadata);
+
                 resolve(backup);
             } catch (error) {
                 console.error('Restore failed:', error);
@@ -217,7 +217,7 @@ export const importBackup = (file: File, mode: 'replace' | 'merge' = 'replace'):
  */
 export const clearAllData = (): void => {
     BACKUP_KEYS.forEach(key => localStorage.removeItem(key));
-    console.log('All application data cleared');
+
 };
 
 /**

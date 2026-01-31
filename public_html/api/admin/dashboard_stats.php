@@ -137,7 +137,6 @@ try {
         'ticketStats' => $ticketStats,
         'recentMemos' => $recentMemos,
         'databaseStatus' => 'Stable',
-        'databaseStatus' => 'Stable',
         'categories' => (function () use ($pdo) {
             try {
                 return $pdo->query("SELECT category as name, SUM(total) as total FROM document_items GROUP BY category")->fetchAll(PDO::FETCH_ASSOC);

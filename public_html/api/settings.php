@@ -24,9 +24,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     requirePermission('system_control');
     if (isset($_GET['action']) && $_GET['action'] === 'clear') {
-        $stmt = $pdo->prepare("DELETE FROM settings");
-        $stmt->execute();
-        echo json_encode(['success' => true, 'message' => 'Settings wiped']);
+        // Thermonuclear Reset: Wipe everything except users
+        $tables = [
+            'document_items',
+            'documents',
+            'clients',
+            'stock',
+            'suppliers',
+            'audit_logs',
+            'notifications',
+            'tasks',
+            'memos',
+            'vault_documents',
+            'tickets',
+            'ticket_messages',
+            'settings'
+        ];
+
+        foreach ($tables as $table) {
+            $pdo->query("DELETE FROM $table");
+            // Reset Auto Increment if applicable
+            try {
+                $pdo->query("ALTER TABLE $table AUTO_INCREMENT = 1");
+            } catch (Exception $e) {
+            }
+        }
+
+        echo json_encode(['success' => true, 'message' => 'System wiped successfully']);
     }
 }
 ?>

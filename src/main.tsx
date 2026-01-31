@@ -11,7 +11,7 @@ const updateSW = registerSW({
     }
   },
   onOfflineReady() {
-    console.log('App ready to work offline');
+
   },
 })
 import './styles/animations.css'

@@ -90,7 +90,7 @@ const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise
                 const { enqueueOperation } = await import('./syncQueue');
                 const payload = options.body ? JSON.parse(options.body as string) : null;
                 await enqueueOperation(endpoint, method as 'POST' | 'PUT' | 'DELETE', payload);
-                console.log(`Queued ${method} operation for ${endpoint}`);
+
 
                 // Return fake success response to keep UI optimistic
                 return { success: true, queued: true } as any;

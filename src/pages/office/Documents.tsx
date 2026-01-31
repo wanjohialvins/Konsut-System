@@ -72,7 +72,7 @@ const Documents = () => {
     const { user } = useAuth();
 
     const handleDownload = async (doc: VaultDoc) => {
-        const downloadUrl = `${API_BASE_URL || 'http://localhost/public_html/api'}/vault.php?action=download&id=${doc.id}`;
+        const downloadUrl = `${API_BASE_URL}/vault.php?action=download&id=${doc.id}`;
 
         try {
             showToast('info', 'Decrypting secure file...');

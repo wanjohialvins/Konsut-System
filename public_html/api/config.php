@@ -1,6 +1,40 @@
 <?php
 ob_start();
 
+// =========================================================================
+//  ENVIRONMENT SETTINGS (Edit this section for Production)
+// =========================================================================
+
+// Set to false for Production
+define('DEBUG_MODE', false);
+
+// Database Configuration
+// defined('DB_HOST') or define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+// defined('DB_NAME') or define('DB_NAME', getenv('DB_NAME') ?: 'invoice_system');
+// defined('DB_USER') or define('DB_USER', getenv('DB_USER') ?: 'root');
+// defined('DB_PASS') or define('DB_PASS', getenv('DB_PASS') ?: '');
+
+// ALLOWING LOCAL OVERRIDES (Create a config.production.php file that is .gitignored if needed)
+if (file_exists(__DIR__ . '/config.production.php')) {
+    require_once __DIR__ . '/config.production.php';
+}
+
+// Fallback Defaults (if not set in production config)
+if (!defined('DB_HOST'))
+    define('DB_HOST', 'localhost');
+if (!defined('DB_NAME'))
+    define('DB_NAME', 'invoice_system');
+if (!defined('DB_USER'))
+    define('DB_USER', 'root');
+if (!defined('DB_PASS'))
+    define('DB_PASS', '');
+if (!defined('ENCRYPTION_KEY'))
+    define('ENCRYPTION_KEY', '75b5a26c8418041c2e42152862d295c25091d3c0500196230f8705307b508f7d');
+
+// =========================================================================
+//  CORE SETUP
+// =========================================================================
+
 // Core Security & Headers
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
@@ -15,19 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 date_default_timezone_set('UTC');
 
-// Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'invoice_system');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('ENCRYPTION_KEY', '75b5a26c8418041c2e42152862d295c25091d3c0500196230f8705307b508f7d');
-
 // Error Handling
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../logs/php_errors.txt');
-error_reporting(E_ALL);
+if (DEBUG_MODE) {
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    ini_set('log_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    ini_set('log_errors', 1);
+    if (!is_dir(__DIR__ . '/../logs')) {
+        @mkdir(__DIR__ . '/../logs', 0755, true);
+    }
+    ini_set('error_log', __DIR__ . '/../logs/php_errors.txt');
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+}
+
 
 /**
  * Send a standardized JSON response
@@ -51,10 +89,10 @@ function sendError($message, $code = 500)
 
 function getDbConnection()
 {
-    $host = 'localhost';
-    $db = 'invoice_system';
-    $user = 'root';
-    $pass = '';
+    $host = DB_HOST;
+    $db = DB_NAME;
+    $user = DB_USER;
+    $pass = DB_PASS;
     $charset = 'utf8mb4';
 
     $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -68,12 +106,16 @@ function getDbConnection()
     try {
         $pdo = new PDO($dsn, $user, $pass, $options);
         // Force MySQL session to UTC for consistent 'last_active' tracking
-// $pdo->exec("SET time_zone = '+00:00'");
+        // $pdo->exec("SET time_zone = '+00:00'");
         return $pdo;
     } catch (\PDOException $e) {
         // Since we already sent JSON headers, this error will be correctly formatted
         http_response_code(500);
-        die(json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]));
+        if (DEBUG_MODE) {
+            die(json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]));
+        } else {
+            die(json_encode(['error' => 'Database connection failed. Check server logs.']));
+        }
     }
 }
 
@@ -237,13 +279,6 @@ function checkPermission($action)
     if ($r === 'admin' || $r === 'ceo')
         return true;
 
-    // Root permission wildcard check - REMOVED to allow granular dashboard access
-/*
-if (in_array('/', $permissions)) {
-return true;
-}
-*/
-
     $permissionMap = getPermissionRouteMap();
 
     $r = strtolower($role);
@@ -274,10 +309,11 @@ return true;
             }
         }
 
-        // DEBUG LOGGING
-        $logData = date('Y-m-d H:i:s') . " | Action: $action | Required: " . json_encode($allowedRoutes) . " | Role: $role |
-Perms: " . json_encode($permissions) . " | Result: " . ($hasPermission ? 'PASS' : 'FAIL') . "\n";
-        file_put_contents(__DIR__ . '/../logs/debug_auth.txt', $logData, FILE_APPEND);
+        // DEBUG LOGGING - Only in Debug Mode
+        if (DEBUG_MODE) {
+            $logData = date('Y-m-d H:i:s') . " | Action: $action | Required: " . json_encode($allowedRoutes) . " | Role: $role | Perms: " . json_encode($permissions) . " | Result: " . ($hasPermission ? 'PASS' : 'FAIL') . "\n";
+            file_put_contents(__DIR__ . '/../logs/debug_auth.txt', $logData, FILE_APPEND);
+        }
 
         return $hasPermission;
     }
