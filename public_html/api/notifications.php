@@ -10,7 +10,6 @@ switch ($method) {
     case 'GET':
         // Notifications are per-user usually, but simplistic system here (system-wide alerts or broadcast)
         // Or we assume this is "Admin Notifications" as per `Notifications.tsx` using `api.admin.getNotifications`.
-        requirePermission('view_dashboard');
         try {
             $stmt = $pdo->query("SELECT * FROM notifications ORDER BY created_at DESC");
             $notifs = $stmt->fetchAll();
@@ -47,7 +46,6 @@ switch ($method) {
 
     case 'PUT':
         // Mark as read
-        requirePermission('view_dashboard');
         $id = $_GET['id'] ?? null;
         if (!$id) {
             // Maybe bulk update?
