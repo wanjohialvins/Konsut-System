@@ -27,8 +27,12 @@ const HelpCenter = () => {
 
     const faqs = [
         { q: "How do I create a new invoice?", a: "Navigate to 'Create New' in the sidebar or from the Dashboard quick actions. Select a client, add items, and click Finalize to generate the PDF." },
-        { q: "Can I edit an invoice after saving?", a: "Yes. Go to the Invoices list, click 'Edit' on the invoice row. Note that changing a finalized invoice might affect tax reports." },
+        { q: "Can I edit an invoice after saving? (Updated v2.3)", a: "Yes! You can now edit invoices directly from the list view. Click the edit icon on any invoice to open the Quick Edit modal where you can modify customer details, line items, and status without leaving the page. Changes save instantly to the cloud." },
         { q: "How do I add my company logo?", a: "Go to Settings > Company Profile. You can upload your logo there, which will appear on all generated PDFs." },
+        { q: "What is 'Financial Pulse'?", a: "It's an AI-driven tool in your Analytics dashboard that forecasts growth, tracks market velocity, and offers recommendations based on your transaction history." },
+        { q: "How do I filter analytics by date range? (New in v2.3)", a: "In the Analytics page, use the date range selector at the top to choose between 7 Days, 30 Days, 90 Days, or Annual views. The charts and metrics update automatically when you change the range." },
+        { q: "How do I rearrange items?", a: "In the New Invoice editor (v2.2+), use the drag handle (six dots) on the left of any line item to drag and drop it into a new position." },
+        { q: "Can I save a manual line item to Stock?", a: "Yes. If you type a custom item, click the small 'Save' icon next to the price field. It will be instantly added to your Inventory for future use." },
         { q: "What happens if I delete a client?", a: "Deleting a client is soft-restricted if they have active invoices to preserve financial integrity. Archive them instead." },
         { q: "Is my data backed up?", a: "Yes, if you use the System Control 'Backup' feature, you can download a full JSON manifest of your data." },
     ];

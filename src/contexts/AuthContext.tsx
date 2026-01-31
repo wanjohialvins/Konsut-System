@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { parsePermissions } from '../utils/permissionUtils';
+import { normalizeUser } from '../utils/userUtils';
 import { api } from '../services/api';
-
 import type { User, UserRole, AuthContextType } from "../types/types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'invoice_system_auth';
+const STORAGE_KEY = 'konsut_system_auth';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             try {
                 setUser(JSON.parse(stored));
             } catch (error) {
-                console.error("Failed to parse stored user", error);
+                console.error("Auth state recovery failed:", error);
                 localStorage.removeItem(STORAGE_KEY);
             }
         }
@@ -28,29 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await api.auth.login({ username, password });
             if (response.success && response.user) {
-                const parsePermissions = (perms: unknown) => {
-                    if (!perms) return [];
-                    if (Array.isArray(perms)) return perms;
-                    if (typeof perms === 'object' && perms !== null) return perms as string[];
-                    try {
-                        if (typeof perms === 'string' && perms.trim() === '') return [];
-                        const parsed = typeof perms === 'string' ? JSON.parse(perms) : perms;
-                        return Array.isArray(parsed) ? parsed : [];
-                    } catch (error) {
-                        console.error("Failed to parse permissions", error);
-                        return [];
-                    }
-                };
-
-                const role = response.user.role || 'viewer';
-                const userData: User = {
-                    ...response.user,
-                    displayRole: role === 'ceo' ? 'CEO' :
-                        role === 'admin' ? 'Administrator' :
-                            role.charAt(0).toUpperCase() + role.slice(1),
-                    permissions: parsePermissions(response.user.permissions),
-                    name: response.user.name || response.user.username || 'User'
-                };
+                const userData = normalizeUser(response.user);
                 setUser(userData);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
                 return { success: true, forceReset: response.forceReset, message: response.message };
@@ -67,29 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await api.auth.recoveryLogin(phrase);
             if (response.success && response.user) {
-                const parsePermissions = (perms: unknown) => {
-                    if (!perms) return [];
-                    if (Array.isArray(perms)) return perms;
-                    if (typeof perms === 'object' && perms !== null) return perms as string[];
-                    try {
-                        if (typeof perms === 'string' && perms.trim() === '') return [];
-                        const parsed = typeof perms === 'string' ? JSON.parse(perms) : perms;
-                        return Array.isArray(parsed) ? parsed : [];
-                    } catch (error) {
-                        console.error("Failed to parse permissions", error);
-                        return [];
-                    }
-                };
-
-                const role = response.user.role || 'viewer';
-                const userData: User = {
-                    ...response.user,
-                    displayRole: role === 'ceo' ? 'CEO' :
-                        role === 'admin' ? 'Administrator' :
-                            role.charAt(0).toUpperCase() + role.slice(1),
-                    permissions: parsePermissions(response.user.permissions),
-                    name: response.user.name || response.user.username || 'User'
-                };
+                const userData = normalizeUser(response.user);
                 setUser(userData);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
                 return { success: true, forceReset: response.forceReset, ...response };
@@ -102,12 +60,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const navigate = useNavigate();
+
     const logout = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY);
         setUser(null);
-        // Force full reload to verify clean state and dump any pending requests
-        window.location.href = '/login';
-    }, []);
+        navigate('/login');
+    }, [navigate]);
 
     const updateUser = (data: Partial<User>) => {
         if (!user) return;
@@ -116,30 +75,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     };
 
+    const lastRefreshRef = React.useRef<number>(0);
     const refreshUser = useCallback(async () => {
         if (!user) return;
+
+        const now = Date.now();
+        if (now - lastRefreshRef.current < 5000) return;
+        lastRefreshRef.current = now;
+
         try {
             const self = await api.users.getSelf();
             if (self) {
-                const parsePermissions = (perms: unknown) => {
-                    if (!perms) return [];
-                    if (Array.isArray(perms)) return perms;
-                    try {
-                        const parsed = typeof perms === 'string' ? JSON.parse(perms) : perms;
-                        return Array.isArray(parsed) ? parsed : [];
-                    } catch { return []; }
-                };
-
-                const role = self.role || 'viewer';
-                const updatedUser: User = {
-                    ...user,
-                    ...self,
-                    displayRole: role === 'ceo' ? 'CEO' :
-                        role === 'admin' ? 'Administrator' :
-                            role.charAt(0).toUpperCase() + role.slice(1),
-                    permissions: parsePermissions(self.permissions),
-                    name: self.name || self.username || user.name
-                };
+                const updatedUser = normalizeUser({ ...user, ...self });
                 setUser(updatedUser);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
             }
@@ -148,26 +95,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [user]);
 
-    // Handle global permission updates (e.g. from 403 errors)
     useEffect(() => {
         const handleUpdate = () => refreshUser();
-        window.addEventListener('permission-update', handleUpdate);
+        const handleForceLogout = () => {
+            console.warn("Session expired (Force Logout initiated)");
+            logout(); // Clear state and redirect to login
+            // detailed message is handled by api.ts error or we can show toast here if we had toast access
+        };
 
-        // Pseudo-live updates: Refresh when user returns to tab
+        window.addEventListener('permission-update', handleUpdate);
+        window.addEventListener('force-logout', handleForceLogout);
         window.addEventListener('focus', handleUpdate);
 
-        // Periodic background refresh (every 5 mins)
-        const interval = setInterval(handleUpdate, 5 * 60 * 1000);
+        // Poll every 30 seconds for real-time permission updates
+        const interval = setInterval(handleUpdate, 30 * 1000);
 
         return () => {
             window.removeEventListener('permission-update', handleUpdate);
+            window.removeEventListener('force-logout', handleForceLogout);
             window.removeEventListener('focus', handleUpdate);
             clearInterval(interval);
         };
-    }, [refreshUser]);
+    }, [refreshUser, logout]);
+
+    const [permissionMap, setPermissionMap] = useState<Record<string, string[]>>({});
+
+    const fetchMeta = useCallback(async () => {
+        try {
+            const meta = await api.meta.get();
+            if (meta && meta.routeMap) {
+                setPermissionMap(meta.routeMap);
+            }
+        } catch (error) {
+            console.error("Failed to fetch system meta:", error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchMeta();
+    }, [fetchMeta]);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, recoveryLogin, logout, updateUser, refreshUser, isAuthenticated: !!user, loading: isLoading }}>
+        <AuthContext.Provider value={{
+            user,
+            isLoading,
+            login,
+            recoveryLogin,
+            logout,
+            updateUser,
+            refreshUser,
+            isAuthenticated: !!user,
+            loading: isLoading,
+            permissionMap
+        }}>
             {children}
         </AuthContext.Provider>
     );

@@ -13,6 +13,7 @@ const TicketDetails = () => {
     const [ticket, setTicket] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [reply, setReply] = useState("");
+    const [isInternal, setIsInternal] = useState(false);
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -47,9 +48,10 @@ const TicketDetails = () => {
             await api.tickets.addMessage({
                 ticket_id: id!,
                 message: reply,
-                is_internal: false // For now, simple reply
+                is_internal: isInternal
             });
             setReply("");
+            setIsInternal(false);
             fetchTicket();
         } catch (e: any) {
             showToast('error', 'Failed to send reply');
@@ -103,8 +105,8 @@ const TicketDetails = () => {
                     <button
                         onClick={toggleStatus}
                         className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-xl ${ticket.status === 'closed'
-                                ? 'bg-emerald-600 text-white shadow-emerald-600/20'
-                                : 'bg-red-600 text-white shadow-red-600/20'
+                            ? 'bg-emerald-600 text-white shadow-emerald-600/20'
+                            : 'bg-red-600 text-white shadow-red-600/20'
                             }`}
                     >
                         {ticket.status === 'closed' ? <><FiCheckCircle /> Reopen Ticket</> : <><FiCheckCircle /> Mark as Closed</>}
@@ -127,10 +129,10 @@ const TicketDetails = () => {
                                     </span>
                                 </div>
                                 <div className={`p-6 rounded-[2rem] shadow-sm relative ${isOwnMessage
-                                        ? 'bg-brand-600 text-white rounded-tr-none'
-                                        : isSupport
-                                            ? 'bg-slate-900 text-white rounded-tl-none border border-brand-500/30'
-                                            : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-tl-none border border-slate-100 dark:border-slate-800'
+                                    ? 'bg-brand-600 text-white rounded-tr-none'
+                                    : isSupport
+                                        ? 'bg-slate-900 text-white rounded-tl-none border border-brand-500/30'
+                                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-tl-none border border-slate-100 dark:border-slate-800'
                                     }`}>
                                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
                                 </div>
@@ -142,28 +144,49 @@ const TicketDetails = () => {
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-2xl relative z-20 shrink-0">
-                <form onSubmit={handleReply} className="flex gap-4">
-                    <button type="button" className="p-4 bg-slate-50 dark:bg-slate-950 text-slate-400 rounded-2xl hover:text-brand-600 transition-colors">
-                        <FiPaperclip size={20} />
-                    </button>
-                    <textarea
-                        rows={1}
-                        placeholder={ticket.status === 'closed' ? "This ticket is closed" : "Write a response..."}
-                        disabled={ticket.status === 'closed' || sending}
-                        value={reply}
-                        onChange={(e) => setReply(e.target.value)}
-                        className="flex-1 bg-slate-50 dark:bg-slate-950 border-none rounded-2xl px-6 py-4 focus:ring-4 focus:ring-brand-500/10 outline-none transition-all resize-none text-slate-900 dark:text-white"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleReply(e);
-                            }
-                        }}
-                    />
+                <form onSubmit={handleReply} className="flex gap-4 items-end">
+                    <div className="flex-1 space-y-4">
+                        {(isAdmin || user?.role === 'manager' || user?.role === 'staff') && (
+                            <div className="flex items-center gap-2 px-2">
+                                <input
+                                    type="checkbox"
+                                    id="internal_note"
+                                    checked={isInternal}
+                                    onChange={e => setIsInternal(e.target.checked)}
+                                    className="w-4 h-4 text-amber-500 rounded focus:ring-amber-500 cursor-pointer"
+                                />
+                                <label htmlFor="internal_note" className="text-xs font-bold uppercase tracking-widest text-slate-500 cursor-pointer select-none flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${isInternal ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}`}></span>
+                                    Internal Note (Private)
+                                </label>
+                            </div>
+                        )}
+                        <textarea
+                            rows={1}
+                            placeholder={ticket.status === 'closed' ? "This ticket is closed" : (isInternal ? "Write a private internal note..." : "Write a response...")}
+                            disabled={ticket.status === 'closed' || sending}
+                            value={reply}
+                            onChange={(e) => setReply(e.target.value)}
+                            className={`w-full border-none rounded-2xl px-6 py-4 focus:ring-4 outline-none transition-all resize-none text-slate-900 dark:text-white ${isInternal
+                                ? 'bg-amber-50 dark:bg-amber-900/10 focus:ring-amber-500/10 placeholder-amber-800/30'
+                                : 'bg-slate-50 dark:bg-slate-950 focus:ring-brand-500/10'
+                                }`}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleReply(e);
+                                }
+                            }}
+                        />
+                    </div>
                     <button
                         type="submit"
                         disabled={ticket.status === 'closed' || !reply.trim() || sending}
-                        className="p-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-30 text-white rounded-2xl shadow-xl shadow-brand-600/20 transition-all active:scale-95"
+                        className={`p-4 text-white rounded-2xl shadow-xl transition-all active:scale-95 h-[56px] w-[56px] flex items-center justify-center ${isInternal
+                            ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20'
+                            : 'bg-brand-600 hover:bg-brand-700 shadow-brand-600/20 disabled:opacity-30'
+                            }`}
+                        title={isInternal ? "Post Internal Note" : "Send Reply"}
                     >
                         <FiSend size={20} />
                     </button>

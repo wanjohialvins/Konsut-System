@@ -24,7 +24,7 @@ switch ($method) {
         break;
 
     case 'POST':
-        requirePermission('manage_memos'); // Memos likely managed by admin
+        requirePermission('manage_memos');
         $data = json_decode(file_get_contents('php://input'), true);
         try {
             $stmt = $pdo->prepare("INSERT INTO memos (id, title, content, author, date, urgent) VALUES (?, ?, ?, ?, ?, ?)");
@@ -36,6 +36,37 @@ switch ($method) {
                 $data['date'],
                 $data['urgent'] ? 1 : 0
             ]);
+            echo json_encode(['success' => true]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        break;
+
+    case 'PUT':
+        requirePermission('manage_memos');
+        $data = json_decode(file_get_contents('php://input'), true);
+        try {
+            $stmt = $pdo->prepare("UPDATE memos SET title = ?, content = ?, urgent = ? WHERE id = ?");
+            $stmt->execute([
+                $data['title'],
+                $data['content'],
+                $data['urgent'] ? 1 : 0,
+                $data['id']
+            ]);
+            echo json_encode(['success' => true]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        break;
+
+    case 'DELETE':
+        requirePermission('manage_memos');
+        $id = $_GET['id'] ?? '';
+        try {
+            $stmt = $pdo->prepare("DELETE FROM memos WHERE id = ?");
+            $stmt->execute([$id]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             http_response_code(500);

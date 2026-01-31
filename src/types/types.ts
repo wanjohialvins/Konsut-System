@@ -1,14 +1,17 @@
 export type InvoiceType = 'quotation' | 'proforma' | 'invoice';
-export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+
+export type Category = 'products' | 'mobilization' | 'services';
 
 export interface Product {
   id: string;
   name: string;
-  category?: string;
+  category?: Category | string;
   priceKsh?: number;
   priceUSD?: number;
   description?: string;
   quantity?: number;
+  type?: Category; // For compatibility with StockItem usage
 }
 
 export interface InvoiceItem {
@@ -28,7 +31,22 @@ export interface Customer {
   email: string;
   address: string;
   kraPin?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  // Extended fields for Client compatibility
+  company?: string;
+  source?: string;
+  notes?: string;
+  // Aggregated Stats (Optional, provided by backend)
+  totalInvoices?: number;
+  totalRevenue?: number;
+  lastActive?: string;
+  pendingCount?: number;
+  overdueCount?: number;
 }
+
+// Alias for backward compatibility and semantic clarity
+export type Client = Customer;
 
 export interface Invoice {
   id: string;
@@ -64,9 +82,9 @@ export interface User {
   username: string;
   email?: string;
   role: UserRole | string;
-  is_active: number | boolean;
-  last_login?: string;
-  created_at?: string;
+  isActive: number | boolean;
+  lastLogin?: string;
+  createdAt?: string;
   permissions?: string[] | string;
   name?: string; // Optional for compatibility
   displayRole?: string; // Optional for compatibility
@@ -84,6 +102,7 @@ export interface AuthContextType {
   isLoading?: boolean;
   updateUser?: (data: Partial<User>) => void;
   refreshUser?: () => Promise<void>;
+  permissionMap: Record<string, string[]>;
 }
 
 export type ThemeMode = 'light' | 'dark' | 'auto';

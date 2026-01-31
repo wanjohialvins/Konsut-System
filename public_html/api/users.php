@@ -8,6 +8,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         $action = $_GET['action'] ?? '';
+
+        // --- 1. Get Self ---
         if ($action === 'get_self') {
             $userId = getRequestHeader('X-User-Id');
             if (!$userId) {
@@ -15,10 +17,27 @@ switch ($method) {
                 echo json_encode(['error' => 'Authentication required']);
                 exit;
             }
-            $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users WHERE id = ?");
-            $stmt->execute([$userId]);
+            try {
+                // Try selecting with force_refresh
+                $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at, force_refresh FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+            } catch (PDOException $e) {
+                // Fallback if column missing
+                $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+            }
             $user = $stmt->fetch();
             if ($user) {
+                // Check Force Logout Flag
+                if (!empty($user['force_refresh']) && $user['force_refresh'] == 1) {
+                    // Reset flag
+                    $pdo->prepare("UPDATE users SET force_refresh = 0 WHERE id = ?")->execute([$userId]);
+
+                    // Return specific 401 to trigger logout
+                    http_response_code(401);
+                    echo json_encode(['error' => 'Session expired (Admin action)', 'forceLogout' => true]);
+                    exit;
+                }
                 echo json_encode($user);
             } else {
                 http_response_code(404);
@@ -27,17 +46,35 @@ switch ($method) {
             exit;
         }
 
+        // --- 2. Get Assignable Users (Public for authenticated) ---
+        if ($action === 'get_assignable') {
+            // Allows dropdown population for Tasks/Tickets
+            // Returns minimal data (id, username, role)
+            // Auth Check
+            $userId = getRequestHeader('X-User-Id');
+            if (!$userId) {
+                http_response_code(401);
+                die(json_encode(['error' => 'Authentication required']));
+            }
+
+            $stmt = $pdo->query("SELECT id, username, role FROM users ORDER BY username ASC");
+            echo json_encode($stmt->fetchAll());
+            exit;
+        }
+
+        // --- 3. Full User List (Restricted) ---
         requirePermission('view_users');
         $stmt = $pdo->query("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users ORDER BY username ASC");
         $users = $stmt->fetchAll();
 
         // Calculate Online Status
-        $now = time();
+        $now = time(); // PHP time() is always UTC independent of timezone settings
         foreach ($users as &$user) {
             if (!empty($user['last_active'])) {
-                $lastActive = strtotime($user['last_active']);
-                // Active if seen in last 2 minutes
-                $user['is_active'] = ($now - $lastActive) < 120;
+                // Ensure strtotime parses the DB time correctly
+                $lastActive = strtotime($user['last_active'] . ' UTC');
+                // Active if seen in last 60 seconds
+                $user['is_active'] = ($now - $lastActive) < 60;
             } else {
                 $user['is_active'] = false;
             }

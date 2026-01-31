@@ -1,66 +1,29 @@
 import { DocumentEngine } from "./DocumentEngine";
-
-const SEQUENCE_KEY = "konsut_document_sequences";
-
-type SequenceConfig = {
-    invoice: number;
-    quotation: number;
-    proforma: number;
-    lastDate: string; // YYYY-MM-DD
-};
+import { api } from "../services/api";
 
 export class SequenceManager {
-    private static getSequences(): SequenceConfig {
-        const raw = localStorage.getItem(SEQUENCE_KEY);
-        const todayCommon = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
-        const defaults: SequenceConfig = {
-            invoice: 0,
-            quotation: 0,
-            proforma: 0,
-            lastDate: todayCommon
-        };
-
-        if (!raw) return defaults;
-
-        try {
-            const data = JSON.parse(raw) as SequenceConfig;
-            // Daily reset check
-            if (data.lastDate !== todayCommon) {
-                return defaults;
-            }
-            return data;
-        } catch {
-            return defaults;
-        }
-    }
-
-    private static saveSequences(config: SequenceConfig) {
-        localStorage.setItem(SEQUENCE_KEY, JSON.stringify(config));
-    }
 
     /**
      * Atomically gets the next number for a document type.
-     * Increments the counter PERMANENTLY.
+     * Increments the counter PERMANENTLY in the DB.
      * Use this only when actually saving/generating a final document.
      */
-    static getNextNumber(type: 'invoice' | 'quotation' | 'proforma'): string {
-        const config = this.getSequences();
-
-        // Increment
-        config[type]++;
-
-        this.saveSequences(config);
-
-        return DocumentEngine.formatDocumentNumber(type, config[type]);
+    static async getNextNumber(type: 'invoice' | 'quotation' | 'proforma'): Promise<string> {
+        const res = await api.sequences.next(type);
+        // Use backend formatted string OR frontend formatting if needed.
+        // Let's use Frontend formatting to respect DocumentEngine logic if complex.
+        // But DocumentEngine might need raw number.
+        // Assume api returns { number: string, value: number }
+        // If DocumentEngine needs number:
+        return DocumentEngine.formatDocumentNumber(type, res.value);
     }
 
     /**
      * Peeks at what the next number WILL be without incrementing.
      * Useful for "New Quote #..." preview.
      */
-    static peekNextNumber(type: 'invoice' | 'quotation' | 'proforma'): string {
-        const config = this.getSequences();
-        return DocumentEngine.formatDocumentNumber(type, config[type] + 1);
+    static async peekNextNumber(type: 'invoice' | 'quotation' | 'proforma'): Promise<string> {
+        const res = await api.sequences.peek(type);
+        return DocumentEngine.formatDocumentNumber(type, res.value);
     }
 }

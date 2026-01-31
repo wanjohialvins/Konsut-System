@@ -1,0 +1,30 @@
+{
+    "backup_full": {
+        "name": "Full System Backup",
+        "description": "Generates a JSON dump of the entire database.",
+        "schedule": "00:00",
+        "frequency": "daily",
+        "enabled": true
+    },
+    "optimize_db": {
+        "name": "Database Optimization",
+        "description": "Runs OPTIMIZE TABLE on all core tables.",
+        "schedule": "03:00",
+        "frequency": "weekly",
+        "enabled": true
+    },
+    "prune_logs": {
+        "name": "Prune Error Logs",
+        "description": "Clears physical PHP error logs > 5MB.",
+        "schedule": "01:00",
+        "frequency": "daily",
+        "enabled": true
+    },
+    "sync_sequences": {
+        "name": "Synchronize Sequences",
+        "description": "Ensures invoice numbers match database count.",
+        "schedule": "HOURLY",
+        "frequency": "hourly",
+        "enabled": true
+    }
+}

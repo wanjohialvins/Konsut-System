@@ -10,8 +10,31 @@ switch ($method) {
     case 'GET':
         requirePermission('view_tasks');
         try {
-            $stmt = $pdo->query("SELECT * FROM tasks ORDER BY created_at DESC");
-            echo json_encode($stmt->fetchAll());
+            $userId = getRequestHeader('X-User-Id');
+            $userRole = getRequestHeader('X-User-Role');
+
+            // Logic: Admins/Managers see ALL tasks. Others see only assigned to them OR created by them (if we tracked creator).
+            // Current DB schema has 'assignee' column (string name) not ID. This is a flaw but we work with it.
+            // Ideally assigner should be tracked too.
+            // For now, checks if user is assigner or assignee?
+            // Since 'assignee' is a string name, we need the username.
+
+            if (in_array($userRole, ['admin', 'manager', 'ceo'])) {
+                $stmt = $pdo->query("SELECT * FROM tasks ORDER BY created_at DESC");
+                echo json_encode($stmt->fetchAll());
+            } else {
+                // Fetch username for this user
+                $uStmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+                $uStmt->execute([$userId]);
+                $uName = $uStmt->fetchColumn();
+
+                // Filter: Assignee matches username OR open tasks (unassigned)? Maybe not.
+                // Let's filter by Assignee Name
+                // Note: This relies on assignee name matching username exactly.
+                $stmt = $pdo->prepare("SELECT * FROM tasks WHERE assignee = ? OR assignee = '' ORDER BY due_date ASC");
+                $stmt->execute([$uName]);
+                echo json_encode($stmt->fetchAll());
+            }
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);

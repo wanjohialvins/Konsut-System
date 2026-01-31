@@ -1,6 +1,6 @@
 // Toast notification context and provider
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Toast } from '../components/shared/UIComponents';
+import { Toast } from '../components/ui/Toast';
 
 import type { ToastType, ToastMessage, ToastContextType } from "../types/types";
 
@@ -10,8 +10,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
     const showToast = useCallback((type: ToastType, message: string) => {
-        const id = Math.random().toString(36).substr(2, 9);
-        setToasts(prev => [...prev, { id, type, message }]);
+        setToasts(prev => {
+            // Prevent exact same message duplication within a short window
+            if (prev.some(t => t.message === message)) return prev;
+
+            const id = Math.random().toString(36).substr(2, 9);
+            return [...prev, { id, type, message }];
+        });
     }, []);
 
     const removeToast = useCallback((id: string) => {

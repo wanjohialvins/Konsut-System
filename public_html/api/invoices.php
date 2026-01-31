@@ -1,7 +1,8 @@
 <?php
 // backend/invoices.php
 require_once 'config.php';
-require_once 'auth.php'; // Assuming auth.php contains requirePermission
+require_once 'auth.php';
+require_once 'utils/client_utils.php';
 
 $pdo = getDbConnection();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -29,22 +30,28 @@ if ($method === 'GET') {
             }
 
             $invoice['items'] = $items;
-            echo json_encode($invoice);
+            sendResponse($invoice);
         } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'Invoice not found']);
+            sendError('Invoice not found', 404);
         }
     } else {
         // List invoices with basic info
         $type = $_GET['type'] ?? null;
+        $clientId = $_GET['clientId'] ?? null;
         $query = "SELECT d.*, c.name as customerName FROM documents d LEFT JOIN clients c ON d.customer_id = c.id WHERE d.deleted_at IS NULL";
+        $params = [];
+
         if ($type) {
             $query .= " AND d.type = :type";
-            $stmt = $pdo->prepare($query . " ORDER BY d.created_at DESC");
-            $stmt->execute(['type' => $type]);
-        } else {
-            $stmt = $pdo->query($query . " ORDER BY d.created_at DESC");
+            $params['type'] = $type;
         }
+        if ($clientId) {
+            $query .= " AND d.customer_id = :clientId";
+            $params['clientId'] = $clientId;
+        }
+
+        $stmt = $pdo->prepare($query . " ORDER BY d.created_at DESC");
+        $stmt->execute($params);
         echo json_encode($stmt->fetchAll());
     }
 } elseif ($method === 'POST') {
@@ -54,9 +61,12 @@ if ($method === 'GET') {
 
     $pdo->beginTransaction();
     try {
-        $customerId = ensureClientExists($pdo, $data['customer'] ?? []);
+        $clientStatus = ensureClientExists($pdo, $data['customer'] ?? []);
+        $customerId = $clientStatus['id'];
+        $clientUpdated = $clientStatus['updated'];
+
         $userId = getRequestHeader('X-User-Id');
-        file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . " | User ID: " . var_export($userId, true) . "\n", FILE_APPEND);
+        // file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . " | User ID: " . var_export($userId, true) . "\n", FILE_APPEND);
 
         $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
@@ -90,7 +100,7 @@ if ($method === 'GET') {
             ]);
         }
         $pdo->commit();
-        echo json_encode(['success' => true]);
+        echo json_encode(['success' => true, 'client_updated' => $clientUpdated, 'id' => $data['id']]);
     } catch (Exception $e) {
         $pdo->rollBack();
         http_response_code(500);
@@ -101,7 +111,9 @@ if ($method === 'GET') {
     $data = json_decode(file_get_contents('php://input'), true);
     $pdo->beginTransaction();
     try {
-        $customerId = ensureClientExists($pdo, $data['customer'] ?? []);
+        $clientStatus = ensureClientExists($pdo, $data['customer'] ?? []);
+        $customerId = $clientStatus['id'];
+        $clientUpdated = $clientStatus['updated'];
 
         $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
         $stmt->execute([
@@ -112,7 +124,7 @@ if ($method === 'GET') {
             (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
             $data['currency'] ?? 'Ksh',
             $data['currencyRate'] ?? 1.0,
-            $data['subtotal'],
+            $subtotal = $data['subtotal'],
             $data['taxAmount'] ?? 0,
             $data['grandTotal'],
             $data['clientResponsibilities'] ?? '',
@@ -137,7 +149,7 @@ if ($method === 'GET') {
             ]);
         }
         $pdo->commit();
-        echo json_encode(['success' => true]);
+        echo json_encode(['success' => true, 'client_updated' => $clientUpdated]);
     } catch (Exception $e) {
         $pdo->rollBack();
         http_response_code(500);
@@ -149,42 +161,5 @@ if ($method === 'GET') {
     // Soft Delete
     $stmt = $pdo->prepare("UPDATE documents SET deleted_at = NOW() WHERE id = ?");
     $stmt->execute([$id]);
-    echo json_encode(['success' => true]);
-}
-
-function ensureClientExists($pdo, $customer)
-{
-    if (empty($customer['id']) || empty($customer['name']))
-        return null;
-
-    // Check if exists
-    $stmt = $pdo->prepare("SELECT id FROM clients WHERE id = ?");
-    $stmt->execute([$customer['id']]);
-    if ($stmt->fetch()) {
-        // Update existing client info if needed? 
-        // For now, let's just update contact info to ensure it's fresh
-        $update = $pdo->prepare("UPDATE clients SET name=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
-        $update->execute([
-            $customer['name'],
-            $customer['email'] ?? '',
-            $customer['phone'] ?? '',
-            $customer['address'] ?? '',
-            $customer['kraPin'] ?? '',
-            $customer['id']
-        ]);
-        return $customer['id'];
-    }
-
-    // Create new
-    file_put_contents('debug_invoice.txt', "Creating new client...\n", FILE_APPEND);
-    $stmt = $pdo->prepare("INSERT INTO clients (id, name, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([
-        $customer['id'],
-        $customer['name'],
-        $customer['email'] ?? '',
-        $customer['phone'] ?? '',
-        $customer['address'] ?? '',
-        $customer['kraPin'] ?? ''
-    ]);
-    return $customer['id'];
+    sendResponse(['success' => true]);
 }

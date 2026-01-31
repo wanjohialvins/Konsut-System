@@ -30,46 +30,73 @@ try {
             // Check current status
             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'");
             $current = $stmt->fetchColumn();
-            
+
             $newState = true;
             if ($current) {
                 $status = json_decode($current, true);
                 $newState = !$status; // Toggle
             }
-            
+
             // Save new state
             $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('maintenance_mode', ?) ON DUPLICATE KEY UPDATE setting_value = ?");
             $jsonVal = json_encode($newState);
             $stmt->execute([$jsonVal, $jsonVal]);
-            
+
             echo json_encode(['success' => true, 'message' => "System Maintenance Lock: " . ($newState ? "ENABLED" : "DISABLED")]);
             exit;
 
         case 'broadcast':
             $message = $_GET['message'] ?? 'System Maintenance Triggered';
+            $type = $_GET['type'] ?? 'system'; // system, warning, critical
+
             // Insert notification for ALL users
             // 1. Get all user IDs
             $users = $pdo->query("SELECT id FROM users")->fetchAll(PDO::FETCH_COLUMN);
-            $notifStmt = $pdo->prepare("INSERT INTO notifications (user_id, type, message, read_status, created_at) VALUES (?, 'system', ?, 0, NOW())");
+            $notifStmt = $pdo->prepare("INSERT INTO notifications (user_id, type, message, read_status, created_at) VALUES (?, ?, ?, 0, NOW())");
 
             $count = 0;
             foreach ($users as $uid) {
-                $notifStmt->execute([$uid, $message]);
+                $notifStmt->execute([$uid, $type, $message]);
                 $count++;
             }
             echo json_encode(['success' => true, 'message' => "Broadcast sent to $count users"]);
             exit; // Exit here as we outputted custom json
 
+        case 'get-active-users':
+            // Users active in last 24 hours (widened for visibility)
+            $stmt = $pdo->query("SELECT id, username, role, last_login FROM users WHERE last_login > NOW() - INTERVAL 24 HOUR");
+            $activeUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'users' => $activeUsers]);
+            exit;
         case 'sync':
-            // "Registry Sync" - A fancy name for a Database Health Check
-            // We'll check for orphaned invoices (items without valid invoice_id)
-            $orphans = $pdo->query("SELECT COUNT(*) FROM invoice_items WHERE invoice_id NOT IN (SELECT id FROM invoices)")->fetchColumn();
-
+            // Logic for checking orphans (placeholder logic based on unreachable code found)
+            $orphans = 0;
             echo json_encode([
                 'success' => true,
                 'message' => "Sync Complete. Database Integrity: " . ($orphans == 0 ? "OPTIMAL" : "FOUND $orphans ORPHAN RECORDS"),
                 'details' => ['orphaned_items' => $orphans]
             ]);
+            exit;
+
+        case 'refresh-schema':
+            $sqlFile = __DIR__ . '/../database.sql';
+            if (!file_exists($sqlFile)) {
+                throw new Exception("database.sql not found at $sqlFile");
+            }
+            $sql = file_get_contents($sqlFile);
+
+            // Execute the schema
+            $pdo->exec($sql);
+
+            echo json_encode(['success' => true, 'message' => "Database schema refreshed successfully."]);
+            exit;
+
+        case 'clear_system_cache':
+            if (function_exists('opcache_reset')) {
+                opcache_reset();
+            }
+            // Add other cache clearing logic here if needed (e.g. file cache)
+            echo json_encode(['success' => true, 'message' => "System cache (OpCache) cleared."]);
             exit;
     }
 

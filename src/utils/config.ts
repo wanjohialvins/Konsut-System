@@ -17,6 +17,8 @@ export const DEFAULT_COMPANY = {
     logoPath: "/src/assets/logo.jpg",
 };
 
+export const DEFAULT_CURRENCY_RATE = 130;
+
 export const DEFAULT_INVOICE_SETTINGS = {
     numberFormat: "comma",
     dateFormat: "DD/MM/YYYY",
@@ -28,6 +30,8 @@ export const DEFAULT_INVOICE_SETTINGS = {
     includeClientPIN: true,
     includePaymentDetails: true,
     includeCompanyDetails: true,
+    includeClientResponsibilities: true,
+    includeSignature: true,
     includeTerms: true,
     includeWatermark: true,
     includeBarcode: true,
@@ -35,7 +39,7 @@ export const DEFAULT_INVOICE_SETTINGS = {
     includeFooter: true,
     defaultStatus: "Pending",
     currency: "Ksh",
-    currencyRate: 130,
+    currencyRate: DEFAULT_CURRENCY_RATE,
     taxRate: 0.16,
     includeTax: true,
     pageOrientation: "portrait",

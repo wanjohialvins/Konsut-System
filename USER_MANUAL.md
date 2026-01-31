@@ -1,6 +1,6 @@
 # KONSUT System - Professional User Manual
 
-**Version 2.1.0** | **Last Updated**: January 2026
+**Version 2.3.0** | **Last Updated**: January 31, 2026
 
 Welcome to the KONSUT System - your comprehensive business management platform. This manual provides complete guidance for all user roles, from basic operations to advanced administration.
 
@@ -120,12 +120,17 @@ Your dashboard provides a real-time snapshot of business operations.
 
 - **Search**: Filter by client name, invoice ID, or status
 - **Status Update**: Mark as Paid/Pending/Overdue
+- **Quick Edit** (New in v2.3): Click edit icon to modify documents inline without leaving the list view
+  - Edit customer details
+  - Modify line items
+  - Update status
+  - Changes save instantly to cloud
 - **Actions**:
   - View details
   - Download PDF
-  - Edit (if permitted)
+  - Edit inline (Quick Edit modal)
   - Delete (Admin only)
-  - Duplicate
+  - Convert between document types
 
 ### PDF Features
 Generated PDFs include:
@@ -221,27 +226,36 @@ View for each client:
 
 **Location**: Analytics page
 
+### Date Range Filtering (Enhanced v2.3)
+- **7 Days**: Week-over-week performance
+- **30 Days**: Monthly trends (default)
+- **90 Days**: Quarterly analysis
+- **Annual**: Year-over-year comparison
+- Data refreshes automatically when changing ranges
+
 ### Available Reports
 
 #### Revenue Analysis
 - **Trends**: Line charts showing revenue over time
-- **Growth**: Month-over-month comparisons
-- **Forecasting**: Predicted revenue based on trends
+- **Growth**: Period-over-period comparisons with percentage change
+- **Forecasting**: AI-powered revenue predictions
+- **Financial Pulse**: Real-time market velocity indicators
 
 #### Category Breakdown
 - **Sales by Category**: Products vs Services vs Mobilization
-- **Top Products**: Best-selling items
+- **Category Liquidity**: Interactive pie chart with hover details
 - **Stock Value**: Inventory valuation by category
 
 #### Client Insights
-- **Top Customers**: Highest revenue contributors
+- **Top Customers**: Highest revenue contributors (Top 10)
 - **Client Lifetime Value**: Total spending per client
 - **Purchase Frequency**: Transaction patterns
+- **Last Engagement**: Most recent order dates
 
 #### Payment Status
-- **Paid vs Pending**: Visual distribution
+- **Status Distribution Matrix**: Visual breakdown of Paid/Pending/Overdue
+- **Collection Efficiency**: Payment rate percentage with progress bar
 - **Overdue Tracking**: Late payment monitoring
-- **Collection Efficiency**: Payment rate percentage
 
 ### Exporting Data
 - Click **Export CSV** on any report

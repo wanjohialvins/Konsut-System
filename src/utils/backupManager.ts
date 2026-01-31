@@ -99,7 +99,7 @@ export const exportBackup = (): void => {
         const backup: BackupData = {
             version: '1.0',
             timestamp: new Date().toISOString(),
-            appName: 'KONSUT Invoice System',
+            appName: 'Konsut System',
             data,
             metadata: {
                 invoiceCount: invoices.length,
@@ -135,7 +135,7 @@ const validateBackup = (backup: unknown): backup is BackupData => {
     if (!backup || typeof backup !== 'object') return false;
     const b = backup as Record<string, any>;
     if (!b.version || !b.timestamp || !b.data) return false;
-    if (b.appName !== 'KONSUT Invoice System') {
+    if (b.appName !== 'Konsut System') {
         console.warn('Backup is from a different application');
     }
     return true;

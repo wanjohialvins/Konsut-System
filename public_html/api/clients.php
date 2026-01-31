@@ -8,8 +8,32 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         requirePermission('view_clients');
-        $stmt = $pdo->query("SELECT * FROM clients WHERE deleted_at IS NULL ORDER BY name ASC");
-        echo json_encode($stmt->fetchAll());
+        $query = "
+            SELECT 
+                c.*,
+                COUNT(CASE WHEN d.type = 'invoice' THEN 1 END) as totalInvoices,
+                SUM(CASE WHEN d.type = 'invoice' AND d.status != 'cancelled' THEN d.grandTotal ELSE 0 END) as totalRevenue,
+                MAX(d.issuedDate) as lastActive,
+                SUM(CASE WHEN d.type = 'invoice' AND LOWER(d.status) = 'pending' THEN 1 ELSE 0 END) as pendingCount,
+                SUM(CASE WHEN d.type = 'invoice' AND LOWER(d.status) = 'overdue' THEN 1 ELSE 0 END) as overdueCount
+            FROM clients c
+            LEFT JOIN documents d ON c.id = d.customer_id AND d.deleted_at IS NULL
+            WHERE c.deleted_at IS NULL
+            GROUP BY c.id
+            ORDER BY c.name ASC
+        ";
+        $stmt = $pdo->query($query);
+        $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Cast numeric strings to appropriate types
+        foreach ($clients as &$client) {
+            $client['totalInvoices'] = (int) $client['totalInvoices'];
+            $client['totalRevenue'] = (float) $client['totalRevenue'];
+            $client['pendingCount'] = (int) $client['pendingCount'];
+            $client['overdueCount'] = (int) $client['overdueCount'];
+        }
+
+        sendResponse($clients);
         break;
 
     case 'POST':
@@ -24,7 +48,7 @@ switch ($method) {
             $data['address'] ?? '',
             $data['kraPin'] ?? ''
         ]);
-        echo json_encode(['success' => true]);
+        sendResponse(['success' => true]);
         break;
 
     case 'PUT':
@@ -39,7 +63,7 @@ switch ($method) {
             $data['kraPin'] ?? '',
             $data['id']
         ]);
-        echo json_encode(['success' => true]);
+        sendResponse(['success' => true]);
         break;
 
     case 'DELETE':
@@ -48,6 +72,6 @@ switch ($method) {
         // Soft Delete
         $stmt = $pdo->prepare("UPDATE clients SET deleted_at = NOW() WHERE id = ?");
         $stmt->execute([$id]);
-        echo json_encode(['success' => true]);
+        sendResponse(['success' => true]);
         break;
 }

@@ -1,6 +1,6 @@
 # KONSUT System - Enterprise Business Management Platform
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)
 ![License](https://img.shields.io/badge/license-Proprietary-red.svg)
 ![Status](https://img.shields.io/badge/status-Production-green.svg)
 
@@ -12,10 +12,11 @@ A professional-grade, full-stack business management system built with React 19,
 
 ### 📄 Document Management
 - **Multi-Format Invoicing**: Create Quotations, Proforma Invoices, and Tax Invoices
+- **Inline Quick Edit**: Edit documents directly from the list view with a modern modal interface (New in v2.3)
 - **Professional PDF Generation**: Export documents with company branding, QR codes, and watermarks
 - **Smart Conversion**: Convert quotations to invoices with preserved numbering
 - **Auto-Save Drafts**: Never lose work with automatic local and cloud persistence
-- **Status Tracking**: Monitor paid, pending, and overdue invoices in real-time
+- **Sticky Editor**: Modern, split-pane interface with real-time sticky summary
 
 ### 📦 Inventory Control
 - **Multi-Category System**: Products, Services, and Mobilization equipment
@@ -31,12 +32,13 @@ A professional-grade, full-stack business management system built with React 19,
 - **Advanced Search**: Filter by name, phone, email, or PIN
 - **Export Capabilities**: CSV export with complete statistics
 
-### 📊 Analytics & Reporting
-- **Real-Time Dashboard**: KPIs, revenue trends, and status breakdowns
-- **Visual Analytics**: Line charts, bar graphs, and pie charts powered by Recharts
-- **Category Analysis**: Sales breakdown by product type
-- **Top Performers**: Identify best customers and products
-- **Data Export**: Download analytics data as CSV
+### 📊 Analytics & Reporting (Enhanced v2.3)
+- **Financial Pulse AI**: Real-time intelligence and growth projections
+- **Dynamic Date Filtering**: 7-day, 30-day, 90-day, and annual views with live data refresh
+- **Glassmorphic UI**: Premium, modern interface with translucent elements
+- **Visual Analytics**: Gradient-enhanced charts for revenue and status
+- **Category Comparison**: Interactive liquidity breakdown
+- **Live Ledger**: Searchable financial transaction history
 
 ### 🔐 Enterprise Security & Access Control
 
@@ -182,10 +184,12 @@ When an admin updates a user's role or permissions:
 3. The UI updates instantly to show/hide restricted features
 
 ### Database Schema Highlights
+- **Consolidated Schema**: All table definitions in single `database.sql` file for easy deployment
 - **Users Table**: Stores roles as `VARCHAR(50)` to support all 8 role types
 - **Permissions**: JSON array of allowed routes per user
 - **Activity Tracking**: `last_active` timestamp updated on every request
 - **Invoice Items**: Separate table for cloud sync compatibility
+- **Document Vault**: Encrypted storage with user tracking and initialization vectors
 
 ### PDF Generation
 - Company logo and branding
@@ -264,6 +268,6 @@ Proprietary software © 2024-2025 KONSUT Ltd. All rights reserved.
 
 ---
 
-**Version**: 2.1.0  
-**Last Updated**: January 2026  
+**Version**: 2.3.0  
+**Last Updated**: January 31, 2026  
 **Maintained by**: KONSUT Development Team
