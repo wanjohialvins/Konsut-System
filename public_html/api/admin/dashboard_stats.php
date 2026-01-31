@@ -81,24 +81,39 @@ try {
         LIMIT 10");
     $auditLogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 7. Ticket Stats (For IT/Support)
-    $stmt = $pdo->query("SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
-        SUM(CASE WHEN status = 'urgent' THEN 1 ELSE 0 END) as urgent_count
-        FROM tickets");
-    $ticketStats = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 7. Ticket Stats (For IT/Support) - Handle if table doesn't exist
+    $ticketStats = ['total' => 0, 'open_count' => 0, 'urgent_count' => 0];
+    try {
+        $stmt = $pdo->query("SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
+            SUM(CASE WHEN status = 'urgent' THEN 1 ELSE 0 END) as urgent_count
+            FROM tickets");
+        $ticketStats = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Table doesn't exist yet, use defaults
+    }
 
-    // 8. Task Stats (For Manager/Staff)
-    $stmt = $pdo->query("SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count
-        FROM tasks");
-    $taskStats = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 8. Task Stats (For Manager/Staff) - Handle if table doesn't exist
+    $taskStats = ['total' => 0, 'pending_count' => 0];
+    try {
+        $stmt = $pdo->query("SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count
+            FROM tasks");
+        $taskStats = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Table doesn't exist yet, use defaults
+    }
 
-    // 9. Recent Memos (For All)
-    $stmt = $pdo->query("SELECT title, content, date, urgent FROM memos ORDER BY created_at DESC LIMIT 3");
-    $recentMemos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 9. Recent Memos (For All) - Handle if table doesn't exist
+    $recentMemos = [];
+    try {
+        $stmt = $pdo->query("SELECT title, content, date, urgent FROM memos ORDER BY created_at DESC LIMIT 3");
+        $recentMemos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Table doesn't exist yet, use empty array
+    }
 
     echo json_encode([
         'metrics' => [
