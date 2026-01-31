@@ -58,7 +58,10 @@ const NewInvoice: React.FC = () => {
   // --- Core State ---
   const [loading, setLoading] = useState<boolean>(false);
   const [activeCategory, setActiveCategory] = useState<Category>("products");
-  const [activeDocumentType, setActiveDocumentType] = useState<InvoiceType>("quotation");
+  const [activeDocumentType, setActiveDocumentType] = useState<InvoiceType>(() => {
+    const typeParam = searchParams.get("type");
+    return (typeParam as InvoiceType) || "quotation";
+  });
 
   const { previewUrl, previewTitle, previewInvoiceData, closePreview } = usePDFPreview();
 

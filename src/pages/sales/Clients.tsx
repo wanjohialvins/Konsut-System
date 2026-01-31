@@ -486,6 +486,9 @@ const Clients: React.FC = () => {
                         </td>
                         <td className="px-6 py-5 text-center" onClick={e => e.stopPropagation()}>
                           <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={e => { e.stopPropagation(); navigate(`/new-invoice?clientId=${client.id}&type=quotation`); }} className="p-2 text-emerald-500 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-900/10 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg transition-colors border border-emerald-200 dark:border-emerald-900/30" title="New Order (Quotation)">
+                              <FiPlus />
+                            </button>
                             <button onClick={e => { e.stopPropagation(); setSelectedClient(client); }} className="p-2 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 bg-gray-50 dark:bg-midnight-950 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors border border-gray-200 dark:border-midnight-800" title="View Details">
                               <FaEye />
                             </button>
