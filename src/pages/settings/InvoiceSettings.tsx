@@ -238,7 +238,7 @@ const InvoiceSettings = () => {
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 dark:border-midnight-800 pb-2 flex items-center gap-2">
                             <FiEye /> Document Workflow
                         </h3>
-                        <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">Changes made here affect all <span className="text-brand-600 font-bold">New Invoices</span> and Quotations instantly. Standardized VAT is automatically applied to all line items unless overridden manually.</p>
+                        <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">Changes made here affect all <span className="text-brand-600 font-bold">New Documents</span> instantly. Standardized VAT is automatically applied to all line items unless overridden manually.</p>
 
                         <button
                             type="submit"
