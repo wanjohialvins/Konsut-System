@@ -137,14 +137,25 @@ try {
         'ticketStats' => $ticketStats,
         'recentMemos' => $recentMemos,
         'databaseStatus' => 'Stable',
-        'categories' => $pdo->query("SELECT category as name, SUM(total) as total FROM document_items GROUP BY category")->fetchAll(PDO::FETCH_ASSOC),
-        'topCustomers' => $pdo->query("SELECT c.name, SUM(d.grandTotal) as total, COUNT(d.id) as count, MAX(d.issuedDate) as lastOrder 
+        'databaseStatus' => 'Stable',
+        'categories' => (function () use ($pdo) {
+            try {
+                return $pdo->query("SELECT category as name, SUM(total) as total FROM document_items GROUP BY category")->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                return []; }
+        })(),
+        'topCustomers' => (function () use ($pdo) {
+            try {
+                return $pdo->query("SELECT c.name, SUM(d.grandTotal) as total, COUNT(d.id) as count, MAX(d.issuedDate) as lastOrder 
                                       FROM documents d 
                                       JOIN clients c ON d.customer_id = c.id 
                                       WHERE d.type = 'invoice' AND d.deleted_at IS NULL 
                                       GROUP BY d.customer_id 
                                       ORDER BY total DESC 
-                                      LIMIT 10")->fetchAll(PDO::FETCH_ASSOC)
+                                      LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                return []; }
+        })()
     ]);
 
 } catch (Exception $e) {
