@@ -16,6 +16,7 @@ const getBaseUrl = () => {
 };
 
 export const API_BASE_URL = getBaseUrl();
+// Re-triggering deployment with correct domain settings
 
 
 const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise<T> => {
