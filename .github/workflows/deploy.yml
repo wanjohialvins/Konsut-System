@@ -27,7 +27,7 @@ jobs:
       - name: 🏗️ Build Frontend
         run: npm run build
 
-      - name: 📂 Deploy Frontend (dist → public_html)
+      - name: 📂 Deploy Frontend (dist → konsut.system.co.ke/eragon)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -36,7 +36,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./dist/
-          server-dir: ./public_html/
+          server-dir: ./konsut.system.co.ke/eragon/
           exclude: |
             **/.git*
             **/.git*/**
@@ -53,7 +53,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./public_html/api/
-          server-dir: ./public_html/api/
+          server-dir: ./konsut.system.co.ke/eragon/api/
           exclude: |
             **/config.production.php
             **/debug_*.txt
@@ -68,7 +68,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: ./public_html/
+          server-dir: ./konsut.system.co.ke/eragon/
           exclude: |
             **/*
             !.htaccess
