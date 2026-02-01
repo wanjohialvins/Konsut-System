@@ -29,7 +29,7 @@ class ErrorBoundary extends Component<Props, State> {
 
         // Send to Backend
         try {
-            fetch('http://localhost/api/admin/error_logger.php', {
+            fetch('/api/admin/error_logger.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
