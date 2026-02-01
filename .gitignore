@@ -68,6 +68,7 @@ Thumbs.db
 
 # Local backups and temporary data
 /backend/backups/
+*.sql
 *.sql.gz
 *.zip
 *.rar
