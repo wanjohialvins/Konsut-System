@@ -66,12 +66,30 @@ Thumbs.db
 /backend/make_pass.php
 /backend/populate_settings.php
 
-# Local backups and temporary data
+# Production configuration (CRITICAL - NEVER COMMIT)
+**/config.production.php
+config.production.php
+/public_html/api/config.production.php
+
+# Database files and backups (CRITICAL - NEVER COMMIT)
 /backend/backups/
 *.sql
 *.sql.gz
 *.zip
 *.rar
+*.dump
+*.backup
+
+# Credentials and secrets (CRITICAL - NEVER COMMIT)
+.env
+.env.*
+!.env.example
+credentials.json
+secrets.json
+*.key
+*.pem
+*.p12
+*.pfx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
