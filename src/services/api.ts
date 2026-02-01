@@ -5,10 +5,14 @@ import { toCamelCase, normalizeInvoice } from "../utils/formatters";
 
 const getBaseUrl = () => {
     const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
 
-    // Default to /public_html/api on the current host
-    return `${protocol}//${hostname}/public_html/api`;
+    // Local development (using Vite proxy or direct PHP serve)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost/eragon/api'; // Or whatever your local PHP path is
+    }
+
+    // Production: API is relative to the root
+    return '/api';
 };
 
 export const API_BASE_URL = getBaseUrl();
