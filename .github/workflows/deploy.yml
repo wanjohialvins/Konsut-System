@@ -25,9 +25,11 @@ jobs:
         run: npm ci
         
       - name: 🏗️ Build Frontend
-        run: npm run build
+        run: |
+          npm run build
+          cp .htaccess dist/
 
-      - name: 📂 Deploy Frontend (dist → Root)
+      - name: 📂 Deploy Frontend (dist + .htaccess → Root)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -58,17 +60,3 @@ jobs:
             **/config.production.php
             **/debug_*.txt
             **/*.log
-            
-      - name: 📂 Deploy .htaccess
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          local-dir: ./
-          server-dir: /
-          exclude: |
-            **/*
-            !.htaccess
