@@ -36,7 +36,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./dist/
-          server-dir: ./
+          server-dir: /
           exclude: |
             **/.git*
             **/.git*/**
@@ -53,7 +53,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./public_html/api/
-          server-dir: ./api/
+          server-dir: /api/
           exclude: |
             **/config.production.php
             **/debug_*.txt
@@ -68,7 +68,7 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: ./
+          server-dir: /
           exclude: |
             **/*
             !.htaccess
