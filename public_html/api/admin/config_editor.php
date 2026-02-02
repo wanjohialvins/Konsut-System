@@ -10,8 +10,8 @@ if ($method === 'GET') {
     $config = [];
 
     // Regex to find define('KEY', 'VALUE');
-    // Note: This is simple and assumes standard formatting.
-    preg_match_all("/define\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\);/", $content, $matches);
+    // Regex to find define('KEY', 'VALUE'); - Now ignores commented out lines
+    preg_match_all("/^(?!\s*[\/\/|#])\s*define\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\);/m", $content, $matches);
 
     foreach ($matches[1] as $index => $key) {
         // Filter out sensitive DB creds if you want, or show them.

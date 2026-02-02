@@ -9,16 +9,6 @@ ob_start();
 define('DEBUG_MODE', false);
 
 // Database Configuration
-// defined('DB_HOST') or define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-// defined('DB_NAME') or define('DB_NAME', getenv('DB_NAME') ?: 'invoice_system');
-// defined('DB_USER') or define('DB_USER', getenv('DB_USER') ?: 'root');
-// defined('DB_PASS') or define('DB_PASS', getenv('DB_PASS') ?: '');
-
-// ALLOWING LOCAL OVERRIDES (Create a config.production.php file that is .gitignored if needed)
-if (file_exists(__DIR__ . '/config.production.php')) {
-    require_once __DIR__ . '/config.production.php';
-}
-
 // Fallback Defaults (if not set in production config)
 if (!defined('DB_HOST'))
     define('DB_HOST', 'localhost');
@@ -105,11 +95,11 @@ function getDbConnection()
 
     try {
         $pdo = new PDO($dsn, $user, $pass, $options);
-        // Force MySQL session to UTC for consistent 'last_active' tracking
-        // $pdo->exec("SET time_zone = '+00:00'");
         return $pdo;
     } catch (\PDOException $e) {
-        // Since we already sent JSON headers, this error will be correctly formatted
+        // Log the actual error for the developer (essential for cPanel debugging)
+        error_log("Database Connection Failed: " . $e->getMessage());
+
         http_response_code(500);
         if (DEBUG_MODE) {
             die(json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]));
