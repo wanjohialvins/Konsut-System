@@ -35,10 +35,10 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./dist/
-          server-dir: ./
+          server-dir: /
           exclude: |
             **/.git*
             **/.git*/**
@@ -52,10 +52,10 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./public_html/api/
-          server-dir: ./api/
+          server-dir: /api/
           exclude: |
             **/config.production.php
             **/debug_*.txt
