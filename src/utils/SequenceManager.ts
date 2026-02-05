@@ -10,12 +10,8 @@ export class SequenceManager {
      */
     static async getNextNumber(type: 'invoice' | 'quotation' | 'proforma'): Promise<string> {
         const res = await api.sequences.next(type);
-        // Use backend formatted string OR frontend formatting if needed.
-        // Let's use Frontend formatting to respect DocumentEngine logic if complex.
-        // But DocumentEngine might need raw number.
-        // Assume api returns { number: string, value: number }
-        // If DocumentEngine needs number:
-        return DocumentEngine.formatDocumentNumber(type, res.value);
+        // Use backend formatted string if available, otherwise fallback to frontend logic
+        return res.number || DocumentEngine.formatDocumentNumber(type, res.value);
     }
 
     /**
@@ -24,6 +20,6 @@ export class SequenceManager {
      */
     static async peekNextNumber(type: 'invoice' | 'quotation' | 'proforma'): Promise<string> {
         const res = await api.sequences.peek(type);
-        return DocumentEngine.formatDocumentNumber(type, res.value);
+        return res.number || DocumentEngine.formatDocumentNumber(type, res.value);
     }
 }

@@ -19,6 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             unset($user['password']);
 
+            // Cast booleans for JSON
+            $user['force_password_change'] = (int) ($user['force_password_change'] ?? 0);
+
             $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?")->execute([$user['id']]);
 
             $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';

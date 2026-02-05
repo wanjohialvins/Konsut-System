@@ -96,30 +96,13 @@ try {
 
 function formatDocumentNumber($type, $num)
 {
-    // Format: INV-001 or QT-001 or PRO-001 (Daily-reset based?)
-    // SequenceManager.ts logic: DocumentEngine.formatDocumentNumber(type, num)
-    // We don't have DocumentEngine here. We need to replicate formatting logic or just return raw number?
-    // Frontend expects formatted string? "INV-005".
-    // Let's replicate simple formatting or check DocumentEngine logic.
-    // Assuming Standard: INV-001, QUO-001, PRO-001
-    // Actually, let's keep it simple: Return the NUMBER, and let frontend format it?
-    // But existing `SequenceManager.getNextNumber` returns string.
-    // If I move logic to backend, backend should ideally return final string OR frontend formats.
-    // If I return JSON { number: "INV-001", raw: 1 }, frontend can choose.
+    // Consistency: Matches frontend DocumentEngine.ts logic
+    // Format: [PREFIX]-[MMDD]-[XX]
+    $prefix = $type === 'invoice' ? 'INV' : ($type === 'quotation' ? 'QUO' : 'PRO');
 
-    // I will guess formatting for now based on typical types.
-    $prefix = '';
-    switch ($type) {
-        case 'invoice':
-            $prefix = 'INV-';
-            break;
-        case 'quotation':
-            $prefix = 'QT-';
-            break;
-        case 'proforma':
-            $prefix = 'PF-';
-            break; // Check actual prefix
-    }
-    return $prefix . str_pad($num, 3, '0', STR_PAD_LEFT);
+    $monthDay = date('md'); // e.g. 0205
+    $seqStr = str_pad($num, 2, '0', STR_PAD_LEFT);
+
+    return "{$prefix}-{$monthDay}-{$seqStr}";
 }
 ?>

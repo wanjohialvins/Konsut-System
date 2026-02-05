@@ -10,16 +10,24 @@ interface UserAvatarProps {
 }
 
 const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 36, className = "" }) => {
-    // 1. Check for custom user icon (if implemented in future, e.g. user.avatarUrl)
-    // For now, we rely on role-based icons
+    // 1. Check for custom user icon
+    if (user?.avatarUrl) {
+        return (
+            <img
+                src={user.avatarUrl}
+                alt={user.username}
+                className={`rounded-full object-cover border border-gray-200 dark:border-midnight-700 ${className}`}
+                style={{ width: size, height: size }}
+            />
+        );
+    }
 
-    // 2. Get Role Definition
+    // 2. Fallback: Role-based icons
     const roleKey = user?.role || 'viewer';
     const roleDef = ROLE_DEFINITIONS[roleKey] || ROLE_DEFINITIONS['viewer'];
     const Icon = roleDef.icon || FiUser;
 
     // 3. Get Color
-    // Use the colorClass from definition, or fallback
     const colorClass = roleDef.colorClass;
 
     return (

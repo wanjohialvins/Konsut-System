@@ -88,6 +88,7 @@ const Clients: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
 
+  const [sort, setSort] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
   const { previewUrl, previewTitle, previewPDF, closePreview } = usePDFPreview();
 
   // Form State
@@ -337,13 +338,32 @@ const Clients: React.FC = () => {
 
   const filteredClients = useMemo(() => {
     const term = searchTerm.toLowerCase();
-    return clients.filter(c =>
+    let result = clients.filter(c =>
       c.name.toLowerCase().includes(term) ||
       c.email.toLowerCase().includes(term) ||
       c.company?.toLowerCase().includes(term) ||
       c.phone.includes(term)
     );
-  }, [clients, searchTerm]);
+
+    result.sort((a, b) => {
+      let valA: any = a[sort.key as keyof Client] || '';
+      let valB: any = b[sort.key as keyof Client] || '';
+
+      if (sort.key === 'revenue') {
+        valA = a.totalRevenue || 0;
+        valB = b.totalRevenue || 0;
+      } else if (sort.key === 'outstanding') {
+        valA = (a.overdueCount || 0) + (a.pendingCount || 0); // Using counts as proxy if balance not in types
+        valB = (b.overdueCount || 0) + (b.pendingCount || 0);
+      }
+
+      if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [clients, searchTerm, sort]);
 
   /* -------------------------------------------------------------------------- */
   /*                                Render                                      */
@@ -406,8 +426,13 @@ const Clients: React.FC = () => {
             { key: 'revenue', label: 'Total Revenue' },
             { key: 'outstanding', label: 'Outstanding Balance' }
           ]}
-          // We'll hook these up properly in a future refactor, ensuring UI consistency first.
-          activeSort={{ key: 'name', direction: 'asc' }}
+          activeSort={sort}
+          onSortChange={(key) => {
+            setSort(prev => ({
+              key,
+              direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+            }));
+          }}
           onExport={handleExport}
           actions={
             <div className="flex flex-wrap items-center gap-2">

@@ -83,6 +83,7 @@ export interface User {
   email?: string;
   role: UserRole | string;
   isActive: number | boolean;
+  avatarUrl?: string;
   lastLogin?: string;
   createdAt?: string;
   permissions?: string[] | string;

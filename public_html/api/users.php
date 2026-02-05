@@ -177,6 +177,11 @@ switch ($method) {
             $params[] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
+        if (isset($data['force_password_change'])) {
+            $fields[] = "force_password_change=?";
+            $params[] = (int) $data['force_password_change'];
+        }
+
         // Role/Permissions can ONLY be updated by manager_users (action != update_self)
         if ($action !== 'update_self') {
             if (isset($data['role'])) {

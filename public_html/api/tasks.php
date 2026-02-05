@@ -20,7 +20,10 @@ switch ($method) {
             // Since 'assignee' is a string name, we need the username.
 
             if (in_array($userRole, ['admin', 'manager', 'ceo'])) {
-                $stmt = $pdo->query("SELECT * FROM tasks ORDER BY created_at DESC");
+                $stmt = $pdo->query("SELECT t.*, u.username as creator_name 
+                                    FROM tasks t 
+                                    LEFT JOIN users u ON t.created_by = u.id 
+                                    ORDER BY t.created_at DESC");
                 echo json_encode($stmt->fetchAll());
             } else {
                 // Fetch username for this user
@@ -28,11 +31,13 @@ switch ($method) {
                 $uStmt->execute([$userId]);
                 $uName = $uStmt->fetchColumn();
 
-                // Filter: Assignee matches username OR open tasks (unassigned)? Maybe not.
-                // Let's filter by Assignee Name
-                // Note: This relies on assignee name matching username exactly.
-                $stmt = $pdo->prepare("SELECT * FROM tasks WHERE assignee = ? OR assignee = '' ORDER BY due_date ASC");
-                $stmt->execute([$uName]);
+                // Filter: Assignee matches username OR created by this user
+                $stmt = $pdo->prepare("SELECT t.*, u.username as creator_name 
+                                      FROM tasks t 
+                                      LEFT JOIN users u ON t.created_by = u.id 
+                                      WHERE t.assignee = ? OR t.assignee = '' OR t.created_by = ? 
+                                      ORDER BY t.due_date ASC");
+                $stmt->execute([$uName, $userId]);
                 echo json_encode($stmt->fetchAll());
             }
         } catch (PDOException $e) {
@@ -45,14 +50,16 @@ switch ($method) {
         requirePermission('manage_tasks');
         $data = json_decode(file_get_contents('php://input'), true);
         try {
-            $stmt = $pdo->prepare("INSERT INTO tasks (id, title, priority, status, due_date, assignee) VALUES (?, ?, ?, ?, ?, ?)");
+            $userId = getRequestHeader('X-User-Id');
+            $stmt = $pdo->prepare("INSERT INTO tasks (id, title, priority, status, due_date, assignee, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $data['id'],
                 $data['title'],
                 $data['priority'] ?? 'medium',
                 $data['status'] ?? 'pending',
                 $data['due_date'],
-                $data['assignee'] ?? ''
+                $data['assignee'] ?? '',
+                $userId
             ]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {

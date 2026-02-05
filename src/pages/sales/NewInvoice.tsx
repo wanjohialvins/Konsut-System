@@ -554,8 +554,7 @@ const NewInvoice: React.FC = () => {
 
     try {
       // 1. Prepare Data Object
-      // Use existing ID if available, otherwise generate ONE time (and save it??)
-      // Ideally, we should save before generating PDF to lock the number.
+      // Use existing ID if available, otherwise generate ONE time
       let finalId = editId;
       let isNewId = false;
 

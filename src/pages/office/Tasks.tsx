@@ -14,6 +14,7 @@ interface Task {
     status: 'pending' | 'progress' | 'completed';
     due_date: string;
     assignee: string;
+    creator_name?: string;
 }
 
 const Tasks = () => {
@@ -151,12 +152,18 @@ const Tasks = () => {
                                         </button>
                                     )}
                                     <h4 className="font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-600 transition-colors pr-6">{task.title}</h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter">
+                                    <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
                                         <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>
                                         <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
                                             <FiClock size={10} /> {task.due_date}
                                         </span>
-                                        <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
+                                        {task.creator_name && (
+                                            <span className="px-2 py-1 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 rounded-lg flex items-center gap-1 border border-brand-100 dark:border-brand-900/30">
+                                                By: {task.creator_name}
+                                            </span>
+                                        )}
+                                        <div className="text-gray-300 mx-1">→</div>
+                                        <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
                                             <FiUser size={10} /> {task.assignee}
                                         </span>
                                     </div>
