@@ -9,7 +9,12 @@ ob_start();
 define('DEBUG_MODE', false);
 
 // Database Configuration
-// Fallback Defaults (if not set in production config)
+// 1. Try to load production config (if exists on server)
+if (file_exists(__DIR__ . '/config.production.php')) {
+    include_once __DIR__ . '/config.production.php';
+}
+
+// 2. Fallback Defaults (if not set in production config)
 if (!defined('DB_HOST'))
     define('DB_HOST', 'localhost');
 if (!defined('DB_NAME'))
