@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiSend, FiTag, FiFlag, FiLayers } from 'react-icons/fi';
+import { SmartInput, SmartTextarea } from "../../components/ui/SmartGuide";
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -52,13 +53,12 @@ const CreateTicket = () => {
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                         <FiTag /> Subject
                     </label>
-                    <input
-                        type="text"
+                    <SmartInput
                         placeholder="What's the issue about?"
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border-none rounded-2xl focus:ring-4 focus:ring-brand-500/10 outline-none transition-all font-medium text-slate-900 dark:text-white"
                         required
+                        context="ticket_subject"
                     />
                 </div>
 
@@ -98,13 +98,14 @@ const CreateTicket = () => {
 
                 <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Message</label>
-                    <textarea
+                    <SmartTextarea
                         rows={6}
                         placeholder="Provide as much detail as possible..."
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border-none rounded-2xl focus:ring-4 focus:ring-brand-500/10 outline-none transition-all font-medium text-slate-900 dark:text-white resize-none"
+                        className="resize-none"
                         required
+                        context="ticket_desc"
                     />
                 </div>
 

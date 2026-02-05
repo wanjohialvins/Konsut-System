@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiMessageSquare, FiPlus, FiStar, FiClock, FiTrash2 } from 'react-icons/fi';
+import { SmartTextarea } from "../../components/ui/SmartGuide";
 import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -184,12 +185,13 @@ const Memos = () => {
                                 onChange={e => setNewItem({ ...newItem, title: e.target.value })}
                                 required
                             />
-                            <textarea
+                            <SmartTextarea
                                 placeholder="Content..."
-                                className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none h-32"
+                                className="h-32"
                                 value={newItem.content}
                                 onChange={e => setNewItem({ ...newItem, content: e.target.value })}
                                 required
+                                context="memo_content"
                             />
                             <div className="flex items-center gap-2">
                                 <input

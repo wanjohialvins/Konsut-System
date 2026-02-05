@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiFolder, FiFile, FiUpload, FiDownload, FiTrash2, FiSearch, FiEye } from 'react-icons/fi';
+import { SmartInput } from "../../components/ui/SmartGuide";
 import { useModal } from "../../contexts/ModalContext";
 import { api, API_BASE_URL } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -143,12 +144,12 @@ const Documents = () => {
                 <div className="p-6 border-b border-gray-100 dark:border-midnight-800 flex items-center gap-4">
                     <div className="relative flex-1">
                         <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
+                        <SmartInput
                             placeholder="Search the vault..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
+                            className="bg-gray-50 dark:bg-midnight-950 px-12 focus:ring-2 focus:ring-indigo-500 font-medium"
+                            context="search_vault"
                         />
                     </div>
                 </div>

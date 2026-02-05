@@ -28,6 +28,7 @@ import {
   FaIdCard
 } from "react-icons/fa";
 import { FiPlus, FiDownload, FiUpload, FiSearch, FiMail, FiPhone } from "react-icons/fi";
+import { SmartInput } from "../../components/ui/SmartGuide";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -418,12 +419,13 @@ const Clients: React.FC = () => {
 
         {/* Search */}
         <div className="relative group animate-slide-up delay-300">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors text-lg" />
-          <input
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors text-lg z-10" />
+          <SmartInput
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by name, company, email..."
-            className="w-full bg-white dark:bg-midnight-900 border-none rounded-2xl py-5 pl-14 pr-6 shadow-xl shadow-gray-200/40 dark:shadow-none font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 transition-all placeholder-gray-400"
+            className="pl-14 pr-6 shadow-xl shadow-gray-200/40 dark:shadow-none placeholder-gray-400"
+            context="search_clients"
           />
         </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FiSearch, FiBook, FiMessageCircle, FiChevronRight, FiHelpCircle } from 'react-icons/fi';
+import { SmartInput } from "../../components/ui/SmartGuide";
 
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -48,11 +49,12 @@ const HelpCenter = () => {
                 <h1 className="text-5xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">How can we help?</h1>
                 <div className="relative max-w-2xl mx-auto">
                     <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-                    <input
+                    <SmartInput
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search for answers..."
-                        className="w-full pl-14 pr-6 py-5 rounded-[2rem] shadow-2xl shadow-indigo-100 dark:shadow-none bg-white dark:bg-midnight-900 border-2 border-transparent focus:border-indigo-500 text-lg font-medium outline-none transition-all dark:text-white"
+                        className="pl-14 pr-6 py-5 shadow-2xl shadow-indigo-100 dark:shadow-none bg-white dark:bg-midnight-900 border-2 border-transparent focus:border-indigo-500 text-lg font-medium outline-none transition-all dark:text-white"
+                        context="search_help"
                     />
                 </div>
             </div>

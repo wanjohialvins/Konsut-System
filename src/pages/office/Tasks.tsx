@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiSearch, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2, FiEdit2, FiCalendar, FiCheckSquare, FiUser } from 'react-icons/fi';
+import { SmartInput } from "../../components/ui/SmartGuide";
 import { useModal } from "../../contexts/ModalContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -175,12 +176,13 @@ const Tasks = () => {
                     <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl w-full max-w-md shadow-2xl">
                         <h2 className="text-xl font-black mb-6 dark:text-white">Create Task</h2>
                         <form onSubmit={handleAdd} className="space-y-4">
-                            <input
+                            <SmartInput
                                 placeholder="Task Title"
-                                className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-bold outline-none focus:ring-2 focus:ring-brand-500"
+                                className="font-bold"
                                 value={newItem.title}
                                 onChange={e => setNewItem({ ...newItem, title: e.target.value })}
                                 required
+                                context="task_title"
                             />
                             <div className="grid grid-cols-2 gap-4">
                                 <select

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiUsers, FiPlus, FiSearch, FiPhone, FiMail, FiMapPin, FiTrash2, FiEdit3, FiGlobe, FiTruck } from "react-icons/fi";
+import { SmartInput } from "../../components/ui/SmartGuide";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -91,11 +92,12 @@ const Suppliers = () => {
                 </div>
                 <div className="flex gap-3 items-center">
                     <div className="relative">
-                        <input
+                        <SmartInput
                             placeholder="Search suppliers..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="pl-4 pr-10 py-3 rounded-2xl border-none bg-white dark:bg-midnight-900 shadow-sm focus:ring-2 focus:ring-emerald-500 w-64"
+                            className="bg-white dark:bg-midnight-900 shadow-sm focus:ring-2 focus:ring-emerald-500 w-64"
+                            context="search_suppliers"
                         />
                     </div>
                     <button
