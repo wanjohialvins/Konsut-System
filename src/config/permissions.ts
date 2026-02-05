@@ -16,11 +16,6 @@ import {
 // Paths that are accessible to all authenticated users (unless explicitly blocked)
 // logic previously hardcoded in usePermissions.ts
 export const UNIVERSAL_PATHS = [
-    '/stock/inventory',
-    '/suppliers',
-    '/documents',
-    '/tasks',
-    '/memos',
     '/notifications',
     '/support'
 ];
