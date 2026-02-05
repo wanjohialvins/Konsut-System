@@ -9,8 +9,8 @@ export const usePermissions = () => {
 
         const role = (user.role || '').toLowerCase();
 
-        // 1. Global Admin/CEO Bypass
-        if (role === 'admin' || role === 'ceo') return true;
+        // 1. Global Admin Bypass (CEO now follows standard permissions)
+        if (role === 'admin') return true;
 
         // 2. Personal Settings (Always Allowed)
         if (path.startsWith('/settings/profile') || path.startsWith('/settings/preferences')) return true;
@@ -39,7 +39,7 @@ export const usePermissions = () => {
     const hasRole = (roles: string | string[]) => {
         if (!user) return false;
         const currentRole = (user.role || '').toLowerCase();
-        if (currentRole === 'admin' || currentRole === 'ceo') return true;
+        if (currentRole === 'admin') return true;
 
         const roleList = (Array.isArray(roles) ? roles : [roles]).map(r => r.toLowerCase());
         return roleList.includes(currentRole);

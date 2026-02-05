@@ -270,8 +270,8 @@ function checkPermission($action)
     }
 
     $r = strtolower($role);
-    // Allow 'admin' and 'ceo' to bypass permissions
-    if ($r === 'admin' || $r === 'ceo')
+    // Allow 'admin' to bypass permissions ('ceo' now follows standard permissions)
+    if ($r === 'admin')
         return true;
 
     $permissionMap = getPermissionRouteMap();
@@ -581,7 +581,55 @@ function getRolePresets()
 {
     return [
         'admin' => ['/'],
-        'ceo' => ['/'],
+        'ceo' => [
+            '/',
+            '/analytics',
+            'view_stock',
+            'manage_stock',
+            '/stock/inventory',
+            '/stock/add',
+            'view_orders',
+            'create_order',
+            'manage_invoices',
+            'delete_invoice',
+            '/invoices',
+            '/new-invoice',
+            'view_clients',
+            'manage_clients',
+            'delete_client',
+            '/clients',
+            'view_suppliers',
+            'manage_suppliers',
+            '/suppliers',
+            '/documents',
+            'manage_documents',
+            '/tasks',
+            'manage_tasks',
+            '/memos',
+            'manage_memos',
+            '/notifications',
+            'manage_notifications',
+            'view_users',
+            'manage_users',
+            '/users',
+            '/audit-logs',
+            '/system-logs',
+            '/accountability',
+            '/system/vitals',
+            '/system/data',
+            '/system/security',
+            '/system/broadcast',
+            '/settings/profile',
+            '/settings/company',
+            '/settings/invoice',
+            '/settings/preferences',
+            'view_settings',
+            'manage_settings',
+            '/support',
+            '/support/guide',
+            '/tickets',
+            '/tickets/new'
+        ],
         'manager' => [
             '/',
             '/analytics',
