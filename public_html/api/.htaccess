@@ -4,16 +4,15 @@
     RewriteEngine On
     
     # 1. Pass Authorization Header to PHP (CRITICAL for cPanel/Apache)
-    # Without this, $_SERVER['HTTP_AUTHORIZATION'] is often null
     RewriteCond %{HTTP:Authorization} ^(.+)$
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
 
-# 2. Block access to sensitive development/system files
-<FilesMatch "\.(md|sql|bak|log|txt|json)$">
+# 2. Prevent Directory Listing (Security)
+Options -Indexes
+
+# 3. Block access to explicitly dangerous files only
+<FilesMatch "\.(bak|log)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
-
-# 3. Prevent Directory Listing (Security)
-Options -Indexes
