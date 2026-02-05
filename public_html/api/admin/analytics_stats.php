@@ -2,6 +2,7 @@
 // backend/admin/analytics_stats.php
 require_once '../config.php';
 require_once '../auth.php';
+requirePermission('view_reports');
 
 $pdo = getDbConnection();
 

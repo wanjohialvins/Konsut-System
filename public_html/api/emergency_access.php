@@ -5,6 +5,13 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
+// SAFETY CHECK: Disable this file by default in production
+if (!defined('ALLOW_EMERGENCY_ACCESS') || ALLOW_EMERGENCY_ACCESS !== true) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Emergency access is disabled. Enable it in config.php if needed.']);
+    exit;
+}
+
 $pdo = getDbConnection();
 
 // Static credentials for the emergency admin

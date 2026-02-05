@@ -1,78 +1,107 @@
 <?php
-// backend/config.php
+/**
+ * Konsut System - Configuration Template
+ * Rename this file to config.php or config.production.php
+ */
+ob_start();
 
-// 1. Handle CORS immediately
+// =========================================================================
+//  ENVIRONMENT SETTINGS (Edit this section for Production)
+// =========================================================================
+
+// Set to false for Production
+define('DEBUG_MODE', false);
+
+// Database Configuration
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'your_database_name');
+define('DB_USER', 'your_database_user');
+define('DB_PASS', 'your_database_password');
+
+// Security Keys
+define('ENCRYPTION_KEY', 'your_32byte_hex_key'); // Generate with bin2hex(random_bytes(32))
+define('ALLOW_EMERGENCY_ACCESS', false);
+
+// =========================================================================
+//  CORE SETUP
+// =========================================================================
+
+// Core Security & Headers
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-User-Role, X-User-Permissions, X-User-Id");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-User-Role, X-User-Permissions, X-User-Id, X-Action");
+header("Access-Control-Expose-Headers: X-Action, X-User-Permissions");
 header("Content-Type: application/json; charset=UTF-8");
 
-// 2. Handle Preflight Requests
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// 3. Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'invoice_system');
-define('DB_USER', 'your_username');
-define('DB_PASS', 'your_password');
+date_default_timezone_set('UTC');
 
-// 4. Error Handling
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(E_ALL);
+// Error Handling
+if (DEBUG_MODE) {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+    if (!is_dir(__DIR__ . '/../logs')) {
+        @mkdir(__DIR__ . '/../logs', 0755, true);
+    }
+    ini_set('error_log', __DIR__ . '/../logs/php_errors.txt');
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+}
+
+// =========================================================================
+//  FUNCTIONS (Do not edit below this line unless you know what you are doing)
+// =========================================================================
 
 function getDbConnection()
 {
-    $host = 'localhost';
-    $db = 'invoice_system';
-    $user = 'your_username';
-    $pass = 'your_password';
-    $charset = 'utf8mb4';
-
-    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
     $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ];
-
     try {
-        return new PDO($dsn, $user, $pass, $options);
+        return new PDO($dsn, DB_USER, DB_PASS, $options);
     } catch (\PDOException $e) {
-        // Since we already sent JSON headers, this error will be correctly formatted
+        error_log("Database Connection Failed: " . $e->getMessage());
         http_response_code(500);
-        die(json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]));
+        die(json_encode(['error' => 'Database connection failed.']));
     }
 }
 
-/**
- * RBAC Helper: Check if current user has permission
- */
-function checkPermission($action)
+function getRequestHeader($name)
 {
-    $role = $_SERVER['HTTP_X_USER_ROLE'] ?? 'viewer';
-    $permissionsJson = $_SERVER['HTTP_X_USER_PERMISSIONS'] ?? '[]';
-    $permissions = json_decode($permissionsJson, true);
-
-    if ($role === 'admin')
-        return true;
-
-    return in_array($action, $permissions);
-}
-
-function requirePermission($action)
-{
-    if (!checkPermission($action)) {
-        http_response_code(403);
-        echo json_encode(['error' => "Forbidden: You don't have permission to $action"]);
-        exit;
+    $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+    if (isset($_SERVER[$key]))
+        return $_SERVER[$key];
+    if (strtolower($name) === 'authorization') {
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']))
+            return $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        if (isset($_SERVER['HTTP_AUTHORIZATION']))
+            return $_SERVER['HTTP_AUTHORIZATION'];
     }
+    return null;
 }
 
-// Start session last, as it's less critical for API than headers
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+function sendResponse($data, $code = 200)
+{
+    http_response_code($code);
+    echo json_encode($data);
+    exit;
 }
+
+function sendError($message, $code = 500)
+{
+    http_response_code($code);
+    echo json_encode(['error' => $message]);
+    exit;
+}
+
+// ... Additional core logic (initSession, checkPermission, etc.) should be 
+// included here from the live config.php during deployment.

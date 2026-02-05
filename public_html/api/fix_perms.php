@@ -5,12 +5,8 @@
  * causing "553 Permission denied" errors during FTP deployment.
  */
 
-// Basic security - you may want to delete this after use or add a password check
-define('AUTHORIZED', true);
-
-if (!AUTHORIZED) {
-    die("Unauthorized.");
-}
+require_once 'config.php';
+requirePermission('system_control');
 
 $paths = [
     __DIR__,
