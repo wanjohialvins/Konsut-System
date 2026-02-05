@@ -124,6 +124,13 @@ switch ($method) {
     case 'POST':
         requirePermission('manage_documents');
 
+        // Check for POST max size overflow (if $_FILES is empty but Content-Length > 0)
+        if (empty($_FILES) && empty($_POST) && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0) {
+            http_response_code(413); // Payload Too Large
+            echo json_encode(['error' => 'File too large. Maximum allowed size is ' . ini_get('post_max_size')]);
+            exit;
+        }
+
         if (!isset($_FILES['file'])) {
             http_response_code(400);
             echo json_encode(['error' => 'No file uploaded']);
@@ -138,10 +145,41 @@ switch ($method) {
         }
 
         $file = $_FILES['file'];
+
+        // Check for upload errors
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize',
+                UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE directive',
+                UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+                UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+                UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload',
+            ];
+            $msg = $uploadErrors[$file['error']] ?? 'Unknown upload error';
+            echo json_encode(['error' => $msg]);
+            exit;
+        }
+
         $uploadDir = '../uploads/';
 
-        if (!is_dir($uploadDir))
-            mkdir($uploadDir, 0755, true);
+        if (!is_dir($uploadDir)) {
+            if (!@mkdir($uploadDir, 0755, true)) {
+                $error = error_get_last();
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to create uploads directory: ' . ($error['message'] ?? 'Unknown error')]);
+                exit;
+            }
+        }
+
+        // Verify directory is writable
+        if (!is_writable($uploadDir)) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Uploads directory is not writable. Check folder permissions.']);
+            exit;
+        }
 
         // Security: Generated Name
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
