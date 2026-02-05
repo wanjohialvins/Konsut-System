@@ -56,8 +56,19 @@ if ($method === 'GET') {
     }
 } elseif ($method === 'POST') {
     requirePermission('manage_invoices');
-    $data = json_decode(file_get_contents('php://input'), true);
-    // file_put_contents('debug_invoice.txt', "POST Data: " . print_r($data, true) . "\n", FILE_APPEND);
+    $data = getJsonInput();
+
+    // specific validation for items
+    if (!empty($data['items']) && is_array($data['items'])) {
+        foreach ($data['items'] as $item) {
+            if (
+                (isset($item['quantity']) && $item['quantity'] < 0) ||
+                (isset($item['unitPrice']) && $item['unitPrice'] < 0)
+            ) {
+                sendError('Invalid item data: Quantity and Price cannot be negative.', 400);
+            }
+        }
+    }
 
     $pdo->beginTransaction();
     try {
@@ -108,7 +119,19 @@ if ($method === 'GET') {
     }
 } elseif ($method === 'PUT') {
     requirePermission('manage_invoices');
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = getJsonInput();
+
+    // specific validation for items
+    if (!empty($data['items']) && is_array($data['items'])) {
+        foreach ($data['items'] as $item) {
+            if (
+                (isset($item['quantity']) && $item['quantity'] < 0) ||
+                (isset($item['unitPrice']) && $item['unitPrice'] < 0)
+            ) {
+                sendError('Invalid item data: Quantity and Price cannot be negative.', 400);
+            }
+        }
+    }
     $pdo->beginTransaction();
     try {
         $clientStatus = ensureClientExists($pdo, $data['customer'] ?? []);

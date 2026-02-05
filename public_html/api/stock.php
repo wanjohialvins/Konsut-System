@@ -3,7 +3,7 @@
 require_once 'config.php';
 
 $pdo = getDbConnection();
-file_put_contents('debug_stock.txt', date('Y-m-d H:i:s') . " | ACCESSED\n", FILE_APPEND);
+// file_put_contents('debug_stock.txt', date('Y-m-d H:i:s') . " | ACCESSED\n", FILE_APPEND); // Removed for production
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
@@ -15,7 +15,7 @@ switch ($method) {
 
     case 'POST':
         requirePermission('manage_stock');
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonInput();
         try {
             $stmt = $pdo->prepare("INSERT INTO stock (id, name, description, category, unitPrice, unitPriceUsd, quantity) 
                                    VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -40,7 +40,7 @@ switch ($method) {
 
     case 'PUT':
         requirePermission('manage_stock');
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonInput();
         $stmt = $pdo->prepare("UPDATE stock SET name=?, description=?, category=?, unitPrice=?, unitPriceUsd=?, quantity=? WHERE id=?");
         $stmt->execute([
             $data['name'],
@@ -57,18 +57,11 @@ switch ($method) {
     case 'DELETE':
         requirePermission('manage_stock');
         $id = $_GET['id'] ?? '';
-        $all = isset($_GET['all']) && $_GET['all'] === 'true';
 
         try {
-            if ($all) {
-                // Bulk HARD Delete (Clear Database)
-                $stmt = $pdo->prepare("DELETE FROM stock");
-                $stmt->execute();
-            } else {
-                // Single Soft Delete (Keep history safely)
-                $stmt = $pdo->prepare("UPDATE stock SET deleted_at = NOW() WHERE id = ?");
-                $stmt->execute([$id]);
-            }
+            // Single Soft Delete (Keep history safely)
+            $stmt = $pdo->prepare("UPDATE stock SET deleted_at = NOW() WHERE id = ?");
+            $stmt->execute([$id]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             http_response_code(400);
