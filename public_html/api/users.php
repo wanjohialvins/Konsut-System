@@ -11,54 +11,47 @@ switch ($method) {
 
         // --- 1. Get Self ---
         if ($action === 'get_self') {
-            $userId = getRequestHeader('X-User-Id');
-            if (!$userId) {
+            $user = $GLOBALS['CURRENT_USER_SESSION'] ?? null;
+            if (!$user) {
                 http_response_code(401);
                 echo json_encode(['error' => 'Authentication required']);
                 exit;
             }
-            try {
-                // Try selecting with force_refresh
-                $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at, force_refresh FROM users WHERE id = ?");
-                $stmt->execute([$userId]);
-            } catch (PDOException $e) {
-                // Fallback if column missing
-                $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at FROM users WHERE id = ?");
-                $stmt->execute([$userId]);
-            }
-            $user = $stmt->fetch();
-            if ($user) {
-                // Check Force Logout Flag
-                if (!empty($user['force_refresh']) && $user['force_refresh'] == 1) {
-                    // Reset flag
-                    $pdo->prepare("UPDATE users SET force_refresh = 0 WHERE id = ?")->execute([$userId]);
 
-                    // Return specific 401 to trigger logout
-                    http_response_code(401);
-                    echo json_encode(['error' => 'Session expired (Admin action)', 'forceLogout' => true]);
-                    exit;
+            // Sync with DB for the most fresh flags (like force_refresh)
+            try {
+                $stmt = $pdo->prepare("SELECT id, username, email, role, permissions, last_login, last_active, created_at, force_refresh FROM users WHERE id = ?");
+                $stmt->execute([$user['id']]);
+                $freshUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($freshUser) {
+                    if (!empty($freshUser['force_refresh']) && $freshUser['force_refresh'] == 1) {
+                        $pdo->prepare("UPDATE users SET force_refresh = 0 WHERE id = ?")->execute([$user['id']]);
+                        http_response_code(401);
+                        echo json_encode(['error' => 'Session expired (Admin action)', 'forceLogout' => true]);
+                        exit;
+                    }
+                    echo json_encode($freshUser);
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'User not found']);
                 }
+            } catch (PDOException $e) {
+                // Return cached session if select fails
                 echo json_encode($user);
-            } else {
-                http_response_code(404);
-                echo json_encode(['error' => 'User not found']);
             }
             exit;
         }
 
         // --- 2. Get Assignable Users (Public for authenticated) ---
         if ($action === 'get_assignable') {
-            // Allows dropdown population for Tasks/Tickets
-            // Returns minimal data (id, username, role)
-            // Auth Check
-            $userId = getRequestHeader('X-User-Id');
-            if (!$userId) {
+            if (empty($GLOBALS['CURRENT_USER_SESSION'])) {
                 http_response_code(401);
                 die(json_encode(['error' => 'Authentication required']));
             }
 
             $stmt = $pdo->query("SELECT id, username, role FROM users ORDER BY username ASC");
-            echo json_encode($stmt->fetchAll());
+            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
             exit;
         }
 
@@ -129,16 +122,16 @@ switch ($method) {
 
         // Security logic: Users can update themselves WITHOUT manage_users permission
         if ($action === 'update_self') {
-            $userIdHeader = getRequestHeader('X-User-Id');
-            if (empty($userIdHeader)) {
+            $sessionUser = $GLOBALS['CURRENT_USER_SESSION'] ?? null;
+            if (!$sessionUser) {
                 http_response_code(401);
                 echo json_encode(['error' => 'Authentication required']);
                 exit;
             }
-            $id = $userIdHeader;
+            $id = $sessionUser['id'];
         } else {
             requirePermission('manage_users');
-            $id = $data['id'];
+            $id = $data['id'] ?? null;
         }
 
         if (empty($id)) {

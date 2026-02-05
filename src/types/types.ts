@@ -89,6 +89,7 @@ export interface User {
   permissions?: string[] | string;
   name?: string; // Optional for compatibility
   displayRole?: string; // Optional for compatibility
+  token?: string; // Phase F Secure Token
 }
 
 export type UserRole = 'admin' | 'manager' | 'staff' | 'storekeeper' | 'accountant' | 'ceo' | 'sales' | 'it' | 'viewer';

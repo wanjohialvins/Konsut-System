@@ -91,23 +91,27 @@ interface SmartTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaEl
     context?: string; // e.g., 'invoice_desc_service'
     label?: string;
     enableSmartGuide?: boolean;
+    ghostOffset?: string;
 }
 
 interface SmartInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     context?: string;
     label?: string;
     enableSmartGuide?: boolean;
+    ghostOffset?: string;
 }
 
 export const SmartTextarea: React.FC<SmartTextareaProps> = ({
     context = 'default',
     label,
     enableSmartGuide = true,
+    ghostOffset,
     className = "",
     value,
     onChange,
     onFocus,
     onBlur,
+    placeholder,
     ...props
 }) => {
     // ... existing implementation ...
@@ -153,11 +157,15 @@ export const SmartTextarea: React.FC<SmartTextareaProps> = ({
                     onChange={onChange}
                     onFocus={(e) => { setIsFocused(true); onFocus?.(e); }}
                     onBlur={(e) => { setIsFocused(false); onBlur?.(e); }}
+                    placeholder={enableSmartGuide && !value && !isFocused ? "" : placeholder}
                     className={`w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-medium focus:ring-4 focus:ring-brand-500/10 transition-all resize-none ${className}`}
                 />
 
                 {enableSmartGuide && !value && !isFocused && (
-                    <div className="absolute top-4 left-5 text-gray-400 pointer-events-none opacity-50 italic truncate max-w-[90%]">
+                    <div
+                        className="absolute top-4 left-5 text-gray-400 pointer-events-none opacity-50 italic truncate max-w-[90%]"
+                        style={ghostOffset ? { left: ghostOffset } : {}}
+                    >
                         e.g., "{suggestion}"
                     </div>
                 )}
@@ -192,11 +200,13 @@ export const SmartInput: React.FC<SmartInputProps> = ({
     context = 'default',
     label,
     enableSmartGuide = true,
+    ghostOffset,
     className = "",
     value,
     onChange,
     onFocus,
     onBlur,
+    placeholder,
     ...props
 }) => {
     const [suggestion, setSuggestion] = useState('');
@@ -234,11 +244,15 @@ export const SmartInput: React.FC<SmartInputProps> = ({
                     onChange={onChange}
                     onFocus={(e) => { setIsFocused(true); onFocus?.(e); }}
                     onBlur={(e) => { setIsFocused(false); onBlur?.(e); }}
+                    placeholder={enableSmartGuide && !value && !isFocused ? "" : placeholder}
                     className={`w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-medium focus:ring-4 focus:ring-brand-500/10 transition-all ${className}`}
                 />
 
                 {enableSmartGuide && !value && !isFocused && (
-                    <div className="absolute top-1/2 -translate-y-1/2 left-5 text-gray-400 pointer-events-none opacity-50 italic truncate max-w-[90%]">
+                    <div
+                        className="absolute top-1/2 -translate-y-1/2 left-5 text-gray-400 pointer-events-none opacity-50 italic truncate max-w-[90%]"
+                        style={ghostOffset ? { left: ghostOffset } : {}}
+                    >
                         e.g., "{suggestion}"
                     </div>
                 )}

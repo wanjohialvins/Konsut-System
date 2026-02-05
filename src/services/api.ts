@@ -26,9 +26,10 @@ const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise
     const headers = {
         'Content-Type': 'application/json',
         ...(user ? {
+            'Authorization': user.token ? `Bearer ${user.token}` : '',
             'X-User-Role': user.role,
             'X-User-Permissions': JSON.stringify(user.permissions || []),
-            'X-User-Id': user.id
+            'X-User-Id': user.id // Fallback for transition
         } : {}),
         ...options.headers,
     };
@@ -241,6 +242,7 @@ export const api = {
             const headers: any = {};
             if (token) {
                 const user = JSON.parse(token);
+                headers['Authorization'] = user.token ? `Bearer ${user.token}` : '';
                 headers['X-User-Id'] = user.id;
                 headers['X-User-Role'] = user.role;
             }

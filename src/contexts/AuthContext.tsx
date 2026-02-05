@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await api.auth.login({ username, password });
             if (response.success && response.user) {
-                const userData = normalizeUser(response.user);
+                const userData = normalizeUser({ ...response.user, token: response.token });
                 setUser(userData);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
                 return { success: true, forceReset: response.forceReset, message: response.message };
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await api.auth.recoveryLogin(phrase);
             if (response.success && response.user) {
-                const userData = normalizeUser(response.user);
+                const userData = normalizeUser({ ...response.user, token: response.token });
                 setUser(userData);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
                 return { success: true, forceReset: response.forceReset, ...response };

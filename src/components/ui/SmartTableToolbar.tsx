@@ -29,6 +29,7 @@ interface SmartTableToolbarProps {
     onExport?: () => void;
 
     actions?: React.ReactNode; // Extra buttons like "New Item"
+    ghostOffset?: string;
     className?: string;
 }
 
@@ -45,6 +46,7 @@ export const SmartTableToolbar: React.FC<SmartTableToolbarProps> = ({
     onFilterChange,
     onExport,
     actions,
+    ghostOffset,
     className = ""
 }) => {
     return (
@@ -58,6 +60,7 @@ export const SmartTableToolbar: React.FC<SmartTableToolbarProps> = ({
                     placeholder={searchPlaceholder}
                     className="pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-brand-500 bg-white dark:bg-midnight-900 border-gray-100 dark:border-midnight-800"
                     context={searchContext}
+                    ghostOffset={ghostOffset || "3rem"}
                 />
             </div>
 

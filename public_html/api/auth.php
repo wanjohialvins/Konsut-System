@@ -23,11 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user['force_password_change'] = (int) ($user['force_password_change'] ?? 0);
 
             $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?")->execute([$user['id']]);
-
             $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
             $pdo->prepare("INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)")->execute([$user['id'], $ip_address]);
 
-            sendResponse(['success' => true, 'user' => $user]);
+            // Generate Secure Token
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
+            $pdo->prepare("INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?, ?, ?)")->execute([$user['id'], $token, $expires]);
+
+            sendResponse(['success' => true, 'user' => $user, 'token' => $token]);
         } else {
             sendError('Invalid credentials', 401);
         }
@@ -51,7 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare("INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)")->execute([$user['id'], $ip_address]);
                 $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())")->execute([$user['id'], 'RECOVERY_LOGIN', "Used recovery phrase from IP $ip_address"]);
 
-                sendResponse(['success' => true, 'user' => $user, 'forceReset' => true]);
+                // Generate Secure Token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
+                $pdo->prepare("INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?, ?, ?)")->execute([$user['id'], $token, $expires]);
+
+                sendResponse(['success' => true, 'user' => $user, 'forceReset' => true, 'token' => $token]);
             }
         } else {
             sendError('Invalid recovery phrase', 401);

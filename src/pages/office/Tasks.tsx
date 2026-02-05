@@ -13,7 +13,8 @@ interface Task {
     priority: 'high' | 'medium' | 'low';
     status: 'pending' | 'progress' | 'completed';
     due_date: string;
-    assignee: string;
+    assignee_id?: number | null;
+    assignee_name?: string;
     creator_name?: string;
 }
 
@@ -28,8 +29,8 @@ const Tasks = () => {
 
     // Add Modal State
     const [isAddOpen, setIsAddOpen] = useState(false);
-    const [newItem, setNewItem] = useState<Partial<Task>>({
-        title: '', priority: 'medium', status: 'pending', due_date: '', assignee: ''
+    const [newItem, setNewItem] = useState<Partial<any>>({
+        title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: ''
     });
 
     const [users, setUsers] = useState<any[]>([]);
@@ -56,7 +57,7 @@ const Tasks = () => {
 
     const filteredTasks = tasks.filter(t =>
         t.title.toLowerCase().includes(search.toLowerCase()) ||
-        t.assignee.toLowerCase().includes(search.toLowerCase())
+        (t.assignee_name || '').toLowerCase().includes(search.toLowerCase())
     );
 
     const handleDelete = async (id: string) => {
@@ -87,16 +88,16 @@ const Tasks = () => {
         try {
             // Auto-assign self if restricted
             const canAssign = ['admin', 'manager', 'ceo'].includes(user?.role || '');
-            const finalAssignee = canAssign ? newItem.assignee : user?.username;
+            const finalAssigneeId = canAssign ? newItem.assigneeId : user?.id;
 
             await api.tasks.create({
                 ...newItem,
-                assignee: finalAssignee,
+                assigneeId: finalAssigneeId,
                 id: `TASK-${Date.now()}`
             });
             showToast('success', 'Task created');
             setIsAddOpen(false);
-            setNewItem({ title: '', priority: 'medium', status: 'pending', due_date: '', assignee: '' });
+            setNewItem({ title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: '' });
             loadTasks();
         } catch (e) {
             showToast('error', 'Failed to create task');
@@ -129,6 +130,7 @@ const Tasks = () => {
                 search={search}
                 onSearchChange={setSearch}
                 searchPlaceholder="Search tasks..."
+                ghostOffset="3rem"
                 actions={
                     <button
                         onClick={() => setIsAddOpen(true)}
@@ -155,7 +157,7 @@ const Tasks = () => {
                                     <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
                                         <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>
                                         <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
-                                            <FiClock size={10} /> {task.due_date}
+                                            <FiCalendar size={10} /> {task.due_date}
                                         </span>
                                         {task.creator_name && (
                                             <span className="px-2 py-1 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 rounded-lg flex items-center gap-1 border border-brand-100 dark:border-brand-900/30">
@@ -164,7 +166,7 @@ const Tasks = () => {
                                         )}
                                         <div className="text-gray-300 mx-1">→</div>
                                         <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
-                                            <FiUser size={10} /> {task.assignee}
+                                            <FiUser size={10} /> {task.assignee_name || 'Global'}
                                         </span>
                                     </div>
                                 </div>
@@ -221,13 +223,12 @@ const Tasks = () => {
                                 {(['admin', 'manager', 'ceo'].includes(user?.role || '')) ? (
                                     <select
                                         className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-medium outline-none focus:ring-2 focus:ring-brand-500"
-                                        value={newItem.assignee}
-                                        onChange={e => setNewItem({ ...newItem, assignee: e.target.value })}
-                                        required
+                                        value={newItem.assigneeId}
+                                        onChange={e => setNewItem({ ...newItem, assigneeId: e.target.value })}
                                     >
-                                        <option value="">Assign To...</option>
+                                        <option value="">Assign To (Global)...</option>
                                         {users.map(u => (
-                                            <option key={u.id} value={u.username}>{u.username}</option>
+                                            <option key={u.id} value={u.id}>{u.username}</option>
                                         ))}
                                     </select>
                                 ) : (

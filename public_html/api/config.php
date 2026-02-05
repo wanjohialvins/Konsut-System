@@ -151,44 +151,87 @@ function getRequestHeader($name)
 }
 
 /**
+ * Validate Bearer Token against DB
+ */
+function validateToken($token)
+{
+    if (!$token)
+        return null;
+    try {
+        $db = getDbConnection();
+        $stmt = $db->prepare("
+            SELECT u.* 
+            FROM users u 
+            JOIN auth_tokens t ON u.id = t.user_id 
+            WHERE t.token = ? AND t.expires_at > NOW()
+            LIMIT 1
+        ");
+        $stmt->execute([$token]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+/**
  * Centralized Session & Activity Tracker
  * Runs on every request to ensure 'last_active' is accurate
  * and detects permission changes for real-time frontend refresh.
  */
 function initSession()
 {
-    $userId = getRequestHeader('X-User-Id');
+    // 1. Try Token Auth (Secure)
+    $authHeader = getRequestHeader('Authorization');
+    $token = null;
+    if ($authHeader && preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        $token = $matches[1];
+    }
+
+    $userId = null;
+    $user = null;
+
+    if ($token) {
+        $user = validateToken($token);
+        if ($user) {
+            $userId = $user['id'];
+            $GLOBALS['CURRENT_USER_SESSION'] = $user;
+        }
+    }
+
+    // 2. Fallback to Legacy Headers (Transitional)
+    if (!$userId) {
+        $userId = getRequestHeader('X-User-Id');
+    }
+
     if (!$userId)
         return;
 
     try {
         $db = getDbConnection();
-        // 1. Update Activity Timestamp (Use UTC)
+        // Update Activity
         $db->prepare("UPDATE users SET last_active = UTC_TIMESTAMP() WHERE id = ?")->execute([$userId]);
 
-        // 2. Cross-check Permissions with Frontend
-        $stmt = $db->prepare("SELECT role, permissions FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $u = $stmt->fetch();
+        // If we didn't get user via token, fetch now for session cache
+        if (!$user) {
+            $stmt = $db->prepare("SELECT id, username, email, role, permissions FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $GLOBALS['CURRENT_USER_SESSION'] = $user;
+        }
 
-        if ($u) {
-            $dbPerms = $u['permissions'] ?? '[]';
+        if ($user) {
+            $dbPerms = $user['permissions'] ?? '[]';
             $fePerms = getRequestHeader('X-User-Permissions') ?? '[]';
 
-            // Normalize JSON for comparison
             $dbPermsArray = json_decode($dbPerms, true) ?? [];
             $fePermsArray = json_decode($fePerms, true) ?? [];
 
-            // If mismatch detected, signal the frontend to refresh its auth state
             if (count(array_diff($dbPermsArray, $fePermsArray)) > 0 || count(array_diff($fePermsArray, $dbPermsArray)) > 0) {
                 header('X-Action: refresh-auth');
             }
-
-            // Cache for subsequent checkPermission calls in this request
-            $GLOBALS['CURRENT_USER_SESSION'] = $u;
         }
     } catch (\Exception $e) {
-        // Fail silently to prevent system hang on DB issues
+        // Fail silently
     }
 }
 
@@ -248,26 +291,12 @@ function getPermissionRouteMap()
  */
 function checkPermission($action)
 {
-    $userId = getRequestHeader('X-User-Id');
-    $role = 'viewer';
-    $permissions = [];
+    $u = $GLOBALS['CURRENT_USER_SESSION'] ?? null;
+    if (!$u)
+        return false;
 
-    // Use cached session if available
-    if (isset($GLOBALS['CURRENT_USER_SESSION'])) {
-        $u = $GLOBALS['CURRENT_USER_SESSION'];
-        $role = $u['role'] ?? 'viewer';
-        $permissions = json_decode($u['permissions'] ?? '[]', true) ?? [];
-    } elseif ($userId) {
-        // Fallback for requests that might have missed initSession
-        $db = getDbConnection();
-        $stmt = $db->prepare("SELECT role, permissions FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $u = $stmt->fetch();
-        if ($u) {
-            $role = $u['role'] ?? 'viewer';
-            $permissions = json_decode($u['permissions'] ?? '[]', true) ?? [];
-        }
-    }
+    $role = $u['role'] ?? 'viewer';
+    $permissions = json_decode($u['permissions'] ?? '[]', true) ?? [];
 
     $r = strtolower($role);
     // Allow 'admin' to bypass permissions ('ceo' now follows standard permissions)
