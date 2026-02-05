@@ -838,14 +838,13 @@ const NewInvoice: React.FC = () => {
       if (!newStockItem.name.trim()) return showToast('error', 'Name is required');
       setLoading(true);
 
-      const payload: Product = {
-        id: '', // Backend generates ID
+      const payload = {
+        id: '',
         name: newStockItem.name,
         category: newStockItem.category,
         description: newStockItem.description,
-        // Backend expects unitPrice (Ksh) or unitPriceUsd
-        // simplified for quick add: assumed Ksh default or handling in backend
-        priceKsh: newStockItem.price,
+        unitPrice: newStockItem.price, // KSH (Maps to 'unitPrice' column)
+        unitPriceUsd: newStockItem.price > 0 ? (newStockItem.price / usdToKshRate) : 0, // Auto-calc USD
         quantity: 0
       };
 
@@ -944,14 +943,7 @@ const NewInvoice: React.FC = () => {
                     />
                   </div>
                 </div>
-                <SmartTextarea
-                  label="Payment Terms & Notes"
-                  value={termsAndConditions}
-                  onChange={(e) => setTermsAndConditions(e.target.value)}
-                  placeholder="Add payment terms, delivery notes, or thank you message..."
-                  context="invoice_desc_service"
-                  rows={3}
-                />
+
 
                 <div>
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 block">Description</label>
