@@ -74,10 +74,10 @@ const CEODashboard = ({ data }: { data: DashboardData }) => {
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
-        <StatCard label="Total Revenue" value={`Ksh ${data.metrics.totalRevenue.toLocaleString()}`} icon={FaMoneyBillWave} color="text-brand-600" bg="bg-brand-50" link="/analytics" trend={`${(data.metrics.revenueGrowth || 0) > 0 ? '+' : ''}${data.metrics.revenueGrowth || 0}% vs last month`} />
-        <StatCard label="Avg Order Value" value={`Ksh ${data.metrics.averageOrderValue.toLocaleString()}`} icon={FaChartLine} color="text-emerald-600" bg="bg-emerald-50" link="/analytics" />
-        <StatCard label="Active Users" value={data.metrics.activeUsers} icon={FaUsers} color="text-purple-600" bg="bg-purple-50" link="/users" />
-        <StatCard label="System Health" value={data.databaseStatus} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
+        <StatCard label="Total Revenue" value={`Ksh ${(data.metrics.totalRevenue || 0).toLocaleString()}`} icon={FaMoneyBillWave} color="text-brand-600" bg="bg-brand-50" link="/analytics" trend={`${(data.metrics.revenueGrowth || 0) > 0 ? '+' : ''}${data.metrics.revenueGrowth || 0}% vs last month`} />
+        <StatCard label="Avg Order Value" value={`Ksh ${(data.metrics.averageOrderValue || 0).toLocaleString()}`} icon={FaChartLine} color="text-emerald-600" bg="bg-emerald-50" link="/analytics" />
+        <StatCard label="Active Users" value={data.metrics.activeUsers || 0} icon={FaUsers} color="text-purple-600" bg="bg-purple-50" link="/users" />
+        <StatCard label="System Health" value={data.databaseStatus || 'Unknown'} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
@@ -203,9 +203,9 @@ const StorekeeperDashboard = ({ data }: { data: DashboardData }) => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard label="Total Inventory Value" value={`Ksh ${data.metrics.stockValue.toLocaleString()}`} icon={FaWarehouse} color="text-indigo-600" bg="bg-indigo-50" link="/stock/inventory" />
-        <StatCard label="Pending Orders" value={data.metrics.pendingInvoicesCount} icon={FaBoxOpen} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
-        <StatCard label="Tasks" value={data.metrics.pendingTasks} icon={FaClipboardList} color="text-blue-600" bg="bg-blue-50" link="/tasks" />
+        <StatCard label="Total Inventory Value" value={`Ksh ${(data.metrics.stockValue || 0).toLocaleString()}`} icon={FaWarehouse} color="text-indigo-600" bg="bg-indigo-50" link="/stock/inventory" />
+        <StatCard label="Pending Orders" value={data.metrics.pendingInvoicesCount || 0} icon={FaBoxOpen} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
+        <StatCard label="Tasks" value={data.metrics.pendingTasks || 0} icon={FaClipboardList} color="text-blue-600" bg="bg-blue-50" link="/tasks" />
       </div>
     </div>
   );
