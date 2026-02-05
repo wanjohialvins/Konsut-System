@@ -1,8 +1,24 @@
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /public_html/app/
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /public_html/app/index.html [L]
-</IfModule>
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Pass Authorization Header to PHP (Required for cPanel/Apache)
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Prevent Directory Listing
+Options -Indexes
+
+# Block access to sensitive directories
+RewriteRule ^(\.git|node_modules|src|\.vscode) - [F,L]
+
+# Block access to sensitive files
+RewriteRule ^(\.env|\.gitignore|package\.json|package-lock\.json|tsconfig\.json|vite\.config\.ts|README\.md) - [F,L]
+
+# Allow access to api
+RewriteRule ^api/ - [L]
+
+# For all other requests, if the file or directory does not exist, redirect to index.html
+# This enables React Router (SPA) to handle the routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [QSA,L]
