@@ -1,7 +1,19 @@
-<FilesMatch "\.(md|sql|bak|log|txt)$">
+# API Security & Configuration
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # 1. Pass Authorization Header to PHP (CRITICAL for cPanel/Apache)
+    # Without this, $_SERVER['HTTP_AUTHORIZATION'] is often null
+    RewriteCond %{HTTP:Authorization} ^(.+)$
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# 2. Block access to sensitive development/system files
+<FilesMatch "\.(md|sql|bak|log|txt|json)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Prevent directory listing
+# 3. Prevent Directory Listing (Security)
 Options -Indexes
