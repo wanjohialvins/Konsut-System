@@ -25,6 +25,8 @@ if (!defined('DB_PASS'))
     define('DB_PASS', '');
 if (!defined('ENCRYPTION_KEY'))
     define('ENCRYPTION_KEY', '75b5a26c8418041c2e42152862d295c25091d3c0500196230f8705307b508f7d');
+if (!defined('RECOVERY_HASH'))
+    define('RECOVERY_HASH', '$2y$10$hiznOqJ1rlUVnxK9lA3JH.2dmSu8qWl0sp94LYSVQdVerwEVlOI0G');
 
 // =========================================================================
 //  CORE SETUP
@@ -80,6 +82,18 @@ function sendError($message, $code = 500)
     http_response_code($code);
     echo json_encode(['error' => $message]);
     exit;
+}
+
+/**
+ * Safe JSON Input Helper
+ */
+function getJsonInput()
+{
+    $input = file_get_contents('php://input');
+    if (empty($input))
+        return [];
+    $data = json_decode($input, true);
+    return is_array($data) ? $data : [];
 }
 
 function getDbConnection()

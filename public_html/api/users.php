@@ -85,7 +85,7 @@ switch ($method) {
 
     case 'POST':
         requirePermission('manage_users');
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonInput();
 
         // Validation
         if (empty($data['username']) || empty($data['password'])) {
@@ -125,7 +125,7 @@ switch ($method) {
 
     case 'PUT':
         $action = $_GET['action'] ?? '';
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonInput();
 
         // Security logic: Users can update themselves WITHOUT manage_users permission
         if ($action === 'update_self') {
@@ -211,7 +211,28 @@ switch ($method) {
         requirePermission('manage_users');
         $id = $_GET['id'] ?? '';
 
-        // Prevent deleting self (simple check, assuming user_id mechanism if implemented)
+        // Check if deleting the last admin
+        $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        $targetRole = $stmt->fetchColumn();
+
+        if (in_array(strtolower((string) $targetRole), ['admin', 'ceo'])) {
+            $countStmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role IN ('admin', 'ceo')");
+            $adminCount = $countStmt->fetchColumn();
+            if ($adminCount <= 1) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Cannot delete the last administrator']);
+                exit;
+            }
+        }
+
+        // Prevent deleting self (if ID matches)
+        $requesterId = getRequestHeader('X-User-Id');
+        if ($id == $requesterId) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Cannot delete your own account']);
+            exit;
+        }
         try {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $stmt->execute([$id]);

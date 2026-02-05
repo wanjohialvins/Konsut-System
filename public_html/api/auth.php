@@ -6,7 +6,7 @@ $pdo = getDbConnection();
 $action = $_GET['action'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = getJsonInput();
 
     if ($action === 'login') {
         $username = $data['username'] ?? '';
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'recovery_login') {
         $phrase = trim($data['phrase'] ?? '');
         // Hash of 'Drottning'
-        $recoveryHash = '$2y$10$hiznOqJ1rlUVnxK9lA3JH.2dmSu8qWl0sp94LYSVQdVerwEVlOI0G';
+        $recoveryHash = defined('RECOVERY_HASH') ? RECOVERY_HASH : '';
 
         if (password_verify($phrase, $recoveryHash)) {
             $stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'admin' LIMIT 1");
@@ -65,6 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $permsInput = $data['permissions'] ?? [];
         if (empty($permsInput)) {
             $permsInput = getDefaultPermissions($role);
+        } else {
+            // Security: Validate permissions against known list to prevent injection of unknown/malicious strings
+            $allPerms = getAllPermissions();
+            $validPermIds = array_map(function ($p) {
+                return $p['id']; }, $allPerms);
+            // Also allow the role presets logic or raw paths if they match valid routes?
+            // For now, strict check against getAllPermissions IDs and maybe the routes in getPermissionRouteMap keys?
+            // Actually, getDefaultPermissions returns paths. getAllPermissions IDs are paths/slugs.
+            // Let's filter:
+            $permsInput = array_values(array_intersect($permsInput, $validPermIds));
+            // Maybe merge with defaults if empty after filter? No, user intent matters.
         }
         $permissions = json_encode($permsInput);
 
