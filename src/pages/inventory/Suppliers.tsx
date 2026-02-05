@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiUsers, FiPlus, FiSearch, FiPhone, FiMail, FiMapPin, FiTrash2, FiEdit3, FiGlobe, FiTruck } from "react-icons/fi";
 import { SmartInput } from "../../components/ui/SmartGuide";
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -80,7 +81,7 @@ const Suppliers = () => {
 
     return (
         <div className="p-6 max-w-[1600px] mx-auto animate-fade-in space-y-8">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
                         <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-600/20">
@@ -90,24 +91,22 @@ const Suppliers = () => {
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Manage supply chain partners and procurement channels</p>
                 </div>
-                <div className="flex gap-3 items-center">
-                    <div className="relative">
-                        <SmartInput
-                            placeholder="Search suppliers..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="bg-white dark:bg-midnight-900 shadow-sm focus:ring-2 focus:ring-emerald-500 w-64"
-                            context="search_suppliers"
-                        />
-                    </div>
+            </header>
+
+            <SmartTableToolbar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search suppliers..."
+                searchContext="search_suppliers"
+                actions={
                     <button
                         onClick={() => setIsAddOpen(true)}
-                        className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all active:scale-95"
+                        className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all active:scale-95 text-xs uppercase tracking-widest"
                     >
                         <FiPlus /> New Supplier
                     </button>
-                </div>
-            </header>
+                }
+            />
 
             {loading ? (
                 <div className="py-20 text-center text-gray-400">Loading suppliers...</div>

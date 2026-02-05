@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiDownload, FiUpload, FiRefreshCcw, FiTag, FiFilter, FiCheckCircle, FiXCircle, FiTrendingUp, FiBox, FiTruck, FiTool } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { api } from "../../services/api";
 import type { Product, Category } from "../../types/types";
 import { DEFAULT_CURRENCY_RATE } from "../../utils/config";
@@ -279,90 +280,87 @@ const Inventory = () => {
                 </div>
             </header>
 
-            <div className="flex gap-4 items-center flex-wrap">
-                <div className="relative flex-1 min-w-[300px]">
-                    <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        id="inventory-search"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder={`Search ${activeCategory}...`}
-                        className="w-full bg-white dark:bg-midnight-900 border-none rounded-[2rem] py-5 pl-14 pr-6 shadow-xl shadow-gray-200/40 dark:shadow-none font-medium text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all text-lg"
-                    />
-                </div>
+            {/* Smart Toolbar */}
+            <SmartTableToolbar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder={`Search ${activeCategory}...`}
+                searchContext="invoice_desc_product"
 
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setShowLowStock(!showLowStock)}
-                        className={`p-5 rounded-[2rem] transition-all flex items-center gap-3 font-bold shadow-xl shadow-gray-200/40 dark:shadow-none ${showLowStock
-                            ? 'bg-red-50 text-red-600 ring-2 ring-red-500 ring-offset-2 dark:ring-offset-midnight-950'
-                            : 'bg-white dark:bg-midnight-900 text-gray-500 hover:text-red-500'
-                            }`}
-                        title="Toggle Low Stock Items"
-                    >
-                        <FaExclamationTriangle size={20} />
-                        <span className="hidden md:inline">Low Stock</span>
-                    </button>
+                sortOptions={[
+                    { key: 'name', label: 'Item Name' },
+                    { key: 'quantity', label: 'Quantity' },
+                    { key: 'price', label: 'Price' }
+                ]}
 
-                    <div className="relative smart-tools-container z-20">
+                // Inventory doesn't have standard "filter" props in state yet, 
+                // but we can map the generic "filter" UI to toggles if needed.
+                // For now, we keep the custom toggles in 'actions' as they are specific.
+
+                onExport={handleExport}
+                className="animate-slide-up delay-100"
+
+                actions={
+                    <>
+                        {/* Custom Toggle: Low Stock */}
                         <button
-                            id="inventory-tools-btn"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className={`p-5 rounded-[2rem] transition-all flex items-center gap-2 font-bold shadow-xl shadow-gray-200/40 dark:shadow-none ${isMenuOpen ? 'bg-brand-600 text-white' : 'bg-white dark:bg-midnight-900 text-brand-600 hover:bg-brand-50'}`}
+                            onClick={() => setShowLowStock(!showLowStock)}
+                            className={`p-3 rounded-xl transition-all flex items-center gap-2 font-bold shadow-sm border border-gray-100 dark:border-midnight-800 ${showLowStock
+                                ? 'bg-red-50 text-red-600 ring-2 ring-red-500 ring-offset-1'
+                                : 'bg-white dark:bg-midnight-900 text-gray-500 hover:text-red-500'
+                                }`}
+                            title="Toggle Low Stock Items"
                         >
-                            <FaMagic size={20} />
-                            <span className="hidden md:inline">Smart Tools</span>
+                            <FaExclamationTriangle />
+                            <span className="hidden xl:inline text-xs uppercase tracking-wider">Low Stock</span>
                         </button>
 
-                        {isMenuOpen && (
-                            <div className="absolute right-0 top-full mt-4 w-64 bg-white dark:bg-midnight-900 rounded-[2rem] shadow-2xl p-4 animate-fade-in border border-gray-100 dark:border-midnight-800">
-                                <button
-                                    onClick={() => { handleMergeDuplicates(); setIsMenuOpen(false); }}
-                                    disabled={loading}
-                                    className="w-full text-left p-4 hover:bg-brand-50 dark:hover:bg-midnight-800 rounded-2xl flex items-center gap-3 text-gray-700 dark:text-gray-300 transition-colors mb-2"
-                                >
-                                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                        <FaCompressArrowsAlt />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-sm">Merge Duplicates</p>
-                                        <p className="text-[10px] opacity-60">Consolidate items</p>
-                                    </div>
-                                </button>
+                        {/* Smart Tools Menu */}
+                        <div className="relative smart-tools-container z-20">
+                            <button
+                                id="inventory-tools-btn"
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className={`p-3 rounded-xl transition-all flex items-center gap-2 font-bold shadow-sm border border-gray-100 dark:border-midnight-800 ${isMenuOpen ? 'bg-brand-600 text-white' : 'bg-white dark:bg-midnight-900 text-brand-600 hover:bg-brand-50'}`}
+                            >
+                                <FaMagic />
+                                <span className="hidden xl:inline text-xs uppercase tracking-wider">Tools</span>
+                            </button>
 
-                                <button
-                                    onClick={() => { handleClearAll(); setIsMenuOpen(false); }}
-                                    disabled={loading}
-                                    className="w-full text-left p-4 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl flex items-center gap-3 text-red-600 transition-colors"
-                                >
-                                    <div className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 rounded-lg">
-                                        <FaBroom />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-sm">Wipe Inventory</p>
-                                        <p className="text-[10px] opacity-60">Delete all items</p>
-                                    </div>
-                                </button>
+                            {isMenuOpen && (
+                                <div className="absolute right-0 top-full mt-4 w-64 bg-white dark:bg-midnight-900 rounded-[2rem] shadow-2xl p-4 animate-fade-in border border-gray-100 dark:border-midnight-800 z-50">
+                                    <button
+                                        onClick={() => { handleMergeDuplicates(); setIsMenuOpen(false); }}
+                                        disabled={loading}
+                                        className="w-full text-left p-4 hover:bg-brand-50 dark:hover:bg-midnight-800 rounded-2xl flex items-center gap-3 text-gray-700 dark:text-gray-300 transition-colors mb-2"
+                                    >
+                                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                            <FaCompressArrowsAlt />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm">Merge Duplicates</p>
+                                            <p className="text-[10px] opacity-60">Consolidate items</p>
+                                        </div>
+                                    </button>
 
-                                <div className="h-px bg-gray-100 dark:bg-midnight-800 my-2"></div>
-
-                                <button
-                                    onClick={() => { handleExport(); setIsMenuOpen(false); }}
-                                    className="w-full text-left p-4 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-2xl flex items-center gap-3 text-gray-700 dark:text-gray-300 transition-colors"
-                                >
-                                    <div className="p-2 bg-green-100 dark:bg-green-900/40 text-green-600 rounded-lg">
-                                        <FaFileCsv />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-sm">Export to CSV</p>
-                                        <p className="text-[10px] opacity-60">Backup data</p>
-                                    </div>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+                                    <button
+                                        onClick={() => { handleClearAll(); setIsMenuOpen(false); }}
+                                        disabled={loading}
+                                        className="w-full text-left p-4 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl flex items-center gap-3 text-red-600 transition-colors"
+                                    >
+                                        <div className="p-2 bg-red-100 dark:bg-red-900/40 text-red-600 rounded-lg">
+                                            <FaBroom />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-sm">Wipe Inventory</p>
+                                            <p className="text-[10px] opacity-60">Delete all items</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                }
+            />
 
             <div className="flex gap-2 border-b border-gray-200 dark:border-midnight-800">
                 {[

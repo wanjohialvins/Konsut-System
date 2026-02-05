@@ -29,6 +29,7 @@ import {
 } from "react-icons/fa";
 import { FiPlus, FiDownload, FiUpload, FiSearch, FiMail, FiPhone } from "react-icons/fi";
 import { SmartInput } from "../../components/ui/SmartGuide";
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -362,36 +363,13 @@ const Clients: React.FC = () => {
       <div className="max-w-[1600px] mx-auto space-y-8">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center animate-slide-up delay-100">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center animate-slide-up delay-100 mb-8">
           <div>
             <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Clients</h1>
             <p className="text-slate-500 dark:text-midnight-text-secondary mt-1 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
               Relationship Management
             </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
-
-            <button onClick={handleExport} title="Export CSV" className="p-3 bg-white dark:bg-midnight-900 text-gray-600 dark:text-gray-300 rounded-xl hover:text-brand-600 hover:border-brand-200 border border-gray-100 dark:border-midnight-800 transition-colors shadow-sm">
-              <FaDownload />
-            </button>
-            <label title="Import CSV" className="p-3 bg-white dark:bg-midnight-900 text-gray-600 dark:text-gray-300 rounded-xl hover:text-brand-600 hover:border-brand-200 border border-gray-100 dark:border-midnight-800 transition-colors shadow-sm cursor-pointer">
-              <FaFileImport />
-              <input type="file" accept=".csv" className="hidden" onChange={handleImport} />
-            </label>
-
-            <button onClick={syncClientsFromInvoices} disabled={syncing} title="Sync from Invoices" className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/20 font-bold text-xs uppercase tracking-widest">
-              <FaSync className={syncing ? "animate-spin" : ""} /> Sync
-            </button>
-
-            <button
-              id="clients-add-btn"
-              onClick={() => { setEditingClient(null); setFormData({ name: "", phone: "", email: "", address: "", company: "", kraPin: "" }); setShowForm(true); }}
-              className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-600/30 font-bold text-xs uppercase tracking-widest transform hover:scale-105 active:scale-95"
-            >
-              <FiPlus /> New Client
-            </button>
           </div>
         </div>
 
@@ -417,17 +395,42 @@ const Clients: React.FC = () => {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative group animate-slide-up delay-300">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors text-lg z-10" />
-          <SmartInput
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by name, company, email..."
-            className="pl-14 pr-6 shadow-xl shadow-gray-200/40 dark:shadow-none placeholder-gray-400"
-            context="search_clients"
-          />
-        </div>
+        {/* Smart Toolbar */}
+        <SmartTableToolbar
+          search={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search by name, company, email..."
+          searchContext="search_clients"
+          sortOptions={[
+            { key: 'name', label: 'Name' },
+            { key: 'revenue', label: 'Total Revenue' },
+            { key: 'outstanding', label: 'Outstanding Balance' }
+          ]}
+          // We'll hook these up properly in a future refactor, ensuring UI consistency first.
+          activeSort={{ key: 'name', direction: 'asc' }}
+          onExport={handleExport}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <label title="Import CSV" className="p-3 bg-white dark:bg-midnight-900 text-gray-600 dark:text-gray-300 rounded-xl hover:text-brand-600 hover:border-brand-200 border border-gray-100 dark:border-midnight-800 transition-colors shadow-sm cursor-pointer">
+                <FaFileImport />
+                <input type="file" accept=".csv" className="hidden" onChange={handleImport} />
+              </label>
+
+              <button onClick={syncClientsFromInvoices} disabled={syncing} title="Sync from Invoices" className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/20 font-bold text-xs uppercase tracking-widest">
+                <FaSync className={syncing ? "animate-spin" : ""} /> Sync
+              </button>
+
+              <button
+                id="clients-add-btn"
+                onClick={() => { setEditingClient(null); setFormData({ name: "", phone: "", email: "", address: "", company: "", kraPin: "" }); setShowForm(true); }}
+                className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-600/30 font-bold text-xs uppercase tracking-widest transform hover:scale-105 active:scale-95"
+              >
+                <FiPlus /> New Client
+              </button>
+            </div>
+          }
+          className="animate-slide-up delay-300"
+        />
 
         {/* Client Table */}
         <div className="bg-white dark:bg-midnight-900 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800 overflow-hidden animate-slide-up delay-400">

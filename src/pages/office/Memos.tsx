@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiMessageSquare, FiPlus, FiStar, FiClock, FiTrash2 } from 'react-icons/fi';
 import { SmartTextarea } from "../../components/ui/SmartGuide";
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -92,7 +93,7 @@ const Memos = () => {
 
     return (
         <div className="p-6 max-w-5xl mx-auto animate-fade-in space-y-8">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
                         <div className="p-3 bg-amber-600 text-white rounded-2xl shadow-xl shadow-amber-600/20">
@@ -102,27 +103,25 @@ const Memos = () => {
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Broadcast announcements and internal notices to all staff</p>
                 </div>
-                <div className="flex gap-3 items-center">
-                    <div className="relative">
-                        <input
-                            placeholder="Search memos..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="pl-4 pr-10 py-3 rounded-2xl border-none bg-white dark:bg-midnight-900 shadow-sm focus:ring-2 focus:ring-amber-500 w-64"
-                        />
-                    </div>
+            </header>
+
+            <SmartTableToolbar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search memos..."
+                actions={
                     <button
                         onClick={() => {
                             setNewItem({ title: '', content: '', urgent: false, author: 'Admin' });
                             setIsEditing(false);
                             setIsAddOpen(true);
                         }}
-                        className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-amber-900/30 transition-all active:scale-95"
+                        className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-amber-900/30 transition-all active:scale-95 text-xs uppercase tracking-widest"
                     >
                         <FiPlus /> Post Memo
                     </button>
-                </div>
-            </header>
+                }
+            />
 
             <div className="space-y-6">
                 {loading ? (

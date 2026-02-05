@@ -79,7 +79,8 @@ export const generateReportPDF = async (data: ReportData) => {
             if (m.trend !== undefined) {
                 doc.setFontSize(8);
                 const isPositive = m.trend >= 0;
-                doc.setTextColor(isPositive ? [16, 185, 129] as any : [239, 68, 68] as any);
+                if (isPositive) doc.setTextColor(16, 185, 129);
+                else doc.setTextColor(239, 68, 68);
                 const trendText = `${isPositive ? '↑' : '↓'} ${Math.abs(m.trend)}%`;
                 doc.text(trendText, x + boxW - 4, y + 15, { align: "right" });
             }
@@ -158,7 +159,7 @@ export const generateReportPDF = async (data: ReportData) => {
         // 8. Footer
         drawFooter(doc, SETTINGS, config);
 
-        const filename = `Financial_Report_${data.period.replace(/ /g, '_')}.pdf`;
+        const filename = `Financial_Report_${data.period.replace(/[^a-z0-9]/gi, '_')}.pdf`;
         doc.save(filename);
         return true;
     } catch (err) {

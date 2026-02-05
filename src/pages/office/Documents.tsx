@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiFolder, FiFile, FiUpload, FiDownload, FiTrash2, FiSearch, FiEye } from 'react-icons/fi';
 import { SmartInput } from "../../components/ui/SmartGuide";
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { useModal } from "../../contexts/ModalContext";
 import { api, API_BASE_URL } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -117,7 +118,7 @@ const Documents = () => {
 
     return (
         <div className="p-6 max-w-[1600px] mx-auto animate-fade-in space-y-8">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
                         <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-600/20">
@@ -127,32 +128,29 @@ const Documents = () => {
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Centralized repository for licenses, contracts, and digital assets</p>
                 </div>
-                <div className="flex gap-3">
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        onChange={handleFileChange}
-                    />
-                    <button onClick={triggerUpload} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-all active:scale-95">
-                        <FiUpload /> Upload File
-                    </button>
-                </div>
             </header>
 
-            <div className="bg-white dark:bg-midnight-900 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-gray-100 dark:border-midnight-800 flex items-center gap-4">
-                    <div className="relative flex-1">
-                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <SmartInput
-                            placeholder="Search the vault..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="bg-gray-50 dark:bg-midnight-950 px-12 focus:ring-2 focus:ring-indigo-500 font-medium"
-                            context="search_vault"
+            <SmartTableToolbar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search the vault..."
+                searchContext="search_vault"
+                actions={
+                    <div className="flex gap-3">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            onChange={handleFileChange}
                         />
+                        <button onClick={triggerUpload} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-all active:scale-95 text-xs uppercase tracking-widest">
+                            <FiUpload /> Upload File
+                        </button>
                     </div>
-                </div>
+                }
+            />
+
+            <div className="bg-white dark:bg-midnight-900 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     {loading ? (
                         <div className="p-10 text-center text-gray-400">Loading documents...</div>

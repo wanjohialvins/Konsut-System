@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiPlus, FiMessageSquare, FiClock, FiCheckCircle, FiAlertCircle, FiSearch, FiFilter } from 'react-icons/fi';
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -55,7 +56,7 @@ const Tickets = () => {
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
                         <div className="p-4 bg-brand-600 text-white rounded-[2rem] shadow-xl shadow-brand-600/20">
@@ -65,38 +66,29 @@ const Tickets = () => {
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Manage and track your support requests</p>
                 </div>
-                <button
-                    onClick={() => navigate('/tickets/new')}
-                    className="flex items-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 shadow-xl shadow-brand-600/20"
-                >
-                    <FiPlus /> New Ticket
-                </button>
             </header>
 
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search tickets by subject or ID..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-brand-500/10 outline-none transition-all shadow-sm"
-                    />
-                </div>
-                <div className="flex gap-2">
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        className="px-6 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-brand-500/10 outline-none transition-all shadow-sm font-bold uppercase text-[10px] tracking-widest"
+            <SmartTableToolbar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search tickets by subject or ID..."
+                filterOptions={[
+                    { value: 'all', label: 'All Status' },
+                    { value: 'open', label: 'Open' },
+                    { value: 'pending', label: 'Pending' },
+                    { value: 'closed', label: 'Closed' }
+                ]}
+                activeFilter={filter}
+                onFilterChange={setFilter}
+                actions={
+                    <button
+                        onClick={() => navigate('/tickets/new')}
+                        className="flex items-center gap-3 bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-xl shadow-brand-600/20"
                     >
-                        <option value="all">All Status</option>
-                        <option value="open">Open</option>
-                        <option value="pending">Pending</option>
-                        <option value="closed">Closed</option>
-                    </select>
-                </div>
-            </div>
+                        <FiPlus /> New Ticket
+                    </button>
+                }
+            />
 
             <div className="grid gap-4">
                 {loading ? (

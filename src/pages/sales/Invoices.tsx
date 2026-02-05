@@ -28,6 +28,7 @@ import { api } from "../../services/api";
 import PDFPreviewModal from "../../components/modals/PDFPreviewModal";
 import EditInvoiceModal from "../../components/modals/EditInvoiceModal";
 import { usePDFPreview } from "../../hooks/usePDFPreview";
+import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 
 // --- Constants ---
 const Invoices = () => {
@@ -389,70 +390,48 @@ const Invoices = () => {
         </div>
 
         {/* Toolbar */}
-        <div className="flex flex-col lg:flex-row gap-4 justify-between items-center animate-slide-up delay-300">
-          <div className="relative group w-full lg:w-96">
-            <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-600 transition-colors" />
-            <input
-              placeholder={`Search ${getTypeLabel(activeTab).toLowerCase()}s...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white dark:bg-midnight-900 border-none rounded-2xl py-4 pl-14 pr-6 shadow-lg shadow-gray-200/20 dark:shadow-none font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 transition-all placeholder-gray-400"
-            />
-          </div>
+        <SmartTableToolbar
+          search={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder={`Search ${getTypeLabel(activeTab).toLowerCase()}s...`}
+          searchContext={activeTab === 'quotation' ? 'invoice_desc_product' : 'invoice_desc_service'}
 
-          <div className="flex gap-3 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0">
-            <div className="relative min-w-[140px]">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full pl-10 pr-8 py-3 bg-white dark:bg-midnight-900 border-none rounded-xl shadow-sm text-sm font-bold text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-brand-500 cursor-pointer outline-none appearance-none"
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="sent">Sent</option>
-                <option value="paid">Paid</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
+          sortOptions={[
+            { key: 'date', label: 'By Date' },
+            { key: 'amount', label: 'By Amount' },
+            { key: 'name', label: 'By Client' }
+          ]}
+          activeSort={sortConfig}
+          onSortChange={(key, direction) => setSortConfig({ key, direction })}
 
-            <div className="relative min-w-[140px]">
-              <select
-                value={sortConfig.key}
-                onChange={(e) => setSortConfig({ ...sortConfig, key: e.target.value })}
-                className="w-full pl-10 pr-8 py-3 bg-white dark:bg-midnight-900 border-none rounded-xl shadow-sm text-sm font-bold text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-brand-500 cursor-pointer outline-none appearance-none"
-              >
-                <option value="date">Date</option>
-                <option value="amount">Amount</option>
-                <option value="name">Client Name</option>
-              </select>
-              <FaSortAmountDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
+          filterOptions={[
+            { value: 'all', label: 'All Status' },
+            { value: 'draft', label: 'Draft' },
+            { value: 'sent', label: 'Sent' },
+            { value: 'paid', label: 'Paid' },
+            { value: 'cancelled', label: 'Cancelled' }
+          ]}
+          activeFilter={statusFilter}
+          onFilterChange={setStatusFilter}
 
-            {/* Currency Toggle */}
-            <div className="flex bg-white dark:bg-midnight-900 p-1 rounded-2xl shadow-lg shadow-gray-200/20 dark:shadow-none border border-gray-100 dark:border-midnight-800">
+          className="animate-slide-up delay-300"
+          actions={
+            <div className="flex bg-white dark:bg-midnight-900 p-1 rounded-xl shadow-lg shadow-gray-200/20 dark:shadow-none border border-gray-100 dark:border-midnight-800">
               <button
                 onClick={() => setDisplayCurrency('Ksh')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all ${displayCurrency === 'Ksh' ? 'bg-brand-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${displayCurrency === 'Ksh' ? 'bg-brand-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 KES
               </button>
               <button
                 onClick={() => setDisplayCurrency('USD')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all ${displayCurrency === 'USD' ? 'bg-brand-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${displayCurrency === 'USD' ? 'bg-brand-600 text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 USD
               </button>
             </div>
-
-            <button
-              onClick={() => setSortConfig(c => ({ ...c, direction: c.direction === 'asc' ? 'desc' : 'asc' }))}
-              className="p-3 bg-white dark:bg-midnight-900 rounded-xl shadow-sm hover:shadow-md transition-all text-gray-500 hover:text-brand-600 dark:text-gray-400"
-            >
-              {sortConfig.direction === 'asc' ? <FaSortAmountUp /> : <FaSortAmountDown />}
-            </button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Table */}
         <div className="bg-white dark:bg-midnight-900 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800 overflow-hidden animate-slide-up delay-400">
