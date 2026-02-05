@@ -156,9 +156,20 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                             </div>
                                             <div className="w-px h-8 bg-gray-100 dark:bg-midnight-800 mx-1"></div>
 
-                                            <button onClick={() => onSaveToStock(item)} title="Save to Stock Library" className="text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 bg-transparent hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-xl transition-colors">
-                                                <FaPlus size={14} />
-                                            </button>
+                                            {item.id.startsWith('TEMP-') ? (
+                                                <button
+                                                    onClick={() => onSaveToStock(item)}
+                                                    title="New Item! Save to Stock Library"
+                                                    className="group/save flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all shadow-sm ring-1 ring-emerald-100 dark:ring-emerald-900/50 animate-pulse-slow"
+                                                >
+                                                    <FiBox size={14} className="group-hover/save:scale-110 transition-transform" />
+                                                    <span className="text-[10px] font-black uppercase tracking-wide">Save</span>
+                                                </button>
+                                            ) : (
+                                                <button onClick={() => onSaveToStock(item)} title="Update Stock Details" className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 p-2 rounded-xl transition-colors">
+                                                    <FiTool size={14} />
+                                                </button>
+                                            )}
                                             <button onClick={() => onRemoveLine(idx)} title="Remove Item" className="text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 bg-transparent hover:bg-rose-50 dark:hover:bg-rose-900/20 p-2 rounded-xl transition-colors">
                                                 <FaTrash size={14} />
                                             </button>

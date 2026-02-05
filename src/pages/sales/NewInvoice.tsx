@@ -2,7 +2,8 @@ import { DocumentEngine } from "../../utils/DocumentEngine";
 import { SequenceManager } from "../../utils/SequenceManager";
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { SmartTextarea } from "../../components/ui/SmartGuide";
 
 import { generateInvoicePDF } from "../../utils/pdfGenerator";
 import { getInvoiceSettings } from "../../utils/config";
@@ -943,6 +944,15 @@ const NewInvoice: React.FC = () => {
                     />
                   </div>
                 </div>
+                <SmartTextarea
+                  label="Payment Terms & Notes"
+                  value={termsAndConditions}
+                  onChange={(e) => setTermsAndConditions(e.target.value)}
+                  placeholder="Add payment terms, delivery notes, or thank you message..."
+                  context="invoice_desc_service"
+                  rows={3}
+                />
+
                 <div>
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 block">Description</label>
                   <textarea
@@ -953,6 +963,7 @@ const NewInvoice: React.FC = () => {
                     className="w-full bg-gray-50 dark:bg-midnight-900 border border-gray-200 dark:border-midnight-700 rounded-xl p-3 font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none resize-none"
                   />
                 </div>
+
                 <button type="submit" disabled={loading} className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest rounded-xl shadow-lg shadow-brand-500/30 transition-all active:scale-95 disabled:opacity-50">
                   {loading ? 'Adding...' : 'Add to Inventory'}
                 </button>
@@ -1163,8 +1174,8 @@ const NewInvoice: React.FC = () => {
           pdfUrl={previewUrl}
           title={previewTitle}
         />
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

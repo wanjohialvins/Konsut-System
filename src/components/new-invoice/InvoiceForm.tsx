@@ -1,7 +1,7 @@
-
-import React from 'react';
-import { FaUser, FaRegCalendarAlt as FaCalendarAlt } from "react-icons/fa";
-import type { InvoiceType } from '../../types/types';
+import React, { useState, useEffect } from 'react';
+import { FaUser, FaRegCalendarAlt as FaCalendarAlt, FaSearch } from "react-icons/fa";
+import type { InvoiceType, Customer } from '../../types/types';
+import { api } from '../../services/api';
 
 interface InvoiceFormProps {
     customerName: string;
@@ -40,6 +40,38 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     activeDocumentType,
     validationErrors,
 }) => {
+    const [suggestions, setSuggestions] = useState<Customer[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [allClients, setAllClients] = useState<Customer[]>([]);
+
+    useEffect(() => {
+        // Pre-fetch clients for speed (filtering locally is faster for <1000 clients)
+        api.clients.getAll().then(clients => setAllClients(clients || [])).catch(() => { });
+    }, []);
+
+    const handleSearch = (query: string) => {
+        if (!query) {
+            setSuggestions([]);
+            return;
+        }
+        const lower = query.toLowerCase();
+        const matches = allClients.filter(c =>
+            c.name.toLowerCase().includes(lower) ||
+            c.phone.includes(query) ||
+            (c.email && c.email.toLowerCase().includes(lower))
+        ).slice(0, 5);
+        setSuggestions(matches);
+    };
+
+    const handleSelectClient = (client: Customer) => {
+        setCustomerName(client.name);
+        setCustomerPhone(client.phone || '');
+        setCustomerEmail(client.email || '');
+        setCustomerAddress(client.address || '');
+        setCustomerKraPin(client.kraPin || ''); // Only overrides if exists
+        setIsSearching(false);
+        setSuggestions([]);
+    };
     return (
         <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800">
             <h2 className="text-sm font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-6 flex items-center gap-2">
@@ -47,14 +79,54 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                 Customer Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div className="relative group">
                     <label className="text-xs font-bold text-gray-400 ml-1 mb-1 block uppercase">Full Name</label>
-                    <input
-                        placeholder="John Doe"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerName ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
-                        autoComplete='off' />
+                    <div className="relative">
+                        <input
+                            placeholder="Type to search clients..."
+                            value={customerName}
+                            onChange={(e) => {
+                                setCustomerName(e.target.value);
+                                setIsSearching(true);
+                                if (e.target.value.length > 1) {
+                                    handleSearch(e.target.value);
+                                } else {
+                                    setSuggestions([]);
+                                }
+                            }}
+                            onFocus={() => {
+                                if (customerName.length > 1) setIsSearching(true);
+                            }}
+                            onBlur={() => setTimeout(() => setIsSearching(false), 200)}
+                            className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerName ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
+                            autoComplete='off'
+                        />
+                        {isSearching && suggestions.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-midnight-800 rounded-xl shadow-2xl border border-gray-100 dark:border-midnight-700 z-50 overflow-hidden max-h-60 overflow-y-auto">
+                                <div className="p-2 border-b border-gray-100 dark:border-midnight-700 bg-gray-50 dark:bg-midnight-900/50 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                    Suggestions
+                                </div>
+                                {suggestions.map((client) => (
+                                    <button
+                                        key={client.id}
+                                        onClick={() => handleSelectClient(client)}
+                                        className="w-full text-left px-4 py-3 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-600 dark:hover:text-brand-400 transition-colors flex flex-col gap-0.5"
+                                    >
+                                        <span className="font-bold text-sm block">{client.name}</span>
+                                        <span className="text-xs text-gray-400 block">{client.phone} • {client.email}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        {/* Quick Create Prompt */}
+                        {isSearching && suggestions.length === 0 && customerName.length > 2 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-midnight-800 rounded-xl shadow-xl border border-gray-100 dark:border-midnight-700 z-50 p-3 text-center">
+                                <p className="text-xs text-gray-500 mb-2">Client not found.</p>
+                                <span className="text-xs font-bold text-brand-500">New client will be created automatically on save.</span>
+                            </div>
+                        )}
+                    </div>
+
                     {validationErrors.customerName && <span className="text-xs font-bold text-red-500 mt-1 block">{validationErrors.customerName}</span>}
                 </div>
                 <div>
