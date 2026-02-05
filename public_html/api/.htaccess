@@ -1,0 +1,7 @@
+<FilesMatch "\.(md|sql|bak|log|txt)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
