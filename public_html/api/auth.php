@@ -19,6 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             unset($user['password']);
 
+            // ROLE-BASED MAINTENANCE CHECK
+            $role = strtolower($user['role'] ?? '');
+            $isAdmin = ($role === 'admin' || $role === 'ceo');
+            if (isMaintenanceActive() && !$isAdmin) {
+                sendError('System is currently in maintenance mode. Only Administrators can login.', 503);
+            }
+
             // Cast booleans for JSON
             $user['force_password_change'] = (int) ($user['force_password_change'] ?? 0);
 

@@ -125,7 +125,15 @@ function getRequestHeader($name)
         return $_SERVER[$key];
     }
 
-    // Fallback: Scan $_SERVER for case-insensitive match (rare edge case)
+    // 2. Fallback: cPanel/Apache redirection (when using .htaccess RewriteRule)
+    if (strtolower($name) === 'authorization') {
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']))
+            return $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        if (isset($_SERVER['HTTP_AUTHORIZATION']))
+            return $_SERVER['HTTP_AUTHORIZATION'];
+    }
+
+    // 3. Fallback: Scan $_SERVER for case-insensitive match (rare edge case)
     foreach ($_SERVER as $k => $v) {
         if (substr($k, 0, 5) === 'HTTP_') {
             $headerKey = str_replace('_', '-', substr($k, 5));
@@ -235,8 +243,45 @@ function initSession()
     }
 }
 
+// Maintenance Mode Enforcement
+function isMaintenanceActive()
+{
+    try {
+        $db = getDbConnection();
+        $stmt = $db->query("SELECT setting_value FROM settings WHERE setting_key = 'system_maintenance' LIMIT 1");
+        $setting = $stmt->fetchColumn();
+        return $setting !== false && json_decode($setting, true) === true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function checkMaintenance()
+{
+    // Skip check for login actions so admins can regain access
+    $script = basename($_SERVER['SCRIPT_NAME']);
+    $action = $_GET['action'] ?? '';
+    if ($script === 'auth.php' && ($action === 'login' || $action === 'recovery_login')) {
+        return;
+    }
+
+    if (isMaintenanceActive()) {
+        $u = $GLOBALS['CURRENT_USER_SESSION'] ?? null;
+        $role = strtolower($u['role'] ?? '');
+        $isAdmin = ($role === 'admin' || $role === 'ceo');
+
+        if (!$isAdmin) {
+            http_response_code(503);
+            header('Retry-After: 1800'); // 30 minutes
+            echo json_encode(['error' => 'System under maintenance', 'maintenance' => true]);
+            exit;
+        }
+    }
+}
+
 // Session Initialization
 initSession();
+checkMaintenance();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -283,6 +328,8 @@ function getPermissionRouteMap()
         'manage_users' => ['manage_users'], // Explicit
         'manage_settings' => ['/settings/company', '/settings/invoice'], // Removed profile/preferences
         'view_settings' => ['/settings/profile', '/settings/company', '/settings/invoice', '/settings/preferences', '/', '/dashboard'],
+        'system_control' => ['/system/security'],
+        'view_maintenance' => ['/system/security', '/maintenance'],
     ];
 }
 

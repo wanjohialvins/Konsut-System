@@ -15,9 +15,11 @@ try {
 
     switch ($action) {
         case 'purge-sessions':
-            // In a real app, delete from sessions table or invalidate tokens
-            // For now, just a dummy success
-            break;
+            $stmt = $pdo->prepare("DELETE FROM auth_tokens WHERE user_id != ?");
+            $stmt->execute([$user_id]);
+            $count = $stmt->rowCount();
+            echo json_encode(['success' => true, 'message' => "Purged $count other active sessions"]);
+            exit;
 
         case 'purge-logs':
             $stmt = $pdo->prepare("DELETE FROM audit_logs WHERE timestamp < NOW() - INTERVAL 30 DAY");
@@ -28,21 +30,22 @@ try {
 
         case 'toggle-lock':
             // Check current status
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'");
+            $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'system_maintenance'");
+            $stmt->execute();
             $current = $stmt->fetchColumn();
 
             $newState = true;
-            if ($current) {
+            if ($current !== false) {
                 $status = json_decode($current, true);
                 $newState = !$status; // Toggle
             }
 
             // Save new state
-            $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('maintenance_mode', ?) ON DUPLICATE KEY UPDATE setting_value = ?");
+            $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('system_maintenance', ?) ON DUPLICATE KEY UPDATE setting_value = ?");
             $jsonVal = json_encode($newState);
             $stmt->execute([$jsonVal, $jsonVal]);
 
-            echo json_encode(['success' => true, 'message' => "System Maintenance Lock: " . ($newState ? "ENABLED" : "DISABLED")]);
+            echo json_encode(['success' => true, 'message' => "System Lockdown: " . ($newState ? "ENABLED" : "DISABLED")]);
             exit;
 
         case 'broadcast':

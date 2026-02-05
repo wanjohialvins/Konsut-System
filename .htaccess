@@ -1,6 +1,10 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
+# Pass Authorization Header to PHP (Required for cPanel/Apache)
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Prevent Directory Listing
 Options -Indexes
 

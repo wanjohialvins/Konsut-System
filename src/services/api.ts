@@ -49,6 +49,14 @@ const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise
         }
 
         if (!response.ok) {
+            if (response.status === 503) {
+                const errorData = await response.clone().json().catch(() => ({}));
+                if (errorData.maintenance) {
+                    localStorage.setItem('system_maintenance', 'true');
+                    window.location.href = '/maintenance';
+                    return null as any;
+                }
+            }
             if (response.status === 403) {
                 window.dispatchEvent(new CustomEvent('permission-update'));
             }
