@@ -395,51 +395,108 @@ const Users = () => {
                                         </div>
                                     </div>
 
-                                    {/* Detailed Permissions (Grouped) */}
-                                    <div className="bg-gray-50 dark:bg-midnight-950/50 rounded-2xl p-6 border border-gray-100 dark:border-midnight-800 space-y-6">
-                                        <div className="flex justify-between items-center">
-                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Granted Permissions</label>
-                                            <span className="text-xs text-brand-600 font-bold">{formData.permissions.length} Active</span>
+                                    {/* Smart Permission Modules */}
+                                    <div className="bg-gray-50 dark:bg-midnight-950/50 rounded-2xl p-6 border border-gray-100 dark:border-midnight-800 space-y-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Access Modules</label>
+                                            <span className="text-xs text-brand-600 font-bold">{formData.permissions.length} Permissions Active</span>
                                         </div>
 
-                                        {Object.entries(groupedPermissions).map(([category, perms]: [string, any]) => (
-                                            <div key={category} className="space-y-3">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <h5 className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{category}</h5>
-                                                    <div className="h-px flex-1 bg-gray-100 dark:bg-midnight-800"></div>
-                                                </div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {(perms as any[]).map((perm) => {
-                                                        const isAction = !perm.id.startsWith('/');
-                                                        return (
-                                                            <label
-                                                                key={perm.id}
-                                                                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all border
-                                                                ${formData.permissions.includes(perm.id)
-                                                                        ? isAction
-                                                                            ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 shadow-sm'
-                                                                            : 'bg-white dark:bg-midnight-900 border-gray-200 dark:border-midnight-700 text-gray-700 dark:text-gray-300 shadow-sm'
-                                                                        : 'bg-transparent border-transparent text-gray-400 hover:bg-white dark:hover:bg-midnight-900'
-                                                                    }`}
-                                                                title={perm.desc}
-                                                            >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="hidden"
-                                                                    checked={formData.permissions.includes(perm.id)}
-                                                                    onChange={() => togglePermission(perm.id)}
-                                                                />
-                                                                {formData.permissions.includes(perm.id)
-                                                                    ? <FiCheckCircle size={12} className={isAction ? 'text-brand-600' : 'text-gray-400'} />
-                                                                    : <div className="w-3 h-3 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                                                                }
-                                                                {perm.label}
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {Object.entries(groupedPermissions).map(([category, perms]: [string, any]) => {
+                                                const catPerms = perms as any[];
+
+                                                // 1. Define Logic
+                                                const writePerms = catPerms.filter(p =>
+                                                    p.id.includes('manage') ||
+                                                    p.id.includes('delete') ||
+                                                    p.id.includes('create') ||
+                                                    p.id.includes('edit') ||
+                                                    p.id.includes('new') ||
+                                                    p.id.includes('add')
+                                                );
+                                                const readPerms = catPerms.filter(p => !writePerms.includes(p));
+
+                                                // 2. Determine Current Status
+                                                const activeInCat = formData.permissions.filter(id => catPerms.some(p => p.id === id));
+                                                const hasAllWrite = writePerms.every(p => activeInCat.includes(p.id));
+                                                const hasAllRead = readPerms.every(p => activeInCat.includes(p.id));
+
+                                                let status = 'custom';
+                                                if (activeInCat.length === 0) status = 'none';
+                                                else if (hasAllRead && activeInCat.length === readPerms.length) status = 'viewer';
+                                                else if (hasAllRead && hasAllWrite && activeInCat.length === catPerms.length) status = 'manager';
+
+                                                // 3. Handler
+                                                const setLevel = (level: string) => {
+                                                    const otherPerms = formData.permissions.filter(id => !catPerms.some(p => p.id === id));
+                                                    let newCatPerms: string[] = [];
+
+                                                    if (level === 'viewer' || level === 'manager') {
+                                                        newCatPerms = [...newCatPerms, ...readPerms.map(p => p.id)];
+                                                    }
+                                                    if (level === 'manager') {
+                                                        newCatPerms = [...newCatPerms, ...writePerms.map(p => p.id)];
+                                                    }
+
+                                                    setFormData(prev => ({ ...prev, permissions: [...otherPerms, ...newCatPerms] }));
+                                                };
+
+                                                return (
+                                                    <div key={category} className="bg-white dark:bg-midnight-900 border border-gray-200 dark:border-midnight-800 rounded-xl p-4 transition-all hover:border-brand-300 dark:hover:border-brand-700/50">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                            <div>
+                                                                <h5 className="font-bold text-gray-900 dark:text-white text-sm">{category}</h5>
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                    {status === 'none' && 'No access granted'}
+                                                                    {status === 'viewer' && 'Read-only access'}
+                                                                    {status === 'manager' && 'Full control enabled'}
+                                                                    {status === 'custom' && 'Custom configuration'}
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                {/* Quick Level Selector */}
+                                                                <div className="flex bg-gray-100 dark:bg-midnight-800 rounded-lg p-1">
+                                                                    {['none', 'viewer', 'manager'].map((lvl) => (
+                                                                        <button
+                                                                            key={lvl}
+                                                                            type="button"
+                                                                            onClick={() => setLevel(lvl)}
+                                                                            className={`px-3 py-1.5 rounded-md text-xs font-bold capitalize transition-all ${status === lvl
+                                                                                    ? 'bg-white dark:bg-midnight-700 text-brand-600 shadow-sm'
+                                                                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                                                                                }`}
+                                                                        >
+                                                                            {lvl}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Advanced Expandable (Always visible for now if custom, or just list detail) */}
+                                                        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-midnight-800 grid grid-cols-2 md:grid-cols-3 gap-2">
+                                                            {catPerms.map((perm) => (
+                                                                <label
+                                                                    key={perm.id}
+                                                                    className={`flex items-center gap-2 text-[10px] font-medium cursor-pointer p-1.5 rounded hover:bg-gray-50 dark:hover:bg-midnight-800/50 ${formData.permissions.includes(perm.id) ? 'text-gray-900 dark:text-white' : 'text-gray-400'
+                                                                        }`}
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className={`rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-3.5 h-3.5`}
+                                                                        checked={formData.permissions.includes(perm.id)}
+                                                                        onChange={() => togglePermission(perm.id)}
+                                                                    />
+                                                                    <span className="truncate" title={perm.desc}>{perm.label}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
 
