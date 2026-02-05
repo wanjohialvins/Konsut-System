@@ -45,8 +45,8 @@ switch ($method) {
                 $data['title'],
                 $data['priority'] ?? 'medium',
                 $data['status'] ?? 'pending',
-                $data['due_date'],
-                $data['assigneeId'] ?? null,
+                $data['dueDate'] ?? $data['due_date'] ?? null,
+                $data['assigneeId'] ?? $data['assignee_id'] ?? null,
                 $userId
             ]);
             echo json_encode(['success' => true]);
@@ -69,8 +69,8 @@ switch ($method) {
                     $data['title'],
                     $data['priority'],
                     $data['status'],
-                    $data['due_date'],
-                    $data['assigneeId'] ?? null,
+                    $data['dueDate'] ?? $data['due_date'] ?? null,
+                    $data['assigneeId'] ?? $data['assignee_id'] ?? null,
                     $data['id']
                 ]);
             }

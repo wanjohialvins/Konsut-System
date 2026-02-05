@@ -12,10 +12,10 @@ interface Task {
     title: string;
     priority: 'high' | 'medium' | 'low';
     status: 'pending' | 'progress' | 'completed';
-    due_date: string;
-    assignee_id?: number | null;
-    assignee_name?: string;
-    creator_name?: string;
+    dueDate: string;
+    assigneeId?: number | null;
+    assigneeName?: string;
+    creatorName?: string;
 }
 
 const Tasks = () => {
@@ -57,7 +57,7 @@ const Tasks = () => {
 
     const filteredTasks = tasks.filter(t =>
         t.title.toLowerCase().includes(search.toLowerCase()) ||
-        (t.assignee_name || '').toLowerCase().includes(search.toLowerCase())
+        (t.assigneeName || '').toLowerCase().includes(search.toLowerCase())
     );
 
     const handleDelete = async (id: string) => {
@@ -157,16 +157,16 @@ const Tasks = () => {
                                     <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
                                         <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>
                                         <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
-                                            <FiCalendar size={10} /> {task.due_date}
+                                            <FiCalendar size={10} /> {task.dueDate}
                                         </span>
-                                        {task.creator_name && (
+                                        {task.creatorName && (
                                             <span className="px-2 py-1 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 rounded-lg flex items-center gap-1 border border-brand-100 dark:border-brand-900/30">
-                                                By: {task.creator_name}
+                                                By: {task.creatorName}
                                             </span>
                                         )}
                                         <div className="text-gray-300 mx-1">→</div>
                                         <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
-                                            <FiUser size={10} /> {task.assignee_name || 'Global'}
+                                            <FiUser size={10} /> {task.assigneeName || 'Global'}
                                         </span>
                                     </div>
                                 </div>
@@ -216,8 +216,8 @@ const Tasks = () => {
                                 <input
                                     type="date"
                                     className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-medium outline-none focus:ring-2 focus:ring-brand-500"
-                                    value={newItem.due_date}
-                                    onChange={e => setNewItem({ ...newItem, due_date: e.target.value })}
+                                    value={newItem.dueDate}
+                                    onChange={e => setNewItem({ ...newItem, dueDate: e.target.value })}
                                     required
                                 />
                                 {(['admin', 'manager', 'ceo'].includes(user?.role || '')) ? (
