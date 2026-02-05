@@ -72,18 +72,18 @@ const SectionHeader = ({ title, icon: Icon, color = "text-gray-900" }: any) => (
 
 const CEODashboard = ({ data }: { data: DashboardData }) => {
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="space-y-6 md:space-y-8 animate-fade-in">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
         <StatCard label="Total Revenue" value={`Ksh ${data.metrics.totalRevenue.toLocaleString()}`} icon={FaMoneyBillWave} color="text-brand-600" bg="bg-brand-50" link="/analytics" trend={`${(data.metrics.revenueGrowth || 0) > 0 ? '+' : ''}${data.metrics.revenueGrowth || 0}% vs last month`} />
         <StatCard label="Avg Order Value" value={`Ksh ${data.metrics.averageOrderValue.toLocaleString()}`} icon={FaChartLine} color="text-emerald-600" bg="bg-emerald-50" link="/analytics" />
         <StatCard label="Active Users" value={data.metrics.activeUsers} icon={FaUsers} color="text-purple-600" bg="bg-purple-50" link="/users" />
         <StatCard label="System Health" value={data.databaseStatus} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
+        <div className="xl:col-span-2 bg-white dark:bg-midnight-900 p-4 md:p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
           <SectionHeader title="Revenue Velocity" icon={FaChartLine} />
-          <div className="h-[300px]">
+          <div className="h-[250px] md:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data.chartData}>
                 <defs>
@@ -102,8 +102,8 @@ const CEODashboard = ({ data }: { data: DashboardData }) => {
           </div>
         </div>
 
-        <div className="space-y-8">
-          <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
+        <div className="space-y-6 md:space-y-8">
+          <div className="bg-white dark:bg-midnight-900 p-4 md:p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
             <SectionHeader title="Risk Radar" icon={FaExclamationTriangle} color="text-rose-600" />
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/30">
@@ -123,7 +123,7 @@ const CEODashboard = ({ data }: { data: DashboardData }) => {
             </div>
           </div>
 
-          <div className="bg-slate-900 text-gray-300 p-8 rounded-3xl shadow-xl border border-slate-800">
+          <div className="bg-slate-900 text-gray-300 p-4 md:p-8 rounded-3xl shadow-xl border border-slate-800">
             <SectionHeader title="Security Audit Log" icon={FaUserShield} color="text-white" />
             <div className="space-y-0 text-sm font-mono overflow-y-auto max-h-[300px] custom-scrollbar">
               {data.auditLogs.map((log: any, i: number) => (
