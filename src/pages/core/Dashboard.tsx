@@ -80,12 +80,12 @@ const CEODashboard = ({ data }: { data: DashboardData }) => {
         <StatCard label="System Health" value={data.databaseStatus || 'Unknown'} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <div className="xl:col-span-2 bg-white dark:bg-midnight-900 p-4 md:p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
           <SectionHeader title="Revenue Velocity" icon={FaChartLine} />
           <div className="h-[250px] md:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.chartData}>
+              <AreaChart data={data.chartData || []}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
@@ -111,14 +111,14 @@ const CEODashboard = ({ data }: { data: DashboardData }) => {
                   <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
                   <span className="font-bold text-rose-800 dark:text-rose-400 text-sm">Overdue Invoices</span>
                 </div>
-                <span className="font-black text-rose-600 text-lg">{data.metrics.overdueCount}</span>
+                <span className="font-black text-rose-600 text-lg">{data.metrics.overdueCount || 0}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                   <span className="font-bold text-amber-800 dark:text-amber-400 text-sm">Low Stock Items</span>
                 </div>
-                <span className="font-black text-amber-600 text-lg">{data.metrics.lowStockCount}</span>
+                <span className="font-black text-amber-600 text-lg">{data.metrics.lowStockCount || 0}</span>
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ const CEODashboard = ({ data }: { data: DashboardData }) => {
           <div className="bg-slate-900 text-gray-300 p-4 md:p-8 rounded-3xl shadow-xl border border-slate-800">
             <SectionHeader title="Security Audit Log" icon={FaUserShield} color="text-white" />
             <div className="space-y-0 text-sm font-mono overflow-y-auto max-h-[300px] custom-scrollbar">
-              {data.auditLogs.map((log: any, i: number) => (
+              {(data.auditLogs || []).map((log: any, i: number) => (
                 <div key={i} className="flex gap-4 py-3 border-b border-slate-800 hover:bg-white/5 px-2 rounded transition-colors items-center">
                   <span className="text-gray-500 whitespace-nowrap text-[10px]">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   <span className={`font-bold text-xs ${log.action.includes('LOGIN') ? 'text-emerald-400' : 'text-blue-400'}`}>{log.action}</span>
@@ -145,16 +145,16 @@ const ManagerDashboard = ({ data }: { data: DashboardData }) => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard label="Pending Orders" value={data.metrics.pendingInvoicesCount} icon={FaFileInvoiceDollar} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
-        <StatCard label="Team Tasks" value={data.metrics.pendingTasks} icon={FaClipboardList} color="text-indigo-600" bg="bg-indigo-50" link="/tasks" />
-        <StatCard label="Open Issues" value={data.metrics.openTickets} icon={FaTicketAlt} color="text-rose-600" bg="bg-rose-50" link="/tickets" />
+        <StatCard label="Pending Orders" value={data.metrics.pendingInvoicesCount || 0} icon={FaFileInvoiceDollar} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
+        <StatCard label="Team Tasks" value={data.metrics.pendingTasks || 0} icon={FaClipboardList} color="text-indigo-600" bg="bg-indigo-50" link="/tasks" />
+        <StatCard label="Open Issues" value={data.metrics.openTickets || 0} icon={FaTicketAlt} color="text-rose-600" bg="bg-rose-50" link="/tickets" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
           <SectionHeader title="Approval Queue" icon={FaCheckCircle} />
           <div className="space-y-4">
-            {data.metrics.pendingInvoicesCount === 0 ? (
+            {(data.metrics.pendingInvoicesCount || 0) === 0 ? (
               <p className="text-gray-400 text-sm italic">No pending items.</p>
             ) : (
               <div className="p-4 bg-amber-50 rounded-2xl flex items-center justify-between">
@@ -172,7 +172,7 @@ const ManagerDashboard = ({ data }: { data: DashboardData }) => {
         <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
           <SectionHeader title="Staff Announcements" icon={FaBullhorn} />
           <div className="space-y-4">
-            {data.recentMemos.map((memo: any, i: number) => (
+            {(data.recentMemos || []).map((memo: any, i: number) => (
               <div key={i} className={`p-4 rounded-2xl border ${memo.urgent ? 'bg-rose-50 border-rose-100' : 'bg-gray-50 border-gray-100'}`}>
                 <h4 className="font-bold text-sm text-gray-800">{memo.title}</h4>
                 <p className="text-xs text-gray-500 mt-1 line-clamp-2">{memo.content}</p>
@@ -189,7 +189,7 @@ const ManagerDashboard = ({ data }: { data: DashboardData }) => {
 const StorekeeperDashboard = ({ data }: { data: DashboardData }) => {
   return (
     <div className="space-y-8 animate-fade-in">
-      {data.metrics.lowStockCount > 0 && (
+      {(data.metrics.lowStockCount || 0) > 0 && (
         <div className="bg-rose-600 text-white p-6 rounded-3xl shadow-lg shadow-rose-500/30 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/20 rounded-xl"><FaExclamationTriangle size={24} /></div>
@@ -216,16 +216,16 @@ const ITDashboard = ({ data }: { data: DashboardData }) => {
     <div className="space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard label="Server Status" value="Online" icon={FaServer} color="text-emerald-500" bg="bg-slate-800" link="/system-health" />
-        <StatCard label="Open Tickets" value={data.metrics.openTickets} icon={FaTicketAlt} color="text-amber-500" bg="bg-slate-800" link="/tickets" />
-        <StatCard label="Active Users" value={data.metrics.activeUsers} icon={FaUsers} color="text-blue-500" bg="bg-slate-800" link="/users" />
-        <StatCard label="Database" value={data.databaseStatus} icon={FaShieldAlt} color="text-purple-500" bg="bg-slate-800" link="/system-health" />
+        <StatCard label="Open Tickets" value={data.metrics.openTickets || 0} icon={FaTicketAlt} color="text-amber-500" bg="bg-slate-800" link="/tickets" />
+        <StatCard label="Active Users" value={data.metrics.activeUsers || 0} icon={FaUsers} color="text-blue-500" bg="bg-slate-800" link="/users" />
+        <StatCard label="Database" value={data.databaseStatus || 'Unknown'} icon={FaShieldAlt} color="text-purple-500" bg="bg-slate-800" link="/system-health" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-slate-900 text-gray-300 p-8 rounded-3xl shadow-xl border border-slate-800">
           <SectionHeader title="Security Audit Log" icon={FaUserShield} color="text-white" />
           <div className="space-y-0 text-sm font-mono overflow-y-auto max-h-[400px]">
-            {data.auditLogs.map((log: any, i: number) => (
+            {(data.auditLogs || []).map((log: any, i: number) => (
               <div key={i} className="flex gap-4 py-3 border-b border-slate-800 hover:bg-white/5 px-2 rounded transition-colors">
                 <span className="text-gray-500 whitespace-nowrap text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
                 <span className={`font-bold ${log.action.includes('LOGIN') ? 'text-emerald-400' : 'text-blue-400'}`}>{log.action}</span>
@@ -241,11 +241,11 @@ const ITDashboard = ({ data }: { data: DashboardData }) => {
           <div className="space-y-4">
             <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex justify-between items-center">
               <span className="text-rose-700 font-bold">Urgent Tickets</span>
-              <span className="text-2xl font-black text-rose-600">{data.metrics.urgentTickets}</span>
+              <span className="text-2xl font-black text-rose-600">{data.metrics.urgentTickets || 0}</span>
             </div>
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex justify-between items-center">
               <span className="text-blue-700 font-bold">Total Open</span>
-              <span className="text-2xl font-black text-blue-600">{data.metrics.openTickets}</span>
+              <span className="text-2xl font-black text-blue-600">{data.metrics.openTickets || 0}</span>
             </div>
             <Link to="/tickets" className="block w-full py-4 text-center bg-slate-100 dark:bg-midnight-800 rounded-xl font-bold hover:bg-slate-200 transition-colors">Manage Tickets</Link>
           </div>
@@ -270,18 +270,18 @@ const DefaultDashboard = ({ data, role }: { data: DashboardData, role: string })
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard label="Notifications" value="3" icon={FaBell} color="text-brand-600" bg="bg-brand-50" link="/notifications" />
-      <StatCard label="Assigned Tasks" value={data.metrics.pendingTasks} icon={FaClipboardList} color="text-amber-600" bg="bg-amber-50" link="/tasks" />
+      <StatCard label="Assigned Tasks" value={data.metrics.pendingTasks || 0} icon={FaClipboardList} color="text-amber-600" bg="bg-amber-50" link="/tasks" />
     </div>
     <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-midnight-800">
       <SectionHeader title="Recent Company Activity" icon={FaClock} />
       <div className="space-y-4">
-        {data.recentActivity.map((a: any, i: number) => (
+        {(data.recentActivity || []).map((a: any, i: number) => (
           <div key={i} className="flex justify-between items-center py-3 border-b border-gray-50 dark:border-midnight-800 last:border-0">
             <div>
               <p className="font-bold text-gray-800 dark:text-white">{a.customerName || a.customer_name || 'Walk-in'}</p>
               <p className="text-xs text-gray-400">Invoice #{a.id}</p>
             </div>
-            <span className="font-black text-brand-600 dark:text-brand-400">Ksh {Number(a.amount).toLocaleString()}</span>
+            <span className="font-black text-brand-600 dark:text-brand-400">Ksh {Number(a.amount || 0).toLocaleString()}</span>
           </div>
         ))}
       </div>
