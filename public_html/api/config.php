@@ -204,9 +204,9 @@ if (session_status() === PHP_SESSION_NONE) {
 function getPermissionRouteMap()
 {
     return [
-        'view_profile' => ['*'],
+        'view_profile' => ['*', '/settings/profile'],
         'get_self' => ['*'],
-        'view_preferences' => ['*'],
+        'view_preferences' => ['*', '/settings/preferences'],
         'view_support' => ['*'],
         'view_tickets' => ['*', '/tickets', '/tickets/new', '/tickets/:id'],
         'manage_tickets' => ['/tickets', '/tickets/new', '/tickets/:id'],
@@ -221,24 +221,24 @@ function getPermissionRouteMap()
         'view_system_broadcast' => ['/system/broadcast'],
         'view_invoices' => ['/invoices', '/new-invoice', '/clients'],
         'manage_invoices' => ['/new-invoice'],
-        'delete_invoice' => ['/invoices'],
+        'delete_invoice' => ['delete_invoice'], // Explicit only
         'view_clients' => ['/clients', '/new-invoice', '/invoices'],
-        'manage_clients' => ['/clients', '/new-invoice'],
+        'manage_clients' => ['manage_clients'], // Decoupled from page view
         'view_stock' => ['*', '/stock/inventory', '/new-invoice', '/stock/add'],
-        'manage_stock' => ['/stock/add', '/stock/inventory'],
+        'manage_stock' => ['/stock/add'], // Removed /stock/inventory to separate View from Edit
         'view_suppliers' => ['*', '/suppliers', '/stock/inventory'],
-        'manage_suppliers' => ['/suppliers'],
+        'manage_suppliers' => ['manage_suppliers'], // Explicit
         'view_documents' => ['*', '/documents'],
-        'manage_documents' => ['/documents'],
+        'manage_documents' => ['manage_documents'], // Explicit
         'view_tasks' => ['*', '/tasks', '/dashboard'],
-        'manage_tasks' => ['/tasks'],
+        'manage_tasks' => ['manage_tasks'], // Explicit
         'view_memos' => ['*', '/memos', '/dashboard'],
-        'manage_memos' => ['/memos'],
+        'manage_memos' => ['manage_memos'], // Explicit
         'view_notifications' => ['*', '/', '/dashboard', '/notifications'],
         'manage_notifications' => ['/', '/dashboard', '/notifications'],
         'view_users' => ['/users'],
-        'manage_users' => ['/users'],
-        'manage_settings' => ['/settings/profile', '/settings/company', '/settings/invoice', '/settings/preferences'],
+        'manage_users' => ['manage_users'], // Explicit
+        'manage_settings' => ['/settings/company', '/settings/invoice'], // Removed profile/preferences
         'view_settings' => ['/settings/profile', '/settings/company', '/settings/invoice', '/settings/preferences', '/', '/dashboard'],
     ];
 }
@@ -451,12 +451,14 @@ Hub'
             'id' => '/new-invoice',
             'label' => 'Create Order',
             'desc' => 'Generate invoices & quotes',
-            'category' => 'Sales &
-Operations'
+            'category' => 'Sales & Operations'
         ],
         ['id' => '/documents', 'label' => 'Document Vault', 'desc' => 'Secure document storage', 'category' => 'Resource Hub'],
+        ['id' => 'manage_documents', 'label' => 'Manage Documents', 'desc' => 'Upload and delete documents', 'category' => 'Resource Hub'],
         ['id' => '/tasks', 'label' => 'Task Board', 'desc' => 'Operational task management', 'category' => 'Team & Tasks'],
+        ['id' => 'manage_tasks', 'label' => 'Manage Tasks', 'desc' => 'Create and edit tasks', 'category' => 'Team & Tasks'],
         ['id' => '/memos', 'label' => 'Internal Memos', 'desc' => 'Company-wide communication', 'category' => 'Team & Tasks'],
+        ['id' => 'manage_memos', 'label' => 'Manage Memos', 'desc' => 'Post and delete memos', 'category' => 'Team & Tasks'],
         [
             'id' => '/notifications',
             'label' => 'Notifications',
