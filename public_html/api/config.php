@@ -334,243 +334,69 @@ function requirePermission($action)
 function getAllPermissions()
 {
     return [
-        // Intelligence
-        ['id' => '/', 'label' => 'Overview', 'desc' => 'Main business dashboard', 'category' => 'Intelligence'],
-        [
-            'id' => '/analytics',
-            'label' => 'Analytics & Reports',
-            'desc' => 'Revenue & accounting reports',
-            'category' =>
-                'Intelligence'
-        ],
+        // 1. Core Dashboards
+        ['id' => '/', 'label' => 'View Command Center', 'desc' => 'Access to main dashboard', 'category' => 'Core Dashboards'],
+        ['id' => '/analytics', 'label' => 'View Financial Analytics', 'desc' => 'Access to revenue reports', 'category' => 'Core Dashboards'],
 
-        // Resource Hub (Stock)
-        [
-            'id' => 'view_stock',
-            'label' => 'View Inventory',
-            'desc' => 'Can see stock levels and items',
-            'category' => 'Resource Hub'
-        ],
-        [
-            'id' => 'manage_stock',
-            'label' => 'Manage Inventory',
-            'desc' => 'Can add, edit, and delete stock',
-            'category' =>
-                'Resource Hub'
-        ],
-        [
-            'id' => '/stock/inventory',
-            'label' => 'Inventory Page',
-            'desc' => 'Access to inventory route',
-            'category' => 'Resource
-Hub'
-        ],
+        // 2. Sales & Orders
+        ['id' => '/invoices', 'label' => 'View Invoices Page', 'desc' => 'Access invoice list', 'category' => 'Sales & Orders'],
+        ['id' => 'view_orders', 'label' => 'View Order Details', 'desc' => 'Read-only access to orders', 'category' => 'Sales & Orders'],
+        ['id' => '/new-invoice', 'label' => 'Access "New Order" Page', 'desc' => 'Open the invoice creator', 'category' => 'Sales & Orders'],
+        ['id' => 'create_order', 'label' => 'Create New Orders', 'desc' => 'Can save new invoices/quotes', 'category' => 'Sales & Orders'],
+        ['id' => 'manage_invoices', 'label' => 'Edit Existing Orders', 'desc' => 'Modify saved invoices', 'category' => 'Sales & Orders'],
+        ['id' => 'delete_invoice', 'label' => 'Delete Orders', 'desc' => 'Permanently remove invoices', 'category' => 'Sales & Orders'],
 
-        // Sales & Operations (Invoices)
-        [
-            'id' => 'view_orders',
-            'label' => 'View Orders',
-            'desc' => 'Can see order history',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => 'create_order',
-            'label' => 'Create Order',
-            'desc' => 'Can generate new invoices and quotes',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => 'manage_invoices',
-            'label' => 'Manage Invoices',
-            'desc' => 'Can create and modify orders',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => 'delete_invoice',
-            'label' => 'Delete Invoices',
-            'desc' => 'Can permanently remove records',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => '/invoices',
-            'label' => 'Invoices Page',
-            'desc' => 'Access to invoices route',
-            'category' => 'Sales & Operations'
-        ],
+        // 3. Inventory & Stock
+        ['id' => '/stock/inventory', 'label' => 'View Inventory Page', 'desc' => 'Access stock list', 'category' => 'Inventory & Stock'],
+        ['id' => 'view_stock', 'label' => 'View Stock Details', 'desc' => 'Read-only access to items', 'category' => 'Inventory & Stock'],
+        ['id' => '/stock/add', 'label' => 'Access "Add Item" Page', 'desc' => 'Open stock entry form', 'category' => 'Inventory & Stock'],
+        ['id' => 'manage_stock', 'label' => 'Manage Inventory Items', 'desc' => 'Add, edit, or delete items', 'category' => 'Inventory & Stock'],
 
-        // Clients
-        [
-            'id' => 'view_clients',
-            'label' => 'View Clients',
-            'desc' => 'Can see customer records',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => 'manage_clients',
-            'label' => 'Manage Clients',
-            'desc' => 'Can modify customer records',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => 'delete_client',
-            'label' => 'Delete Clients',
-            'desc' => 'Can remove customer records',
-            'category' => 'Sales & Operations'
-        ],
-        [
-            'id' => '/clients',
-            'label' => 'Clients Page',
-            'desc' => 'Access to clients route',
-            'category' => 'Sales & Operations'
-        ],
+        // 4. CRM (Clients & Suppliers)
+        ['id' => '/clients', 'label' => 'View Clients Page', 'desc' => 'Access client list', 'category' => 'CRM'],
+        ['id' => 'view_clients', 'label' => 'View Client Profiles', 'desc' => 'Read customer details', 'category' => 'CRM'],
+        ['id' => 'manage_clients', 'label' => 'Manage Clients', 'desc' => 'Add or edit customers', 'category' => 'CRM'],
+        ['id' => 'delete_client', 'label' => 'Delete Clients', 'desc' => 'Remove customer records', 'category' => 'CRM'],
+        ['id' => '/suppliers', 'label' => 'View Suppliers Page', 'desc' => 'Access vendor list', 'category' => 'CRM'],
+        ['id' => 'view_suppliers', 'label' => 'View Supplier Profiles', 'desc' => 'Read vendor details', 'category' => 'CRM'],
+        ['id' => 'manage_suppliers', 'label' => 'Manage Suppliers', 'desc' => 'Add, edit, or remove vendors', 'category' => 'CRM'],
 
-        // Suppliers
-        [
-            'id' => 'view_suppliers',
-            'label' => 'View Suppliers',
-            'desc' => 'Can see vendor relations',
-            'category' => 'Resource
-Hub'
-        ],
-        [
-            'id' => 'manage_suppliers',
-            'label' => 'Manage Suppliers',
-            'desc' => 'Can modify vendor records',
-            'category' =>
-                'Resource Hub'
-        ],
-        [
-            'id' => '/suppliers',
-            'label' => 'Suppliers Page',
-            'desc' => 'Access to suppliers route',
-            'category' => 'Resource Hub'
-        ],
+        // 5. Team Collaboration
+        ['id' => '/tasks', 'label' => 'View Task Board', 'desc' => 'Access team tasks', 'category' => 'Team Collaboration'],
+        ['id' => 'view_tasks', 'label' => 'View Task Details', 'desc' => 'Read task info', 'category' => 'Team Collaboration'],
+        ['id' => 'manage_tasks', 'label' => 'Manage Tasks', 'desc' => 'Create, edit, delete tasks', 'category' => 'Team Collaboration'],
+        ['id' => '/memos', 'label' => 'View Memos', 'desc' => 'Access internal comms', 'category' => 'Team Collaboration'],
+        ['id' => 'view_memos', 'label' => 'Read Memos', 'desc' => 'Read company updates', 'category' => 'Team Collaboration'],
+        ['id' => 'manage_memos', 'label' => 'Post/Delete Memos', 'desc' => 'Manage announcements', 'category' => 'Team Collaboration'],
+        ['id' => '/documents', 'label' => 'View Document Vault', 'desc' => 'Access file storage', 'category' => 'Team Collaboration'],
+        ['id' => 'view_documents', 'label' => 'Preview Documents', 'desc' => 'Read stored files', 'category' => 'Team Collaboration'],
+        ['id' => 'manage_documents', 'label' => 'Manage Documents', 'desc' => 'Upload or delete files', 'category' => 'Team Collaboration'],
 
-        // Other modules...
-        [
-            'id' => '/new-invoice',
-            'label' => 'Create Order',
-            'desc' => 'Generate invoices & quotes',
-            'category' => 'Sales & Operations'
-        ],
-        ['id' => '/documents', 'label' => 'Document Vault', 'desc' => 'Secure document storage', 'category' => 'Resource Hub'],
-        ['id' => 'manage_documents', 'label' => 'Manage Documents', 'desc' => 'Upload and delete documents', 'category' => 'Resource Hub'],
-        ['id' => '/tasks', 'label' => 'Task Board', 'desc' => 'Operational task management', 'category' => 'Team & Tasks'],
-        ['id' => 'manage_tasks', 'label' => 'Manage Tasks', 'desc' => 'Create and edit tasks', 'category' => 'Team & Tasks'],
-        ['id' => '/memos', 'label' => 'Internal Memos', 'desc' => 'Company-wide communication', 'category' => 'Team & Tasks'],
-        ['id' => 'manage_memos', 'label' => 'Manage Memos', 'desc' => 'Post and delete memos', 'category' => 'Team & Tasks'],
-        [
-            'id' => '/notifications',
-            'label' => 'Notifications',
-            'desc' => 'System and alert center',
-            'category' => 'Team & Tasks'
-        ],
-        [
-            'id' => 'view_users',
-            'label' => 'View Personnel',
-            'desc' => 'Can see the list of system users',
-            'category' => 'Governance'
-        ],
-        [
-            'id' => 'manage_users',
-            'label' => 'Manage Personnel',
-            'desc' => 'Can create, edit, and reset user accounts',
-            'category' => 'Governance'
-        ],
-        ['id' => '/users', 'label' => 'User Management Page', 'desc' => 'Access to users route', 'category' => 'Governance'],
-        [
-            'id' => '/audit-logs',
-            'label' => 'Security Logs',
-            'desc' => 'Audit trails & activity history',
-            'category' => 'Governance'
-        ],
-        [
-            'id' => '/system-logs',
-            'label' => 'System Diagnostics',
-            'desc' => 'View frontend error captures',
-            'category' =>
-                'Governance'
-        ],
-        [
-            'id' => '/accountability',
-            'label' => 'Accountability',
-            'desc' => 'System accountability reports',
-            'category' =>
-                'Governance'
-        ],
-        [
-            'id' => '/system/vitals',
-            'label' => 'System Vitals',
-            'desc' => 'Diagnostic & Environment info',
-            'category' => 'Core Intelligence'
-        ],
-        [
-            'id' => '/system/data',
-            'label' => 'Data Core',
-            'desc' => 'Backups, Sync & Cleanup',
-            'category' => 'Core Intelligence'
-        ],
-        [
-            'id' => '/system/security',
-            'label' => 'Security Protocols',
-            'desc' => 'Maintenance & Emergency Reset',
-            'category' =>
-                'Core Intelligence'
-        ],
-        [
-            'id' => '/system/broadcast',
-            'label' => 'Command Center',
-            'desc' => 'System-wide announcements',
-            'category' => 'Core Intelligence'
-        ],
-        [
-            'id' => '/settings/profile',
-            'label' => 'My Account',
-            'desc' => 'Personal account settings',
-            'category' =>
-                'Configuration'
-        ],
-        [
-            'id' => '/settings/company',
-            'label' => 'Business Identity',
-            'desc' => 'Global organization settings',
-            'category' =>
-                'Configuration'
-        ],
-        [
-            'id' => '/settings/invoice',
-            'label' => 'Invoice Engine',
-            'desc' => 'PDF & layout configuration',
-            'category' =>
-                'Configuration'
-        ],
-        [
-            'id' => '/settings/preferences',
-            'label' => 'UI Preferences',
-            'desc' => 'Personal UI/UX settings',
-            'category' =>
-                'Configuration'
-        ],
-        ['id' => '/support', 'label' => 'Help Center', 'desc' => 'Main support dashboard', 'category' => 'Resources & Support'],
-        [
-            'id' => '/support/guide',
-            'label' => 'System Manual',
-            'desc' => 'Complete operation guide',
-            'category' => 'Resources & Support'
-        ],
-        [
-            'id' => '/tickets',
-            'label' => 'Support History',
-            'desc' => 'View past support tickets',
-            'category' => 'Resources & Support'
-        ],
-        [
-            'id' => '/tickets/new',
-            'label' => 'New Ticket Request',
-            'desc' => 'Submit new support requests',
-            'category' =>
-                'Resources & Support'
-        ],
+        // 6. Support & Help
+        ['id' => '/support', 'label' => 'View Help Center', 'desc' => 'Access support dashboard', 'category' => 'Support & Help'],
+        ['id' => '/support/guide', 'label' => 'View System Manual', 'desc' => 'Read operation guides', 'category' => 'Support & Help'],
+        ['id' => '/tickets', 'label' => 'View Ticket History', 'desc' => 'See past support requests', 'category' => 'Support & Help'],
+        ['id' => '/tickets/new', 'label' => 'Create Support Ticket', 'desc' => 'Submit new requests', 'category' => 'Support & Help'],
+
+        // 7. System Administration
+        ['id' => '/users', 'label' => 'View User Management', 'desc' => 'Access user list', 'category' => 'System Administration'],
+        ['id' => 'view_users', 'label' => 'View User Profiles', 'desc' => 'See staff details', 'category' => 'System Administration'],
+        ['id' => 'manage_users', 'label' => 'Manage Users', 'desc' => 'Create, edit, reset users', 'category' => 'System Administration'],
+        ['id' => '/audit-logs', 'label' => 'View Security Logs', 'desc' => 'Audit trails access', 'category' => 'System Administration'],
+        ['id' => '/system-logs', 'label' => 'View System Diagnostics', 'desc' => 'Error logs access', 'category' => 'System Administration'],
+        ['id' => '/accountability', 'label' => 'View Accountability', 'desc' => 'Report access', 'category' => 'System Administration'],
+        ['id' => '/system/vitals', 'label' => 'View System Vitals', 'desc' => 'Server status access', 'category' => 'System Administration'],
+        ['id' => '/system/data', 'label' => 'Manage System Data', 'desc' => 'Backups & Cleanup', 'category' => 'System Administration'],
+        ['id' => '/system/security', 'label' => 'Manage Security', 'desc' => 'Protocols & Resets', 'category' => 'System Administration'],
+        ['id' => '/system/broadcast', 'label' => 'System Broadcaster', 'desc' => 'Send global alerts', 'category' => 'System Administration'],
+
+        // 8. Global Configuration
+        ['id' => '/settings/profile', 'label' => 'My Account Settings', 'desc' => 'Personal profile access', 'category' => 'Global Configuration'],
+        ['id' => '/settings/preferences', 'label' => 'My UI Preferences', 'desc' => 'Personal UI settings', 'category' => 'Global Configuration'],
+        ['id' => 'view_settings', 'label' => 'View Company Settings', 'desc' => 'See business config', 'category' => 'Global Configuration'],
+        ['id' => 'manage_settings', 'label' => 'Edit Company Settings', 'desc' => 'Modify business details', 'category' => 'Global Configuration'],
+        ['id' => '/settings/company', 'label' => 'Company Profile Page', 'desc' => 'Access business settings', 'category' => 'Global Configuration'],
+        ['id' => '/settings/invoice', 'label' => 'Invoice Settings Page', 'desc' => 'Access invoice config', 'category' => 'Global Configuration'],
     ];
 }
 
