@@ -3,7 +3,7 @@
 require_once '../config.php';
 
 $pdo = getDbConnection();
-$user_id = $_SERVER['HTTP_X_USER_ID'] ?? 0;
+$user_id = getRequestHeader('X-User-Id');
 
 // Security check: Only allow admins with 'system_control' permission
 requirePermission('system_control');

@@ -7,8 +7,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 $db = getDbConnection();
 
 // Only logged in users can access tickets
-$user_id = $_SERVER['HTTP_X_USER_ID'] ?? null;
-$user_role = $_SERVER['HTTP_X_USER_ROLE'] ?? null;
+$user_id = getRequestHeader('X-User-Id');
+$user_role = strtolower(getRequestHeader('X-User-Role') ?? '');
 
 if (!$user_id) {
     http_response_code(401);

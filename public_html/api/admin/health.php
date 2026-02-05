@@ -51,23 +51,34 @@ try {
 
     // 4. PHP Error Log (Tail last 20 lines)
     $logFile = ini_get('error_log');
+
+    // cPanel often puts a local 'error_log' in the public_html or api directory
+    $localLog = __DIR__ . '/../error_log';
+    if (!$logFile || !file_exists($logFile) || !is_readable($logFile)) {
+        if (file_exists($localLog) && is_readable($localLog)) {
+            $logFile = $localLog;
+        }
+    }
+
     $phpLogs = [];
     if ($logFile && file_exists($logFile) && is_readable($logFile)) {
-        // Read last 4KB
+        // Read last 8KB (increased from 4KB for better context)
         $fp = fopen($logFile, 'r');
         if ($fp) {
             $fsize = filesize($logFile);
-            $offset = max(0, $fsize - 4096);
+            $offset = max(0, $fsize - 8192);
             fseek($fp, $offset);
-            $data = fread($fp, 4096);
+            $data = fread($fp, 8192);
             fclose($fp);
             if ($data) {
                 $lines = explode("\n", $data);
-                $phpLogs = array_slice($lines, -20); // Take last 20
+                // Filter out empty lines and take last 20
+                $lines = array_filter(array_map('trim', $lines));
+                $phpLogs = array_slice($lines, -20);
             }
         }
     } else {
-        $phpLogs = ["Log file inaccessible or not defined in php.ini", "Path: " . ($logFile ?: 'Unknown')];
+        $phpLogs = ["Log file inaccessible or not defined.", "Attempted Path: " . ($logFile ?: 'None')];
     }
 
     echo json_encode([

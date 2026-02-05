@@ -33,7 +33,13 @@ if ($method === 'POST') {
     }
 
     $content = file_get_contents($configFile);
-    $backupFile = $configFile . '.bak.' . time();
+
+    // Backup to protected logs directory
+    $backupDir = __DIR__ . '/../../logs/backups/';
+    if (!is_dir($backupDir)) {
+        mkdir($backupDir, 0755, true);
+    }
+    $backupFile = $backupDir . 'config.php.bak.' . time();
     copy($configFile, $backupFile); // Backup first
 
     foreach ($newConfig as $key => $value) {
@@ -47,13 +53,15 @@ if ($method === 'POST') {
         $content = preg_replace($pattern, $replacement, $content);
     }
 
-    file_put_contents($configFile, $content);
+    if (file_put_contents($configFile, $content) === false) {
+        sendError('Failed to write to config.php. Please check file permissions.', 500);
+    }
 
     // Log it
     $userId = getRequestHeader('X-User-Id');
     $pdo = getDbConnection();
     $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())");
-    $stmt->execute([$userId, 'CONFIG_UPDATE', "Updated system configuration. Backup: $backupFile"]);
+    $stmt->execute([$userId, 'CONFIG_UPDATE', "Updated system configuration. Backup stored in logs."]);
 
     echo json_encode(['success' => true, 'message' => 'Configuration updated successfully']);
     exit;

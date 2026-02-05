@@ -6,7 +6,7 @@ $pdo = getDbConnection();
 requirePermission('system_control');
 
 $action = $_GET['action'] ?? '';
-$user_id = $_SERVER['HTTP_X_USER_ID'] ?? 0; // Ideally from session/token
+$user_id = getRequestHeader('X-User-Id') ?? 0;
 
 try {
     // Log the action
@@ -82,9 +82,14 @@ try {
             exit;
 
         case 'refresh-schema':
-            $sqlFile = __DIR__ . '/../database.sql';
+            $sqlFile = __DIR__ . '/../../../invoice_system.sql';
             if (!file_exists($sqlFile)) {
-                throw new Exception("database.sql not found at $sqlFile");
+                // Fallback for sibling public_html structure
+                $sqlFile = __DIR__ . '/../../invoice_system.sql';
+            }
+
+            if (!file_exists($sqlFile)) {
+                throw new Exception("invoice_system.sql not found. Checked root and public_html.");
             }
             $sql = file_get_contents($sqlFile);
 

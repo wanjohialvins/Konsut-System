@@ -103,6 +103,12 @@ if ($method === 'POST') {
             ];
             file_put_contents($statusFile, json_encode($statuses));
 
+            // Audit Log
+            $userId = getRequestHeader('X-User-Id') ?? 0;
+            $pdo = getDbConnection();
+            $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())");
+            $stmt->execute([$userId, 'CRON_RUN', "Manually executed task: $taskId"]);
+
             echo json_encode(['success' => true, 'message' => $resultMsg, 'last_run' => $statuses[$taskId]['last_run']]);
         } catch (Exception $e) {
             sendError($e->getMessage(), 500);
