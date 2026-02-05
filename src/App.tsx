@@ -106,7 +106,6 @@ const App = () => {
                       <Route path="system/security" element={<SystemSecurity />} />
                       <Route path="system/broadcast" element={<SystemBroadcast />} />
 
-// Removed SystemHealth
                       <Route path="tasks" element={<Tasks />} />
                       <Route path="documents" element={<Documents />} />
                       <Route path="memos" element={<Memos />} />
