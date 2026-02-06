@@ -77,11 +77,23 @@ const Notifications = () => {
         }
     };
 
-    const filtered = notifications.filter(n => {
+    const filtered = (notifications || []).filter(n => {
+        if (!n) return false;
         if (filter === 'unread') return !n.read;
         if (filter === 'read') return n.read;
         return true;
     });
+
+    const renderDate = (dateStr: string) => {
+        try {
+            if (!dateStr) return 'Unknown date';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return 'Invalid date';
+            return formatDistanceToNow(date, { addSuffix: true });
+        } catch (e) {
+            return 'Invalid date';
+        }
+    };
 
     return (
         <div className="p-6 md:p-10 max-w-4xl mx-auto animate-fade-in">
@@ -112,7 +124,7 @@ const Notifications = () => {
             </header>
 
             <div className="space-y-4">
-                {notifications.length > 0 && notifications.some(n => !n.read) && (
+                {Array.isArray(notifications) && notifications.length > 0 && notifications.some(n => n && !n.read) && (
                     <div className="flex justify-end">
                         <button onClick={markAllAsRead} className="text-xs font-bold text-brand-600 dark:text-brand-400 flex items-center gap-1 hover:underline">
                             <FiCheck /> Mark all as read
@@ -126,47 +138,52 @@ const Notifications = () => {
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading Feed...</p>
                     </div>
                 ) : filtered.length > 0 ? (
-                    filtered.map(notification => (
-                        <div
-                            key={notification.id}
-                            className={`group bg-white dark:bg-midnight-900 p-6 rounded-[2rem] border transition-all duration-300 ${notification.read ? 'border-gray-50 dark:border-midnight-800 opacity-80' : 'border-brand-100 dark:border-brand-500/30 shadow-sm'}`}
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className={`p-3 rounded-2xl ${notification.read ? 'bg-gray-100 dark:bg-midnight-800' : 'bg-brand-50 dark:bg-brand-500/10'}`}>
-                                    {getIcon(notification.type, notification.read)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <h3 className={`font-bold transition-colors ${notification.read ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-white group-hover:text-brand-600'}`}>
-                                            {notification.title}
-                                        </h3>
-                                        {!notification.read && (
-                                            <span className="w-2 h-2 bg-brand-600 rounded-full animate-pulse"></span>
-                                        )}
+                    filtered.map(notification => {
+                        if (!notification) return null;
+                        return (
+                            <div
+                                key={notification.id || Math.random()}
+                                className={`group bg-white dark:bg-midnight-900 p-6 rounded-[2rem] border transition-all duration-300 ${notification.read ? 'border-gray-50 dark:border-midnight-800 opacity-80' : 'border-brand-100 dark:border-brand-500/30 shadow-sm'}`}
+                            >
+                                <div className="flex items-start gap-4">
+                                    <div className={`p-3 rounded-2xl ${notification.read ? 'bg-gray-100 dark:bg-midnight-800' : 'bg-brand-50 dark:bg-brand-500/10'}`}>
+                                        {getIcon(notification.type || 'info', notification.read)}
                                     </div>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">{notification.message}</p>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                            <span className="flex items-center gap-1">
-                                                <FiClock size={12} />
-                                                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h3 className={`font-bold transition-colors ${notification.read ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-white group-hover:text-brand-600'}`}>
+                                                {notification.title || 'Untitled Notification'}
+                                            </h3>
                                             {!notification.read && (
-                                                <button onClick={() => markAsRead(notification.id)} className="p-2 text-brand-600 bg-brand-50 dark:bg-brand-900/20 rounded-xl hover:bg-brand-100 transition-colors" title="Mark Read">
-                                                    <FiCheck size={16} />
-                                                </button>
+                                                <span className="w-2 h-2 bg-brand-600 rounded-full animate-pulse"></span>
                                             )}
-                                            <button onClick={() => deleteNotification(notification.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-midnight-800 rounded-xl transition-colors" title="Delete">
-                                                <FiTrash2 size={16} />
-                                            </button>
+                                        </div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">{notification.message || 'No content provided.'}</p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                <span className="flex items-center gap-1">
+                                                    <FiClock size={12} />
+                                                    {renderDate(notification.created_at)}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {!notification.read && notification.id && (
+                                                    <button onClick={() => markAsRead(notification.id)} className="p-2 text-brand-600 bg-brand-50 dark:bg-brand-900/20 rounded-xl hover:bg-brand-100 transition-colors" title="Mark Read">
+                                                        <FiCheck size={16} />
+                                                    </button>
+                                                )}
+                                                {notification.id && (
+                                                    <button onClick={() => deleteNotification(notification.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-midnight-800 rounded-xl transition-colors" title="Delete">
+                                                        <FiTrash2 size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="bg-white dark:bg-midnight-950/50 border-2 border-dashed border-gray-100 dark:border-midnight-800 rounded-[3rem] py-20 flex flex-col items-center justify-center text-center space-y-4">
                         <div className="w-20 h-20 bg-gray-50 dark:bg-midnight-900 rounded-full flex items-center justify-center text-gray-300">

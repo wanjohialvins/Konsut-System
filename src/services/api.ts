@@ -217,6 +217,7 @@ export const api = {
         debugAuth: (credentials: Record<string, string>) => request<{ success: boolean; debugInfo: any }>('admin/debug_auth.php', { method: 'POST', body: JSON.stringify(credentials) }),
         getSystemHealth: () => request<any>('admin/health.php'),
         getNotifications: () => request('notifications.php'),
+        getNotificationsCount: () => request<{ unreadCount: number }>('notifications.php?action=count'),
         markNotificationRead: (id: string) => request(`notifications.php?id=${id}`, { method: 'PUT' }),
         deleteNotification: (id: string) => request(`notifications.php?id=${id}`, { method: 'DELETE' }),
         backup: () => request<any>('admin/backup.php'),

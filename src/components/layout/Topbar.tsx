@@ -20,37 +20,38 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
   const prevCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    audioRef.current = new Audio(notificationSound);
-  }, []);
-
   const fetchUnreadCount = async () => {
+    if (!user) return;
     try {
-      const resp = await api.admin.runAction('notifications-count'); // I'll map this or use direct API
-      // Wait, api.admin has getNotifications, I should add a count method or hits the raw endpoint
-      const response = await fetch(`${window.location.origin}/api/notifications.php?action=count`, {
-        headers: {
-          'X-User-Id': String(user?.id),
-          'X-User-Role': user?.role || ''
-        }
-      });
-      const data = await response.json();
-      const count = data.unreadCount || 0;
+      const data = await api.admin.getNotificationsCount();
+      const count = data?.unreadCount || 0;
 
+      // Only play sound if unread count increases
       if (count > prevCountRef.current) {
-        audioRef.current?.play().catch(e => console.log('Audio playback blocked'));
+        if (!audioRef.current) {
+          audioRef.current = new Audio(notificationSound);
+        }
+
+        // Safety checks for audio playback
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(err => {
+          // Failure to play sound usually means user hasn't interacted with page yet
+          // We silent catch to prevent app crash
+          console.warn('Notification audio blocked/failed:', err.message);
+        });
       }
+
       setUnreadCount(count);
       prevCountRef.current = count;
     } catch (e) {
-      // Slient fail for topbar polling
+      console.error('Failed to fetch notification count:', e);
     }
   };
 
   useEffect(() => {
     if (user) {
       fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 15000); // Polling every 15s
+      const interval = setInterval(fetchUnreadCount, 20000); // Poll every 20s (less aggressive)
       return () => clearInterval(interval);
     }
   }, [user]);
