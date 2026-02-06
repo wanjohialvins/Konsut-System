@@ -95,18 +95,30 @@ const Tasks = () => {
             const finalAssigneeId = canAssign ? (newItem.assigneeId || null) : user?.id;
             const finalAssigneeRole = canAssign ? (newItem.assigneeRole || null) : null;
 
-            await api.tasks.create({
+            const payload = {
                 ...newItem,
                 assigneeId: finalAssigneeId,
                 assigneeRole: finalAssigneeRole,
-                id: `TASK-${Date.now()}`
-            });
-            showToast('success', 'Task created and broadcasted');
+            };
+
+            if ((newItem as any).id) {
+                // UPDATE
+                await api.tasks.update(payload);
+                showToast('success', 'Task updated');
+            } else {
+                // CREATE
+                await api.tasks.create({
+                    ...payload,
+                    id: `TASK-${Date.now()}`
+                });
+                showToast('success', 'Task created and broadcasted');
+            }
+
             setIsAddOpen(false);
             setNewItem({ title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: '', assigneeRole: '' });
             loadTasks();
         } catch (e) {
-            showToast('error', 'Failed to create task');
+            showToast('error', 'Failed to save task');
         }
     };
 
@@ -160,11 +172,38 @@ const Tasks = () => {
                             <div className="space-y-4">
                                 {filteredTasks.filter(t => t.status === status).map(task => (
                                     <div key={task.id} className="bg-white dark:bg-midnight-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-midnight-800 hover:shadow-md transition-all group relative cursor-pointer" onClick={() => handleStatusChange(task)}>
-                                        {isAdmin && (
-                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }} className="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                                <FiTrash2 />
-                                            </button>
-                                        )}
+                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            {(isAdmin || user?.id === (task as any).created_by) && (
+                                                <>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setNewItem({
+                                                                id: task.id, // Important for updates
+                                                                title: task.title,
+                                                                priority: task.priority,
+                                                                status: task.status,
+                                                                due_date: task.due_date,
+                                                                assigneeId: task.assignee_id,
+                                                                assigneeRole: task.assignee_role
+                                                            });
+                                                            setIsAddOpen(true);
+                                                        }}
+                                                        className="text-gray-300 hover:text-blue-500 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                        title="Edit Task"
+                                                    >
+                                                        <FiEdit2 size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }}
+                                                        className="text-gray-300 hover:text-rose-500 p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                                                        title="Delete Task"
+                                                    >
+                                                        <FiTrash2 size={14} />
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                         <h4 className="font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-600 transition-colors pr-6">{task.title}</h4>
                                         <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
                                             <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>

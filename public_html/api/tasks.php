@@ -71,23 +71,53 @@ switch ($method) {
         break;
 
     case 'PUT':
-        requirePermission('manage_tasks');
+        // Relaxed permission check: Specific logic inside
         $data = json_decode(file_get_contents('php://input'), true);
         try {
+            $user = $GLOBALS['CURRENT_USER_SESSION'];
+            $userId = $user['id'];
+            $userRole = strtolower($user['role']);
+            $hasManageTasks = in_array($userRole, ['admin', 'manager', 'ceo']);
+
+            // Fetch existing task to check ownership/assignment
+            $checkStmt = $pdo->prepare("SELECT * FROM tasks WHERE id = ?");
+            $checkStmt->execute([$data['id']]);
+            $existingTask = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$existingTask) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Task not found']);
+                exit;
+            }
+
             if (isset($data['status']) && count($data) == 2) {
-                $stmt = $pdo->prepare("UPDATE tasks SET status=? WHERE id=?");
-                $stmt->execute([$data['status'], $data['id']]);
+                // STATUS UPDATE: Allow Assignee, Creator, or Admin
+                if ($hasManageTasks || $existingTask['assignee_id'] == $userId || $existingTask['created_by'] == $userId || ($existingTask['assignee_role'] && $existingTask['assignee_role'] == $userRole)) {
+                    $stmt = $pdo->prepare("UPDATE tasks SET status=? WHERE id=?");
+                    $stmt->execute([$data['status'], $data['id']]);
+                } else {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'Permission denied to update status']);
+                    exit;
+                }
             } else {
-                $stmt = $pdo->prepare("UPDATE tasks SET title=?, priority=?, status=?, due_date=?, assignee_id=?, assignee_role=? WHERE id=?");
-                $stmt->execute([
-                    $data['title'],
-                    $data['priority'],
-                    $data['status'],
-                    $data['dueDate'] ?? $data['due_date'] ?? null,
-                    $data['assigneeId'] ?? $data['assignee_id'] ?? null,
-                    $data['assigneeRole'] ?? $data['assignee_role'] ?? null,
-                    $data['id']
-                ]);
+                // FULL UPDATE: Allow Creator or Admin only
+                if ($hasManageTasks || $existingTask['created_by'] == $userId) {
+                    $stmt = $pdo->prepare("UPDATE tasks SET title=?, priority=?, status=?, due_date=?, assignee_id=?, assignee_role=? WHERE id=?");
+                    $stmt->execute([
+                        $data['title'],
+                        $data['priority'],
+                        $data['status'],
+                        $data['dueDate'] ?? $data['due_date'] ?? null,
+                        $data['assigneeId'] ?? $data['assignee_id'] ?? null,
+                        $data['assigneeRole'] ?? $data['assignee_role'] ?? null,
+                        $data['id']
+                    ]);
+                } else {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'Permission denied to edit task details']);
+                    exit;
+                }
             }
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
@@ -97,7 +127,7 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        requirePermission('manage_tasks');
+        // Relaxed permission check: Specific logic inside
         $id = $_GET['id'] ?? null;
         if (!$id) {
             http_response_code(400);
@@ -105,9 +135,24 @@ switch ($method) {
             exit;
         }
         try {
-            $stmt = $pdo->prepare("DELETE FROM tasks WHERE id = ?");
-            $stmt->execute([$id]);
-            echo json_encode(['success' => true]);
+            $user = $GLOBALS['CURRENT_USER_SESSION'];
+            $userId = $user['id'];
+            $userRole = strtolower($user['role']);
+            $hasManageTasks = in_array($userRole, ['admin', 'manager', 'ceo']);
+
+            // Check ownership
+            $checkStmt = $pdo->prepare("SELECT created_by FROM tasks WHERE id = ?");
+            $checkStmt->execute([$id]);
+            $task = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($task && ($hasManageTasks || $task['created_by'] == $userId)) {
+                $stmt = $pdo->prepare("DELETE FROM tasks WHERE id = ?");
+                $stmt->execute([$id]);
+                echo json_encode(['success' => true]);
+            } else {
+                http_response_code(403);
+                echo json_encode(['error' => 'Permission denied']);
+            }
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
