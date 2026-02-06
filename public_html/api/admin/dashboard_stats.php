@@ -114,6 +114,7 @@ $revenueGrowth = ($prevRev > 0) ? round((($currRev - $prevRev) / $prevRev) * 100
         // Table doesn't exist yet, use empty array
         }
 
+        ob_clean();
         echo json_encode([
         'metrics' => [
         'totalRevenue' => round($invStats['total_revenue'] ?? 0),
