@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { FiTrash2, FiEdit2, FiX, FiCheckCircle, FiPlus, FiUser, FiShield, FiKey } from "react-icons/fi";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
@@ -160,9 +161,12 @@ const Users = () => {
         }
     };
 
+
+
     if (loading && users.length === 0) return (
-        <div className="flex items-center justify-center p-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+        <div className="space-y-6 max-w-7xl mx-auto p-6 md:p-8">
+            <PageHeaderSkeleton />
+            <TableSkeleton rows={5} />
         </div>
     );
 

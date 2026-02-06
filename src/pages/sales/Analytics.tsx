@@ -271,12 +271,7 @@ const Analytics: React.FC = () => {
     setIsReportModalOpen(true);
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-      <div className="w-16 h-16 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
-      <p className="text-gray-500 font-bold animate-pulse">Synchronizing Ledger...</p>
-    </div>
-  );
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="p-6 bg-slate-50 dark:bg-midnight-950 min-h-screen transition-colors duration-300 font-sans">

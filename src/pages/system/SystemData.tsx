@@ -3,6 +3,7 @@ import { FiDatabase, FiHardDrive, FiRefreshCcw, FiCopy, FiClock, FiPlay, FiCheck
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { useModal } from "../../contexts/ModalContext";
+import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 const SystemData = () => {
     const { showToast } = useToast();
@@ -17,13 +18,19 @@ const SystemData = () => {
     }, []);
 
     const loadCrons = async () => {
+        setLoading(true);
         try {
             const res = await api.admin.getCrons();
             if (res && res.tasks) setCrons(res.tasks);
         } catch (e) {
             console.error("Failed to load crons", e);
+            // Don't show toast on initial load error to avoid spam, just log
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading && crons.length === 0) return <DashboardSkeleton />;
 
     const handleRunCron = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();

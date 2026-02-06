@@ -3,10 +3,12 @@ import { FiUser, FiMail, FiLock, FiShield, FiSave, FiAward, FiInfo, FiKey, FiEye
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 import UserAvatar from "../../components/ui/UserAvatar";
 
 const UserProfile = () => {
     const { user, updateUser } = useAuth();
+    if (!user) return <SettingsSkeleton />;
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);

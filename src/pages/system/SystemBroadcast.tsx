@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { FiMessageSquare } from "react-icons/fi";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { useAuth } from "../../contexts/AuthContext";
 
 const SystemBroadcast = () => {
+    const { user } = useAuth();
+    if (!user) return <DashboardSkeleton />;
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [broadcastMsg, setBroadcastMsg] = useState("");

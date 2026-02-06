@@ -3,10 +3,12 @@ import { FiSend, FiMessageSquare, FiAlertCircle, FiCheckCircle } from 'react-ico
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 const ContactSupport = () => {
     const { showToast } = useToast();
     const { user } = useAuth();
+    if (!user) return <SettingsSkeleton />;
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         subject: '',

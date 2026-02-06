@@ -3,9 +3,11 @@ import { FiSliders, FiSun, FiMoon, FiCheckCircle } from "react-icons/fi";
 import { useTheme } from "../../hooks/useTheme";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 const Preferences = () => {
     const { theme, toggleTheme, uiDensity, setUiDensity, accentColor, setAccentColor } = useTheme();
+    if (!theme) return <SettingsSkeleton />;
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
 
