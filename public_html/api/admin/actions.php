@@ -15,10 +15,22 @@ try {
 
     switch ($action) {
         case 'purge-sessions':
-            $stmt = $pdo->prepare("DELETE FROM auth_tokens WHERE user_id != ?");
-            $stmt->execute([$user_id]);
-            $count = $stmt->rowCount();
-            echo json_encode(['success' => true, 'message' => "Purged $count other active sessions"]);
+            $pdo->beginTransaction();
+            try {
+                // Delete all tokens except current user
+                $stmt = $pdo->prepare("DELETE FROM auth_tokens WHERE user_id != ?");
+                $stmt->execute([$user_id]);
+                $count = $stmt->rowCount();
+
+                // Set flag as secondary defense
+                $pdo->prepare("UPDATE users SET force_refresh = 1 WHERE id != ?")->execute([$user_id]);
+
+                $pdo->commit();
+                echo json_encode(['success' => true, 'message' => "Purged $count other active sessions"]);
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
             exit;
 
         case 'purge-logs':

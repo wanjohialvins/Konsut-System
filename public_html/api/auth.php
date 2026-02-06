@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'force_logout') {
         // 1. Security Check: Only Admin/CEO
         $requesterId = getRequestHeader('X-User-Id');
-        requirePermission('manage_users'); // Or check role explicitly
+        requirePermission('manage_users');
 
         $targetId = $data['target_user_id'] ?? null;
         if (!$targetId)
@@ -198,15 +198,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($targetId == $requesterId)
             sendError('Cannot force logout yourself', 400);
 
-        // 2. Update User Flag
-        $stmt = $pdo->prepare("UPDATE users SET force_refresh = 1 WHERE id = ?");
-        $stmt->execute([$targetId]);
+        // 2. Update User Flag & Delete Tokens
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare("UPDATE users SET force_refresh = 1 WHERE id = ?")->execute([$targetId]);
+            $pdo->prepare("DELETE FROM auth_tokens WHERE user_id = ?")->execute([$targetId]);
 
-        // 3. Log it
-        $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())")
-            ->execute([$requesterId, 'FORCE_LOGOUT', "Forced logout for user ID: $targetId"]);
+            // 3. Log it
+            $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())")
+                ->execute([$requesterId, 'FORCE_LOGOUT', "Forced logout and purged tokens for user ID: $targetId"]);
 
-        sendResponse(['success' => true, 'message' => 'User will be logged out on next action.']);
+            $pdo->commit();
+            sendResponse(['success' => true, 'message' => 'User logged out and tokens purged.']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            sendError('Force logout failed', 500);
+        }
         exit;
     }
 
@@ -215,15 +222,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $requesterId = getRequestHeader('X-User-Id');
         requirePermission('system_control');
 
-        // 2. Update ALL users except requester
-        $stmt = $pdo->prepare("UPDATE users SET force_refresh = 1 WHERE id != ?");
-        $stmt->execute([$requesterId]);
+        $pdo->beginTransaction();
+        try {
+            // 2. Update ALL users except requester
+            $pdo->prepare("UPDATE users SET force_refresh = 1 WHERE id != ?")->execute([$requesterId]);
 
-        // 3. Log it
-        $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())")
-            ->execute([$requesterId, 'GLOBAL_LOGOUT', "Initiated global kill switch. All other sessions invalidated."]);
+            // Delete all tokens except requester's
+            $pdo->prepare("DELETE FROM auth_tokens WHERE user_id != ?")->execute([$requesterId]);
 
-        sendResponse(['success' => true, 'message' => 'All other users have been forced to logout.']);
+            // 3. Log it
+            $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())")
+                ->execute([$requesterId, 'GLOBAL_LOGOUT', "Initiated global kill switch. All other sessions invalidated."]);
+
+            $pdo->commit();
+            sendResponse(['success' => true, 'message' => 'All other users have been forced to logout.']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            sendError('Global logout failed', 500);
+        }
         exit;
     }
 }
