@@ -81,10 +81,10 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: any) => {
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
-        <StatCard label="Total Revenue" value={`Ksh ${(data.metrics.totalRevenue || 0).toLocaleString()}`} icon={FaMoneyBillWave} color="text-brand-600" bg="bg-brand-50" link="/analytics" trend={`${(data.metrics.revenueGrowth || 0) > 0 ? '+' : ''}${data.metrics.revenueGrowth || 0}% vs prev`} />
-        <StatCard label="Avg Order Value" value={`Ksh ${(data.metrics.averageOrderValue || 0).toLocaleString()}`} icon={FaChartLine} color="text-emerald-600" bg="bg-emerald-50" link="/analytics" />
-        <StatCard label="Active Users" value={data.metrics.activeUsers || 0} icon={FaUsers} color="text-purple-600" bg="bg-purple-50" link="/users" />
-        <StatCard label="System Health" value={data.databaseStatus || 'Unknown'} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
+        <StatCard label="Total Revenue" value={`Ksh ${(data?.metrics?.totalRevenue || 0).toLocaleString()}`} icon={FaMoneyBillWave} color="text-brand-600" bg="bg-brand-50" link="/analytics" trend={`${(data?.metrics?.revenueGrowth || 0) > 0 ? '+' : ''}${data?.metrics?.revenueGrowth || 0}% vs prev`} />
+        <StatCard label="Avg Order Value" value={`Ksh ${(data?.metrics?.averageOrderValue || 0).toLocaleString()}`} icon={FaChartLine} color="text-emerald-600" bg="bg-emerald-50" link="/analytics" />
+        <StatCard label="Active Users" value={data?.metrics?.activeUsers || 0} icon={FaUsers} color="text-purple-600" bg="bg-purple-50" link="/users" />
+        <StatCard label="System Health" value={data?.databaseStatus || 'Unknown'} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
@@ -99,7 +99,7 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: any) => {
           </div>
           <div className="h-[250px] md:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.chartData || []}>
+              <AreaChart data={data?.chartData || []}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
@@ -127,14 +127,14 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: any) => {
                   <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
                   <span className="font-bold text-rose-800 dark:text-rose-400 text-sm">Overdue Invoices</span>
                 </div>
-                <span className="font-black text-rose-600 text-lg">{data.metrics.overdueCount || 0}</span>
+                <span className="font-black text-rose-600 text-lg">{data?.metrics?.overdueCount || 0}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                   <span className="font-bold text-amber-800 dark:text-amber-400 text-sm">Low Stock Items</span>
                 </div>
-                <span className="font-black text-amber-600 text-lg">{data.metrics.lowStockCount || 0}</span>
+                <span className="font-black text-amber-600 text-lg">{data?.metrics?.lowStockCount || 0}</span>
               </div>
             </div>
           </div>
@@ -142,7 +142,7 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: any) => {
           <div className="bg-slate-900 text-gray-300 p-4 md:p-8 rounded-3xl shadow-xl border border-slate-800">
             <SectionHeader title="Security Audit Log" icon={FaUserShield} color="text-white" />
             <div className="space-y-0 text-sm font-mono overflow-y-auto max-h-[300px] custom-scrollbar">
-              {(data.auditLogs || []).map((log: any, i: number) => (
+              {(data?.auditLogs || []).map((log: any, i: number) => (
                 <div key={i} className="flex gap-4 py-3 border-b border-slate-800 hover:bg-white/5 px-2 rounded transition-colors items-center">
                   <span className="text-gray-500 whitespace-nowrap text-[10px]">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   <span className={`font-bold text-xs ${log.action.includes('LOGIN') ? 'text-emerald-400' : 'text-blue-400'}`}>{log.action}</span>
@@ -161,9 +161,9 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: any) => {
 const ManagerDashboard = ({ data }: { data: DashboardData }) => (
   <div className="space-y-6 md:space-y-8 animate-fade-in">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <StatCard label="Pending Orders" value={data.metrics.pendingInvoicesCount || 0} icon={FaFileInvoiceDollar} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
-      <StatCard label="Team Tasks" value={data.metrics.pendingTasks || 0} icon={FaClipboardList} color="text-indigo-600" bg="bg-indigo-50" link="/tasks" />
-      <StatCard label="Open Issues" value={data.metrics.openTickets || 0} icon={FaTicketAlt} color="text-rose-600" bg="bg-rose-50" link="/tickets" />
+      <StatCard label="Pending Orders" value={data?.metrics?.pendingInvoicesCount || 0} icon={FaFileInvoiceDollar} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
+      <StatCard label="Team Tasks" value={data?.metrics?.pendingTasks || 0} icon={FaClipboardList} color="text-indigo-600" bg="bg-indigo-50" link="/tasks" />
+      <StatCard label="Open Issues" value={data?.metrics?.openTickets || 0} icon={FaTicketAlt} color="text-rose-600" bg="bg-rose-50" link="/tickets" />
     </div>
     {/* Reuse CEO logic for charts if needed, or keeping simple */}
   </div>
@@ -244,12 +244,8 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Quick Action FAB
-  const FAB = (
-    <Link to="/new-invoice" className="fixed bottom-8 right-8 w-16 h-16 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-2xl shadow-brand-600/40 flex items-center justify-center transition-transform hover:scale-110 active:scale-95 z-50">
-      <FaPlus size={24} />
-    </Link>
-  );
+  {/* FAB: Visible for roles with write permissions */ }
+  { ['admin', 'ceo', 'manager', 'sales', 'tech'].includes(user.role?.toLowerCase() || '') && FAB }
 
   return (
     <div ref={dashboardRef} className="p-6 bg-slate-50 dark:bg-midnight-950 min-h-screen font-sans transition-colors duration-300 pb-24">
@@ -261,7 +257,7 @@ const Dashboard: React.FC = () => {
               {data.greeting || `Welcome back, ${user.username}`}
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium flex items-center gap-2">
-              <FaBolt className="text-amber-500" /> System live and {data.databaseStatus === 'Stable' ? 'healthy' : 'experiencing load'}.
+              <FaBolt className="text-amber-500" /> System live and {data?.databaseStatus === 'Stable' ? 'healthy' : 'experiencing load'}.
             </p>
           </div>
 
@@ -291,15 +287,24 @@ const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        {/* Content Render - Simplified Role Mapping for implementation speed */}
-        {user.role?.toLowerCase() === 'ceo' || user.role?.toLowerCase() === 'admin' ? (
-          <CEODashboard data={data} chartMetric={chartMetric} setChartMetric={setChartMetric} />
-        ) : (
-          <ManagerDashboard data={data} />
-        )}
+        {/* Content Render - Comprehensive Role Mapping */}
+        {(() => {
+          const role = user.role?.toLowerCase() || 'viewer';
+
+          if (['ceo', 'admin'].includes(role)) {
+            return <CEODashboard data={data} chartMetric={chartMetric} setChartMetric={setChartMetric} />;
+          }
+
+          if (['manager', 'sales', 'it', 'accountant', 'storekeeper'].includes(role)) {
+            return <ManagerDashboard data={data} />;
+          }
+
+          // Staff, Viewer, and others get a simplified view
+          return <ManagerDashboard data={data} />;
+        })()}
       </div>
 
-      {['admin', 'manager', 'sales', 'staff'].includes(user.role?.toLowerCase() || '') && FAB}
+      {['admin', 'ceo', 'manager', 'sales', 'it', 'storekeeper', 'accountant'].includes(user.role?.toLowerCase() || '') && FAB}
     </div>
   );
 };
