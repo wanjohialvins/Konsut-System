@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { FiActivity, FiSearch, FiServer, FiCpu, FiDatabase, FiCheck, FiUser, FiShield, FiKey, FiLock, FiTerminal, FiGlobe, FiTrash2, FiEye, FiSettings } from "react-icons/fi";
-import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { AdminToolboxSkeleton } from "../../components/skeletons/PageSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { useModal } from "../../contexts/ModalContext";
@@ -344,7 +344,7 @@ const AdminToolbox = () => {
         if (activeTab === 'scheduler') loadTasks();
     }, [activeTab]);
 
-    if (loading && users.length === 0) return <DashboardSkeleton />;
+    if (loading && users.length === 0) return <AdminToolboxSkeleton />;
 
     return (
         <div className="p-6 md:p-8 max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-24">

@@ -3,11 +3,11 @@ import { FiSliders, FiSun, FiMoon, FiCheckCircle } from "react-icons/fi";
 import { useTheme } from "../../hooks/useTheme";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
-import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { InterfaceSkeleton } from "../../components/skeletons/PageSkeletons";
 
 const Preferences = () => {
     const { theme, toggleTheme, uiDensity, setUiDensity, accentColor, setAccentColor } = useTheme();
-    if (!theme) return <SettingsSkeleton />;
+
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
 
@@ -41,6 +41,8 @@ const Preferences = () => {
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{desc}</p>
         </button>
     );
+
+    if (!theme) return <InterfaceSkeleton />;
 
     return (
         <div className="p-8 max-w-6xl mx-auto animate-fade-in">

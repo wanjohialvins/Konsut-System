@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiLock, FiAlertTriangle, FiTrash2 } from "react-icons/fi";
-import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { SecuritySkeleton } from "../../components/skeletons/PageSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -65,7 +65,7 @@ const SystemSecurity = () => {
         }
     };
 
-    if (initialLoading) return <SettingsSkeleton />;
+    if (initialLoading) return <SecuritySkeleton />;
 
     return (
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto space-y-8 animate-fade-in">

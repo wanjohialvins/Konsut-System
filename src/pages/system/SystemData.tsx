@@ -3,7 +3,7 @@ import { FiDatabase, FiHardDrive, FiRefreshCcw, FiCopy, FiClock, FiPlay, FiCheck
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { useModal } from "../../contexts/ModalContext";
-import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { DataCoreSkeleton } from "../../components/skeletons/PageSkeletons";
 
 const SystemData = () => {
     const { showToast } = useToast();
@@ -30,7 +30,7 @@ const SystemData = () => {
         }
     };
 
-    if (loading && crons.length === 0) return <DashboardSkeleton />;
+    if (loading && crons.length === 0) return <DataCoreSkeleton />;
 
     const handleRunCron = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();

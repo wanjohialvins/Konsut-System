@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiActivity, FiSearch, FiServer, FiCpu, FiDatabase, FiCheck, FiX } from "react-icons/fi";
-import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { SystemVitalsSkeleton } from "../../components/skeletons/PageSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -94,7 +94,7 @@ const SystemVitals = () => {
         }
     }
 
-    if (loading && !stats) return <DashboardSkeleton />;
+    if (loading && !stats) return <SystemVitalsSkeleton />;
 
     return (
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto space-y-8 animate-fade-in">

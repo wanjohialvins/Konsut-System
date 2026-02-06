@@ -4,6 +4,7 @@ import { FiArrowLeft, FiSend, FiTag, FiFlag, FiLayers } from 'react-icons/fi';
 import { SmartInput, SmartTextarea } from "../../components/ui/SmartGuide";
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
+import { NewTicketSkeleton } from "../../components/skeletons/PageSkeletons";
 
 const CreateTicket = () => {
     const navigate = useNavigate();
@@ -15,6 +16,8 @@ const CreateTicket = () => {
         priority: 'medium',
         message: ''
     });
+
+    if (loading) return <NewTicketSkeleton />;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

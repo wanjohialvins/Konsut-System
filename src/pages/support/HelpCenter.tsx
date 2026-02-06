@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { FiSearch, FiBook, FiMessageCircle, FiChevronRight, FiHelpCircle } from 'react-icons/fi';
 import { SmartInput } from "../../components/ui/SmartGuide";
 
+
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (

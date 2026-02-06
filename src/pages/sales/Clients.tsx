@@ -40,7 +40,7 @@ import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import SavingIndicator from "../../components/ui/SavingIndicator";
 import { InputMasks } from "../../utils/formatters";
-import { PageHeaderSkeleton, CardGridSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { PageHeaderSkeleton, CardGridSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 /* -------------------------------------------------------------------------- */
 /*                                Types                                       */
@@ -91,6 +91,7 @@ const Clients: React.FC = () => {
   const [clientInvoices, setClientInvoices] = useState<InvoiceData[]>([]);
   const [displayCurrency, setDisplayCurrency] = useState<'Ksh' | 'USD'>('Ksh');
   const [loading, setLoading] = useState(true);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
   const [sort, setSort] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
@@ -173,11 +174,14 @@ const Clients: React.FC = () => {
     const fetchInvoices = async () => {
       if (selectedClient) {
         try {
+          setLoadingInvoices(true);
           const data = await api.invoices.getAll(undefined, selectedClient.id);
           setClientInvoices(data || []);
         } catch (err) {
           console.error("Failed to fetch client invoices", err);
           showToast('error', 'Failed to load client documents');
+        } finally {
+          setLoadingInvoices(false);
         }
       } else {
         setClientInvoices([]);
@@ -740,51 +744,55 @@ const Clients: React.FC = () => {
 
               <div className="mb-8">
                 <h3 className="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-4 flex items-center gap-2"><FaFileInvoice /> Client Documents</h3>
-                <div className="bg-gray-50 dark:bg-midnight-950 rounded-2xl overflow-hidden border border-gray-100 dark:border-midnight-800 max-h-60 overflow-y-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-100 dark:bg-midnight-800 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">ID</th>
-                        <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Date</th>
-                        <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Total</th>
-                        <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Status</th>
-                        <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-midnight-700">
-                      {clientInvoices.sort((a, b) => new Date(b.issuedDate || '').getTime() - new Date(a.issuedDate || '').getTime()).map(doc => (
-                        <tr key={doc.id} className="hover:bg-gray-100 dark:hover:bg-midnight-800 transition-colors">
-                          <td className="px-4 py-3 font-mono text-xs font-bold text-brand-600 dark:text-brand-400">{doc.id}</td>
-                          <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{doc.issuedDate}</td>
-                          <td className="px-4 py-3 font-bold text-gray-900 dark:text-white text-xs">{(doc.grandTotal || 0).toLocaleString()}</td>
-                          <td className="px-4 py-3">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black ${(doc.status || '').toLowerCase() === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                              (doc.status || '').toLowerCase() === 'pending' || (doc.status || '').toLowerCase() === 'sent' ? 'bg-blue-100 text-blue-700' :
-                                (doc.status || '').toLowerCase() === 'overdue' ? 'bg-red-100 text-red-700' :
-                                  'bg-gray-100 text-gray-600'
-                              }`}>{doc.status || 'draft'}</span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => previewPDF(doc.id, doc.type, displayCurrency)}
-                                className="px-2 py-1 bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/20 dark:hover:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-[10px] font-bold uppercase rounded transition-colors"
-                              >
-                                View
-                              </button>
-                              <button
-                                onClick={() => navigate(`/new-invoice?id=${doc.id}&type=${doc.type}`)}
-                                className="px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded transition-colors"
-                              >
-                                Edit
-                              </button>
-                            </div>
-                          </td>
+                {loadingInvoices ? (
+                  <TableSkeleton rows={3} />
+                ) : (
+                  <div className="bg-gray-50 dark:bg-midnight-950 rounded-2xl overflow-hidden border border-gray-100 dark:border-midnight-800 max-h-60 overflow-y-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-gray-100 dark:bg-midnight-800 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">ID</th>
+                          <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Date</th>
+                          <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Total</th>
+                          <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Status</th>
+                          <th className="px-4 py-3 font-black text-[10px] uppercase text-gray-500">Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 dark:divide-midnight-700">
+                        {clientInvoices.sort((a, b) => new Date(b.issuedDate || '').getTime() - new Date(a.issuedDate || '').getTime()).map(doc => (
+                          <tr key={doc.id} className="hover:bg-gray-100 dark:hover:bg-midnight-800 transition-colors">
+                            <td className="px-4 py-3 font-mono text-xs font-bold text-brand-600 dark:text-brand-400">{doc.id}</td>
+                            <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{doc.issuedDate}</td>
+                            <td className="px-4 py-3 font-bold text-gray-900 dark:text-white text-xs">{(doc.grandTotal || 0).toLocaleString()}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black ${(doc.status || '').toLowerCase() === 'paid' ? 'bg-emerald-100 text-emerald-700' :
+                                (doc.status || '').toLowerCase() === 'pending' || (doc.status || '').toLowerCase() === 'sent' ? 'bg-blue-100 text-blue-700' :
+                                  (doc.status || '').toLowerCase() === 'overdue' ? 'bg-red-100 text-red-700' :
+                                    'bg-gray-100 text-gray-600'
+                                }`}>{doc.status || 'draft'}</span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => previewPDF(doc.id, doc.type, displayCurrency)}
+                                  className="px-2 py-1 bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/20 dark:hover:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-[10px] font-bold uppercase rounded transition-colors"
+                                >
+                                  View
+                                </button>
+                                <button
+                                  onClick={() => navigate(`/new-invoice?id=${doc.id}&type=${doc.type}`)}
+                                  className="px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded transition-colors"
+                                >
+                                  Edit
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4">

@@ -28,7 +28,7 @@ import InvoiceForm from "../../components/new-invoice/InvoiceForm";
 import LineItemsTable from "../../components/new-invoice/LineItemsTable";
 import InvoiceSummary from "../../components/new-invoice/InvoiceSummary";
 import InventorySelector from "../../components/new-invoice/InventorySelector";
-import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { CreateDocumentSkeleton } from "../../components/skeletons/PageSkeletons";
 import SavingIndicator from "../../components/ui/SavingIndicator";
 import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
@@ -108,6 +108,8 @@ const NewInvoice: React.FC = () => {
     const s = localStorage.getItem(USD_TO_KSH_KEY);
     return s ? Number(s) : DEFAULT_CURRENCY_RATE;
   });
+
+
 
   const [showDescriptions, setShowDescriptions] = useState<boolean>(true);
   const [includeDescriptionsInPDF, setIncludeDescriptionsInPDF] = useState<boolean>(true);
@@ -911,7 +913,7 @@ const NewInvoice: React.FC = () => {
      ---------------------------- */
 
   if (loading) {
-    return <DashboardSkeleton />;
+    return <CreateDocumentSkeleton />;
   }
 
   return (

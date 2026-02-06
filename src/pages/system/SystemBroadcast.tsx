@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { FiMessageSquare } from "react-icons/fi";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
-import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
+import { CommandCentreSkeleton } from "../../components/skeletons/PageSkeletons";
 import { useAuth } from "../../contexts/AuthContext";
 
 const SystemBroadcast = () => {
     const { user } = useAuth();
-    if (!user) return <DashboardSkeleton />;
+
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [broadcastMsg, setBroadcastMsg] = useState("");
@@ -27,6 +27,8 @@ const SystemBroadcast = () => {
             setLoading(false);
         }
     };
+
+    if (!user) return <CommandCentreSkeleton />;
 
     return (
         <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6 md:space-y-8 animate-fade-in">

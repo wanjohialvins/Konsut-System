@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FiBookOpen, FiFileText, FiUsers, FiBox, FiSettings, FiChevronRight, FiPieChart } from 'react-icons/fi';
 
+
 const GuideSection = ({ title, icon: Icon, children }: any) => (
     <div className="mb-12 scroll-mt-24" id={title.toLowerCase().replace(/\s+/g, '-')}>
         <div className="flex items-center gap-3 mb-4">
