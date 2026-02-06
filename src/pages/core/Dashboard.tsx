@@ -247,8 +247,12 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  {/* FAB: Visible for roles with write permissions */ }
-  { ['admin', 'ceo', 'manager', 'sales', 'tech'].includes(user.role?.toLowerCase() || '') && FAB }
+  // Quick Action FAB
+  const FAB = (
+    <Link to="/new-invoice" className="fixed bottom-8 right-8 w-16 h-16 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-2xl shadow-brand-600/40 flex items-center justify-center transition-transform hover:scale-110 active:scale-95 z-50">
+      <FaPlus size={24} />
+    </Link>
+  );
 
   return (
     <div ref={dashboardRef} className="p-6 bg-slate-50 dark:bg-midnight-950 min-h-screen font-sans transition-colors duration-300 pb-24">
