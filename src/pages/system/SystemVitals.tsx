@@ -73,6 +73,16 @@ const SystemVitals = () => {
         try {
             const res = await api.admin.debugAuth({ username: debugUsername, password: debugPassword });
             setDebugResult(res.debug_info);
+
+            if (res.debug_info.found) {
+                if (res.debug_info.match) {
+                    showToast('success', `Credentials Valid! Role: ${res.debug_info.role}`);
+                } else {
+                    showToast('error', 'Incorrect Password');
+                }
+            } else {
+                showToast('error', `User '${res.debug_info.username}' Not Found`);
+            }
         } catch (e: unknown) {
             const errorMsg = e instanceof Error ? e.message : 'Debug execution failed';
             showToast('error', errorMsg);
