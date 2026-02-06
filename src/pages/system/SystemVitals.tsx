@@ -76,8 +76,10 @@ const SystemVitals = () => {
         } catch (e: unknown) {
             const errorMsg = e instanceof Error ? e.message : 'Debug execution failed';
             showToast('error', errorMsg);
+            setDebugResult({ error: errorMsg, hint: 'Check server logs' });
         } finally {
-            setLoading(false);
+            // Force delay to ensure UX feels responsive but doesn't flicker
+            setTimeout(() => setLoading(false), 500);
         }
     }
 
