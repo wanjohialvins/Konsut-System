@@ -142,14 +142,39 @@ export const drawItemsTable = (
     formatCurrency: (v: number) => string,
     options: any
 ) => {
-    const tableHeader = ["Description", "Qty", "Unit Price", "Discount", "Total"];
-    const tableBody = invoice.items.map((l: any) => [
-        options.includeDescriptions && l.description ? `${l.name}\n${l.description}` : l.name,
-        String(l.quantity),
-        formatCurrency(l.unitPrice),
-        l.discount ? formatCurrency(l.discount) : "-",
-        formatCurrency(l.lineTotal || ((l.unitPrice * l.quantity) - (l.discount || 0))),
-    ]);
+    const hasDiscount = invoice.items.some((item: any) => item.discount && item.discount > 0);
+
+    const tableHeader = hasDiscount
+        ? ["Description", "Qty", "Unit Price", "Discount", "Total"]
+        : ["Description", "Qty", "Unit Price", "Total"];
+
+    const tableBody = invoice.items.map((l: any) => {
+        const row = [
+            options.includeDescriptions && l.description ? `${l.name}\n${l.description}` : l.name,
+            String(l.quantity),
+            formatCurrency(l.unitPrice),
+        ];
+
+        if (hasDiscount) {
+            row.push(l.discount ? formatCurrency(l.discount) : "-");
+        }
+
+        row.push(formatCurrency(l.lineTotal || ((l.unitPrice * l.quantity) - (l.discount || 0))));
+        return row;
+    });
+
+    const columnStyles: any = {
+        0: { halign: "left" },
+        1: { halign: "center" },
+        2: { halign: "right" },
+    };
+
+    if (hasDiscount) {
+        columnStyles[3] = { halign: "right", textColor: [220, 38, 38] };
+        columnStyles[4] = { halign: "right" };
+    } else {
+        columnStyles[3] = { halign: "right" };
+    }
 
     autoTable(doc, {
         startY,
@@ -158,13 +183,7 @@ export const drawItemsTable = (
         theme: "grid",
         styles: { fontSize: SETTINGS.fontSize || 9, cellPadding: 3, font: config.font, textColor: [0, 0, 0], lineColor: [150, 150, 150], lineWidth: 0.1 },
         headStyles: { fillColor: config.primaryColor, textColor: 255, fontStyle: "bold", halign: "center" },
-        columnStyles: {
-            0: { halign: "left" },
-            1: { halign: "center" },
-            2: { halign: "right" },
-            3: { halign: "right", textColor: [220, 38, 38] }, // Red text for discount? Maybe just right align.
-            4: { halign: "right" }
-        },
+        columnStyles,
         alternateRowStyles: { fillColor: [245, 247, 250] },
         margin: { left: config.margin, right: config.margin },
     });
