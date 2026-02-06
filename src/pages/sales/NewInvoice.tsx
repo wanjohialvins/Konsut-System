@@ -255,7 +255,11 @@ const NewInvoice: React.FC = () => {
 
           setIssuedDate(safeDate(invoiceToEdit.issuedDate) || new Date().toISOString().split('T')[0]);
           setDueDate(safeDate(invoiceToEdit.dueDate) || safeDate(invoiceToEdit.quotationValidUntil) || "");
-          setLines(invoiceToEdit.items || []);
+
+          // Defensive check: Ensure items is an array (even though API normalizes it)
+          const safeItems = Array.isArray(invoiceToEdit.items) ? invoiceToEdit.items : [];
+          setLines(safeItems);
+
           if (invoiceToEdit.currencyRate) setUsdToKshRate(invoiceToEdit.currencyRate);
 
           if (invoiceToEdit.clientResponsibilities) {

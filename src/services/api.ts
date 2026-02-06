@@ -169,7 +169,10 @@ export const api = {
             const data = await request<any[]>(`invoices.php${query}`);
             return Array.isArray(data) ? data.map(normalizeInvoice) : [];
         },
-        getOne: (id: string) => request<Invoice>(`invoices.php?id=${id}`),
+        getOne: async (id: string) => {
+            const data = await request<any>(`invoices.php?id=${id}`);
+            return normalizeInvoice(data);
+        },
         create: (data: Invoice) => request<{ success: boolean; clientUpdated: boolean; id: string }>('invoices.php', { method: 'POST', body: JSON.stringify(data) }),
         update: (data: Invoice) => request<{ success: boolean; clientUpdated: boolean; id: string }>('invoices.php', { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id: string) => request<{ success: boolean }>(`invoices.php?id=${id}`, { method: 'DELETE' }),

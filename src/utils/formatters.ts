@@ -38,12 +38,18 @@ export const normalizeInvoice = (raw: any): Invoice => {
         subtotal: Number(raw.subtotal || 0),
         taxAmount: Number(raw.taxAmount || 0),
         grandTotal: Number(raw.grandTotal || 0),
-        items: (Array.isArray(raw.items) ? raw.items : []).map((item: any) => ({
-            ...item,
-            unitPrice: Number(item.unitPrice || 0),
-            total: Number(item.total || 0),
-            quantity: Number(item.quantity || 0)
-        })),
+        items: (function () {
+            let items = raw.items;
+            if (typeof items === 'string') {
+                try { items = JSON.parse(items); } catch { items = []; }
+            }
+            return Array.isArray(items) ? items.map((item: any) => ({
+                ...item,
+                unitPrice: Number(item.unitPrice || 0),
+                total: Number(item.total || 0),
+                quantity: Number(item.quantity || 0)
+            })) : [];
+        })(),
         // Ensure arrays are initialized
         permissions: Array.isArray(raw.permissions) ? raw.permissions : [],
     } as Invoice;
