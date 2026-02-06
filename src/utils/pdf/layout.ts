@@ -50,15 +50,23 @@ export const loadImageAsDataURL = (src: string): Promise<{ data: string; width: 
     });
 
 export const drawBox = (doc: jsPDF, x: number, y: number, w: number, h: number, config: PdfLayoutConfig, title?: string) => {
-    doc.setDrawColor(200, 200, 200);
+    // Light border color for a modern feel
+    doc.setDrawColor(226, 232, 240); // Slate 200
     doc.setLineWidth(0.1);
     doc.rect(x, y, w, h);
 
     if (title) {
-        doc.setFillColor(240, 240, 240);
+        // Subtle background for the box header
+        doc.setFillColor(248, 250, 252); // Slate 50
         doc.rect(x, y, w, 7, "F");
+
+        // Bottom border for the header title area
+        doc.setDrawColor(226, 232, 240);
+        doc.line(x, y + 7, x + w, y + 7);
+
         doc.setFont(config.font, "bold");
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
+        // Use primary color for titles
         doc.setTextColor(config.primaryColor[0], config.primaryColor[1], config.primaryColor[2]);
         doc.text(title, x + 3, y + 5);
     }

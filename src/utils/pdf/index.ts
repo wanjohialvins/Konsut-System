@@ -27,8 +27,8 @@ export const generateInvoicePDF = async (
         const config: PdfLayoutConfig = {
             margin: 15,
             boxGap: 5,
-            primaryColor: [0, 153, 255],
-            secondaryColor: [31, 41, 55],
+            primaryColor: [0, 153, 255], // Brand Blue
+            secondaryColor: [31, 41, 55], // Original Gray
             font,
             pageWidth: doc.internal.pageSize.getWidth(),
             pageHeight: doc.internal.pageSize.getHeight(),
@@ -43,11 +43,12 @@ export const generateInvoicePDF = async (
 
         await drawHeader(doc, COMPANY, SETTINGS, config);
 
-        const titleY = config.margin + 35 + 10;
-        const typeLabel = documentType === 'INVOICE' ? 'INVOICE' : (documentType === 'QUOTATION' ? 'PRICE QUOTATION' : 'PROFORMA INVOICE');
+        // Dynamic spacing based on content
+        const titleY = config.margin + 30 + 10;
+        const typeLabel = documentType === 'INVOICE' ? 'TAX INVOICE' : (documentType === 'QUOTATION' ? 'PRICE QUOTATION' : 'PROFORMA INVOICE');
         drawTitleBar(doc, typeLabel, titleY, config);
 
-        const detailsY = titleY + 15;
+        const detailsY = titleY + 12;
         const detailsHeight = drawDetailsBoxes(doc, invoice, documentType, detailsY, SETTINGS, config);
 
         const tableY = detailsY + detailsHeight + 10;

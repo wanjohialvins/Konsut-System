@@ -5,11 +5,14 @@ import logo from "../../assets/logo.jpg";
 
 export const drawHeader = async (doc: jsPDF, COMPANY: any, SETTINGS: any, config: PdfLayoutConfig) => {
     const headerY = config.margin;
+    const rightMargin = config.pageWidth - config.margin;
+
+    // 1. Logo Handling (Left Side)
     if (SETTINGS.includeHeader) {
         const logoInfo = await loadImageAsDataURL(logo);
         if (logoInfo) {
-            const maxW = 60;
-            const maxH = 35;
+            const maxW = 55;
+            const maxH = 30;
             const aspect = logoInfo.width / logoInfo.height;
             let imgW = maxW;
             let imgH = maxW / aspect;
@@ -18,26 +21,36 @@ export const drawHeader = async (doc: jsPDF, COMPANY: any, SETTINGS: any, config
         }
     }
 
+    // 2. Company Details (Right Side)
     if (SETTINGS.includeCompanyDetails) {
-        const rightMargin = config.pageWidth - config.margin;
-        let y = headerY + 5;
+        let y = headerY + 4;
+
+        // Premium Company Name
         doc.setFont(config.font, "bold");
-        doc.setFontSize(20);
+        doc.setFontSize(18);
         doc.setTextColor(config.primaryColor[0], config.primaryColor[1], config.primaryColor[2]);
-        doc.text(COMPANY.name, rightMargin, y, { align: "right" });
-        y += 7;
+        doc.text(COMPANY.name.toUpperCase(), rightMargin, y, { align: "right" });
+
+        y += 8;
         doc.setFont(config.font, "normal");
-        doc.setFontSize(10);
+        doc.setFontSize(9.5);
         doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
-        doc.text(COMPANY.address1, rightMargin, y, { align: "right" });
+
+        // Compact Address Block
+        const addressText = [COMPANY.address1, COMPANY.address2].filter(Boolean).join(", ");
+        doc.text(addressText, rightMargin, y, { align: "right" });
         y += 5;
-        doc.text(COMPANY.address2, rightMargin, y, { align: "right" });
+
+        // Contact Row
+        const contactInfo = `Phone: ${COMPANY.phone} | Email: ${COMPANY.email}`;
+        doc.text(contactInfo, rightMargin, y, { align: "right" });
         y += 5;
-        doc.text(`Phone: ${COMPANY.phone}`, rightMargin, y, { align: "right" });
-        y += 5;
-        doc.text(`Email: ${COMPANY.email}`, rightMargin, y, { align: "right" });
-        y += 5;
-        doc.text(`PIN: ${COMPANY.pin}`, rightMargin, y, { align: "right" });
+
+        // Tax Info (Prominent but clean)
+        if (COMPANY.pin) {
+            doc.setFont(config.font, "bold");
+            doc.text(`PIN: ${COMPANY.pin}`, rightMargin, y, { align: "right" });
+        }
     }
 };
 
@@ -61,72 +74,85 @@ export const drawDetailsBoxes = (
     const boxWidth = (config.pageWidth - (config.margin * 2) - config.boxGap) / 2;
     const rightBoxX = config.margin + boxWidth + config.boxGap;
 
-    // Billing Height
-    let billToLines = 1; // Name
-    if (invoice.customer.id) billToLines++;
-    if (invoice.customer.phone && SETTINGS.includeClientPhone) billToLines++;
-    if (invoice.customer.email && SETTINGS.includeClientEmail) billToLines++;
-    if (invoice.customer.kraPin && SETTINGS.includeClientPIN) billToLines++;
+    // --- Dynamic Field Hiding & Height Calc ---
+    const customerFields = [];
+    if (invoice.customer.name) customerFields.push({ label: "Bill To", value: invoice.customer.name, isHeader: true });
+    if (invoice.customer.company) customerFields.push({ label: "Company", value: invoice.customer.company });
+    if (invoice.customer.phone && SETTINGS.includeClientPhone) customerFields.push({ label: "Phone", value: invoice.customer.phone });
+    if (invoice.customer.email && SETTINGS.includeClientEmail) customerFields.push({ label: "Email", value: invoice.customer.email });
+    if (invoice.customer.kraPin && SETTINGS.includeClientPIN) customerFields.push({ label: "KRA PIN", value: invoice.customer.kraPin });
+
+    let addrLines: string[] = [];
     if (invoice.customer.address && SETTINGS.includeClientAddress) {
-        const addrLines = doc.splitTextToSize(`Address: ${invoice.customer.address}`, boxWidth - 8);
-        billToLines += addrLines.length;
+        addrLines = doc.splitTextToSize(invoice.customer.address, boxWidth - 8);
     }
-    const billToHeight = 7 + (billToLines * 4) + 4;
 
-    // Details Height
-    let detailLines = 2; // ID + Date
-    if ((documentType === 'QUOTATION' && invoice.quotationValidUntil) || invoice.dueDate) detailLines++;
-    const detailsHeight = 7 + (detailLines * 5) + 4 + 15;
+    // Invoice Details
+    const detailsFields = [
+        { label: documentType === 'INVOICE' ? "Invoice No" : (documentType === 'QUOTATION' ? "Quotation No" : "Proforma No"), value: invoice.id },
+        { label: "Date", value: invoice.issuedDate || new Date().toISOString().split('T')[0] }
+    ];
+    if (documentType === 'QUOTATION' && invoice.quotationValidUntil) detailsFields.push({ label: "Valid Until", value: invoice.quotationValidUntil });
+    else if (invoice.dueDate) detailsFields.push({ label: "Due Date", value: invoice.dueDate });
 
-    const maxHeight = Math.max(billToHeight, detailsHeight);
+    // Calculate Heights
+    const billToHeight = 10 + (customerFields.length * 5) + (addrLines.length * 4) + 5;
+    const detailsHeight = 10 + (detailsFields.length * 7) + 15; // + barcode room
+    const maxHeight = Math.max(billToHeight, detailsHeight, 40);
 
-    // Box 1: Bill To
+    // Box 1: Customer info
     if (SETTINGS.includeCustomerDetails) {
-        drawBox(doc, config.margin, y, boxWidth, maxHeight, config, "Bill To:");
+        drawBox(doc, config.margin, y, boxWidth, maxHeight, config, "CLIENT INFORMATION");
         let ty = y + 12;
-        doc.setFont(config.font, "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
+        customerFields.forEach(f => {
+            if (f.isHeader) {
+                doc.setFont(config.font, "bold");
+                doc.setFontSize(10.5);
+                doc.setTextColor(config.primaryColor[0], config.primaryColor[1], config.primaryColor[2]);
+            } else {
+                doc.setFont(config.font, "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
+                doc.text(`${f.label}: `, config.margin + 4, ty);
+                doc.setTextColor(0, 0, 0);
+            }
+            doc.text(f.value, config.margin + (f.isHeader ? 4 : 20), ty);
+            ty += 5;
+        });
 
-        if (invoice.customer.id) { doc.text(`Customer ID: ${invoice.customer.id}`, config.margin + 4, ty); ty += 4; }
-        doc.text(`Name: ${invoice.customer.name || "N/A"}`, config.margin + 4, ty); ty += 4;
-        if (invoice.customer.phone && SETTINGS.includeClientPhone) { doc.text(`Phone: ${invoice.customer.phone}`, config.margin + 4, ty); ty += 4; }
-        if (invoice.customer.email && SETTINGS.includeClientEmail) { doc.text(`Email: ${invoice.customer.email}`, config.margin + 4, ty); ty += 4; }
-        if (invoice.customer.kraPin && SETTINGS.includeClientPIN) { doc.text(`KRA PIN: ${invoice.customer.kraPin}`, config.margin + 4, ty); ty += 4; }
-        if (invoice.customer.address && SETTINGS.includeClientAddress) {
-            const addrLines = doc.splitTextToSize(`Address: ${invoice.customer.address}`, boxWidth - 8);
-            doc.text(addrLines, config.margin + 4, ty);
+        if (addrLines.length > 0) {
+            doc.setFontSize(9);
+            doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
+            doc.text("Address: ", config.margin + 4, ty);
+            doc.setTextColor(0, 0, 0);
+            doc.text(addrLines, config.margin + 20, ty);
         }
     }
 
-    // Box 2: Invoice Details
-    const detailsHeader = documentType === 'QUOTATION' ? "Quotation Details:" : (documentType === 'PROFORMA' ? "Proforma Details:" : "Invoice Details:");
+    // Box 2: Document Details
+    const detailsHeader = `${documentType} DETAILS`;
     drawBox(doc, rightBoxX, y, boxWidth, maxHeight, config, detailsHeader);
 
-    let dy = y + 12;
-    const labelX = rightBoxX + 4;
-    const valX = rightBoxX + 45;
+    let dy = y + 13;
+    detailsFields.forEach(f => {
+        doc.setFontSize(9);
+        doc.setFont(config.font, "bold");
+        doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
+        doc.text(f.label, rightBoxX + 4, dy);
 
-    const printRow = (label: string, value: string) => {
-        doc.setTextColor(0, 0, 0);
         doc.setFont(config.font, "normal");
-        doc.text(label, labelX, dy);
-        doc.text(value, valX, dy);
-        dy += 5;
-    };
-
-    printRow(documentType === 'INVOICE' ? "Invoice No:" : (documentType === 'QUOTATION' ? "Quotation No:" : "Proforma No:"), invoice.id);
-    printRow("Issued Date:", invoice.issuedDate || new Date().toISOString().split('T')[0]);
-    if (documentType === 'QUOTATION' && invoice.quotationValidUntil) printRow("Valid Until:", invoice.quotationValidUntil);
-    else if (invoice.dueDate) printRow("Due Date:", invoice.dueDate);
+        doc.setTextColor(0, 0, 0);
+        doc.text(f.value, rightBoxX + 40, dy);
+        dy += 7;
+    });
 
     if (SETTINGS.includeBarcode) {
         try {
             const barcodeData = generateBarcode(invoice.id);
-            const bW = 40, bH = 10;
-            if (dy + 2 + bH < y + maxHeight) {
-                doc.addImage(barcodeData, "PNG", rightBoxX + (boxWidth - bW) / 2, dy + 2, bW, bH);
-            }
+            const bW = 45, bH = 10;
+            const bx = rightBoxX + (boxWidth - bW) / 2;
+            const by = y + maxHeight - bH - 4;
+            doc.addImage(barcodeData, "PNG", bx, by, bW, bH);
         } catch (e) { }
     }
 
@@ -180,11 +206,24 @@ export const drawItemsTable = (
         startY,
         head: [tableHeader],
         body: tableBody,
-        theme: "grid",
-        styles: { fontSize: SETTINGS.fontSize || 9, cellPadding: 3, font: config.font, textColor: [0, 0, 0], lineColor: [150, 150, 150], lineWidth: 0.1 },
-        headStyles: { fillColor: config.primaryColor, textColor: 255, fontStyle: "bold", halign: "center" },
+        theme: "striped",
+        styles: {
+            fontSize: SETTINGS.fontSize || 8.5,
+            cellPadding: 4,
+            font: config.font,
+            textColor: [31, 41, 55], // Slate 800
+            lineColor: [226, 232, 240], // Slate 200
+            lineWidth: 0.1
+        },
+        headStyles: {
+            fillColor: config.primaryColor,
+            textColor: 255,
+            fontStyle: "bold",
+            halign: "center",
+            cellPadding: 5
+        },
         columnStyles,
-        alternateRowStyles: { fillColor: [245, 247, 250] },
+        alternateRowStyles: { fillColor: [248, 250, 255] }, // Very light blue tint matching brand
         margin: { left: config.margin, right: config.margin },
     });
 
@@ -231,52 +270,55 @@ export const drawFooterSummary = (
         bankDetails.forEach(line => { doc.text(line, config.margin + 4, py); py += 4; });
     }
 
-    drawBox(doc, rightBoxX, topY, boxWidth, maxHeight, config, "Summary");
+    drawBox(doc, rightBoxX, topY, boxWidth, maxHeight, config, "SUMMARY");
     let sy = topY + 14;
-    const sumLabelX = rightBoxX + 4;
-    const sumValX = config.pageWidth - config.margin - 4;
+    const sumLabelX = rightBoxX + 6;
+    const sumValX = config.pageWidth - config.margin - 6;
 
     const vatRate = SETTINGS.taxRate || 0.16;
     const includeTax = SETTINGS.includeTax !== false;
     const subtotal = invoice.subtotal;
-    // Calculate total discount if not provided
     const totalDiscount = invoice.totalDiscount || invoice.items.reduce((acc: number, item: any) => acc + (item.discount || 0), 0);
-
-    // Net Amount = Subtotal - Discount
     const taxableAmount = Math.max(0, subtotal - totalDiscount);
-
-    // Tax is calculated on TAXABLE AMOUNT (Net), not Gross Subtotal
     const vatAmount = includeTax ? (invoice.taxAmount || (taxableAmount * vatRate)) : 0;
     const finalTotal = invoice.grandTotal || (taxableAmount + vatAmount);
 
     doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    doc.text("Subtotal", sumLabelX, sy);
-    doc.text(`${currency} ${formatCurrency(subtotal)}`, sumValX, sy, { align: "right" });
-    sy += 6;
+    doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
+    doc.setFont(config.font, "normal");
 
+    const printSumRow = (label: string, value: string, isRed?: boolean) => {
+        if (isRed) {
+            doc.setTextColor(220, 38, 38);
+        } else {
+            doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
+        }
+        doc.text(label, sumLabelX, sy);
+        doc.setTextColor(0, 0, 0);
+        doc.text(value, sumValX, sy, { align: "right" });
+        sy += 6;
+    };
+
+    printSumRow("Gross Subtotal", `${currency} ${formatCurrency(subtotal)}`);
     if (totalDiscount > 0) {
-        doc.setTextColor(220, 38, 38); // Red
-        doc.text("Discount", sumLabelX, sy);
-        doc.text(`- ${currency} ${formatCurrency(totalDiscount)}`, sumValX, sy, { align: "right" });
-        doc.setTextColor(0, 0, 0); // Reset
-        sy += 6;
+        printSumRow("Total Discount", `- ${currency} ${formatCurrency(totalDiscount)}`, true);
     }
-
     if (includeTax) {
-        doc.text(`VAT (${(vatRate * 100).toFixed(0)}%)`, sumLabelX, sy);
-        doc.text(`${currency} ${formatCurrency(vatAmount)}`, sumValX, sy, { align: "right" });
-        sy += 6;
+        printSumRow(`VAT (${(vatRate * 100).toFixed(0)}%)`, `${currency} ${formatCurrency(vatAmount)}`);
     }
 
+    // High-impact Grand Total Bar
+    sy += 2;
     doc.setFillColor(config.primaryColor[0], config.primaryColor[1], config.primaryColor[2]);
-    doc.rect(rightBoxX, sy - 4, boxWidth, 10, "F");
+    doc.rect(rightBoxX, sy - 5, boxWidth, 11, "F");
+
     doc.setTextColor(255, 255, 255);
     doc.setFont(config.font, "bold");
-    doc.text("Grand Total", sumLabelX, sy + 2);
+    doc.setFontSize(11);
+    doc.text("GRAND TOTAL", sumLabelX, sy + 2);
     doc.text(`${currency} ${formatCurrency(finalTotal)}`, sumValX, sy + 2, { align: "right" });
 
-    return Math.max(sy + 10, topY + maxHeight);
+    return Math.max(sy + 12, topY + maxHeight);
 };
 
 export const drawCustomSections = (doc: jsPDF, invoice: any, startY: number, SETTINGS: any, config: PdfLayoutConfig) => {
