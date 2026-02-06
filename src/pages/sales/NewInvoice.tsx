@@ -205,7 +205,7 @@ const NewInvoice: React.FC = () => {
         }
       }
 
-      if (stockData) {
+      if (stockData && Array.isArray(stockData)) {
         // Map Backend (unitPrice) -> Frontend (priceKsh)
         const mappedStock: Product[] = stockData.map((s: Record<string, any>) => ({
           ...s,
@@ -226,7 +226,9 @@ const NewInvoice: React.FC = () => {
         const invoiceToEdit = await api.invoices.getOne(editId) as Invoice;
         if (invoiceToEdit) {
           showToast("info", `Loaded ${invoiceToEdit.type} ${invoiceToEdit.id}`);
-          setActiveDocumentType(invoiceToEdit.type);
+          if (invoiceToEdit.type) {
+            setActiveDocumentType(invoiceToEdit.type);
+          }
 
           const customer = {
             id: invoiceToEdit.customer?.id || '',
