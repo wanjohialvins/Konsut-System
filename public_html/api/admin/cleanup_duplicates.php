@@ -53,8 +53,11 @@ try {
                         $upd = $pdo->prepare("UPDATE stock SET quantity = ? WHERE id = ?");
                         $upd->execute([$totalQty, $primary['id']]);
 
+                        // Re-link existing document items to the primary product
+                        $relink = $pdo->prepare("UPDATE document_items SET product_id = ? WHERE product_id IN ($placeholders)");
+                        $relink->execute(array_merge([$primary['id']], $idsToDelete));
+
                         // Delete duplicates
-                        $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
                         $del = $pdo->prepare("DELETE FROM stock WHERE id IN ($placeholders)");
                         $del->execute($idsToDelete);
                     }
@@ -88,6 +91,11 @@ try {
                     $results['clients'] += count($idsToDelete);
                     if ($mode === 'commit') {
                         $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
+
+                        // Re-link existing documents to the primary client
+                        $relink = $pdo->prepare("UPDATE documents SET customer_id = ? WHERE customer_id IN ($placeholders)");
+                        $relink->execute(array_merge([$items[0]['id']], $idsToDelete));
+
                         $del = $pdo->prepare("DELETE FROM clients WHERE id IN ($placeholders)");
                         $del->execute($idsToDelete);
                     }
