@@ -9,6 +9,7 @@ import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import SavingIndicator from "../../components/ui/SavingIndicator";
 import { useMemo, useCallback } from "react";
+import { PreloadAssetsSkeleton } from "../../components/skeletons/PageSkeletons";
 
 type Category = "products" | "mobilization" | "services";
 
@@ -18,7 +19,9 @@ const AddStock = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState<Category>("products");
+
     const [currencyRate, setCurrencyRate] = useState<number>(130);
+    const [initializing, setInitializing] = useState(true);
 
     // Form State
     const [formName, setFormName] = useState<string>("");
@@ -69,6 +72,9 @@ const AddStock = () => {
     useEffect(() => {
         api.settings.get().then(s => {
             if (s?.invoiceSettings?.currencyRate) setCurrencyRate(Number(s.invoiceSettings.currencyRate));
+        }).finally(() => {
+            // Fake delay for premium feel if fast
+            setTimeout(() => setInitializing(false), 500);
         });
     }, []);
 
@@ -194,6 +200,8 @@ const AddStock = () => {
         };
         reader.readAsText(file);
     };
+
+    if (initializing) return <PreloadAssetsSkeleton />;
 
     return (
         <div className="p-6 max-w-4xl mx-auto animate-fade-in mb-20">

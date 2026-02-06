@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiSend, FiTag, FiFlag, FiLayers } from 'react-icons/fi';
 import { SmartInput, SmartTextarea } from "../../components/ui/SmartGuide";
@@ -10,6 +10,7 @@ const CreateTicket = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [initializing, setInitializing] = useState(true);
     const [formData, setFormData] = useState({
         subject: '',
         category: 'general',
@@ -17,7 +18,12 @@ const CreateTicket = () => {
         message: ''
     });
 
-    if (loading) return <NewTicketSkeleton />;
+    useEffect(() => {
+        const t = setTimeout(() => setInitializing(false), 500);
+        return () => clearTimeout(t);
+    }, []);
+
+    if (initializing || loading) return <NewTicketSkeleton />;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

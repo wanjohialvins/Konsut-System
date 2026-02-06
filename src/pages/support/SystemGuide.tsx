@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiBookOpen, FiFileText, FiUsers, FiBox, FiSettings, FiChevronRight, FiPieChart } from 'react-icons/fi';
+import { SystemManualSkeleton } from "../../components/skeletons/PageSkeletons";
 
 
 const GuideSection = ({ title, icon: Icon, children }: any) => (
@@ -18,6 +19,15 @@ const GuideSection = ({ title, icon: Icon, children }: any) => (
 
 const SystemGuide = () => {
     const [activeSection, setActiveSection] = useState('getting-started');
+    const [initializing, setInitializing] = useState(true);
+
+    // Simulate load
+    useEffect(() => {
+        const t = setTimeout(() => setInitializing(false), 600);
+        return () => clearTimeout(t);
+    }, []);
+
+    if (initializing) return <SystemManualSkeleton />;
 
     const scrollTo = (id: string) => {
         const el = document.getElementById(id);

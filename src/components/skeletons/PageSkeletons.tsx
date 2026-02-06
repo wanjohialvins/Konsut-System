@@ -519,3 +519,41 @@ export const InterfaceSkeleton = () => (
         </div>
     </div>
 );
+
+export const PreloadAssetsSkeleton = () => (
+    <div className="p-6 max-w-4xl mx-auto animate-pulse mb-20">
+        <div className="mb-12 flex items-center justify-between">
+            <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                    <PulseBlock className="h-16 w-16 rounded-[2rem]" />
+                    <PulseBlock className="h-10 w-64 rounded-xl" />
+                </div>
+                <PulseBlock className="h-6 w-96 ml-2 rounded" />
+            </div>
+            <PulseBlock className="h-14 w-14 rounded-2xl" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="space-y-4">
+                <PulseBlock className="h-4 w-32 ml-4 rounded" />
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="h-24 rounded-[2rem] bg-gray-200 dark:bg-midnight-800 border-gray-100 dark:border-midnight-800" />
+                ))}
+            </div>
+            <div className="lg:col-span-2">
+                <CardSkeleton className="bg-white dark:bg-midnight-900 rounded-[3rem] h-[500px]">
+                    <div className="space-y-8">
+                        <PulseBlock className="h-20 w-full rounded-[1.5rem]" />
+                        <div className="grid grid-cols-3 gap-8">
+                            <PulseBlock className="h-20 w-full rounded-[1.5rem]" />
+                            <PulseBlock className="h-20 w-full rounded-[1.5rem]" />
+                            <PulseBlock className="h-20 w-full rounded-[1.5rem]" />
+                        </div>
+                        <PulseBlock className="h-32 w-full rounded-[1.5rem]" />
+                        <PulseBlock className="h-24 w-full rounded-[2rem]" />
+                    </div>
+                </CardSkeleton>
+            </div>
+        </div>
+    </div>
+);

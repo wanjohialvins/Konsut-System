@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FiSearch, FiBook, FiMessageCircle, FiChevronRight, FiHelpCircle } from 'react-icons/fi';
 import { SmartInput } from "../../components/ui/SmartGuide";
+import { HelpCentreSkeleton } from "../../components/skeletons/PageSkeletons";
 
 
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
@@ -26,6 +27,15 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
 
 const HelpCenter = () => {
     const [search, setSearch] = useState("");
+    const [initializing, setInitializing] = useState(true);
+
+    // Simulate load
+    useEffect(() => {
+        const t = setTimeout(() => setInitializing(false), 600);
+        return () => clearTimeout(t);
+    }, []);
+
+    if (initializing) return <HelpCentreSkeleton />;
 
     const faqs = [
         { q: "How do I create a new invoice?", a: "Navigate to 'Create New' in the sidebar or from the Dashboard quick actions. Select a client, add items, and click Finalize to generate the PDF." },
