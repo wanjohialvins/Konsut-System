@@ -4,6 +4,7 @@ import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
+import NotificationSkeleton from '../../components/skeletons/NotificationSkeleton';
 
 interface Notification {
     id: string;
@@ -133,10 +134,7 @@ const Notifications = () => {
                 )}
 
                 {loading ? (
-                    <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                        <div className="w-10 h-10 border-4 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading Feed...</p>
-                    </div>
+                    <NotificationSkeleton />
                 ) : filtered.length > 0 ? (
                     filtered.map(notification => {
                         if (!notification) return null;

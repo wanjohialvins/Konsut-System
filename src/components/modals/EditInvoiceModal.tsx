@@ -10,6 +10,7 @@ import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import SavingIndicator from '../ui/SavingIndicator';
 import { InputMasks } from '../../utils/formatters';
+import { ModalSkeleton } from '../skeletons/ModalSkeleton';
 
 interface EditInvoiceModalProps {
     isOpen: boolean;
@@ -316,191 +317,195 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                        {/* Editor Section */}
-                        <div className="xl:col-span-2 space-y-8">
-                            {/* Customer Details */}
-                            <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Customer Details</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Customer Name"
-                                        value={customerName}
-                                        onChange={(e) => setCustomerName(e.target.value)}
-                                        className="col-span-2 px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    />
-                                    <input
-                                        type="tel"
-                                        placeholder="Phone"
-                                        value={customerPhone}
-                                        onChange={(e) => setCustomerPhone(InputMasks.phone(e.target.value))}
-                                        className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    />
-                                    <input
-                                        type="email"
-                                        placeholder="Email"
-                                        value={customerEmail}
-                                        onChange={(e) => setCustomerEmail(e.target.value)}
-                                        className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Address"
-                                        value={customerAddress}
-                                        onChange={(e) => setCustomerAddress(e.target.value)}
-                                        className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="KRA PIN"
-                                        value={customerKraPin}
-                                        onChange={(e) => setCustomerKraPin(InputMasks.kraPin(e.target.value))}
-                                        className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-sm font-black uppercase tracking-widest text-gray-500 flex items-center gap-2">
-                                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400"><FaPlus /></div>
-                                        Line Items
-                                    </h2>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setLines([...lines, { id: `manual - ${Date.now()} `, name: "New Item", category: "products", quantity: 1, unitPrice: 0, lineTotal: 0 }])}
-                                            className="px-4 py-2 bg-gray-50 dark:bg-midnight-800 text-gray-600 dark:text-gray-300 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-all"
-                                        >
-                                            Add Row
-                                        </button>
+                    {loading ? (
+                        <ModalSkeleton />
+                    ) : (
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                            {/* Editor Section */}
+                            <div className="xl:col-span-2 space-y-8">
+                                {/* Customer Details */}
+                                <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Customer Details</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Customer Name"
+                                            value={customerName}
+                                            onChange={(e) => setCustomerName(e.target.value)}
+                                            className="col-span-2 px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        />
+                                        <input
+                                            type="tel"
+                                            placeholder="Phone"
+                                            value={customerPhone}
+                                            onChange={(e) => setCustomerPhone(InputMasks.phone(e.target.value))}
+                                            className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="Email"
+                                            value={customerEmail}
+                                            onChange={(e) => setCustomerEmail(e.target.value)}
+                                            className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Address"
+                                            value={customerAddress}
+                                            onChange={(e) => setCustomerAddress(e.target.value)}
+                                            className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="KRA PIN"
+                                            value={customerKraPin}
+                                            onChange={(e) => setCustomerKraPin(InputMasks.kraPin(e.target.value))}
+                                            className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        />
                                     </div>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead className="bg-gray-50/80 dark:bg-midnight-950/80 text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest border-b border-gray-100 dark:border-midnight-800">
-                                            <tr>
-                                                <th className="px-6 py-4">Item</th>
-                                                <th className="px-4 py-4 text-center">Qty</th>
-                                                <th className="px-4 py-4 text-right">Price</th>
-                                                <th className="px-4 py-4 text-right">Total</th>
-                                                <th className="px-4 py-4 text-center">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-50 dark:divide-midnight-800">
-                                            {lines.map((item, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-midnight-800/50">
-                                                    <td className="px-6 py-3">
-                                                        <input
-                                                            type="text"
-                                                            value={item.name}
-                                                            onChange={(e) => {
-                                                                const newLines = [...lines];
-                                                                newLines[idx].name = e.target.value;
-                                                                setLines(newLines);
-                                                            }}
-                                                            className="w-full bg-transparent border-none text-sm font-medium text-gray-900 dark:text-white focus:outline-none"
-                                                        />
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <input
-                                                            type="number"
-                                                            value={item.quantity}
-                                                            onChange={(e) => {
-                                                                const newLines = [...lines];
-                                                                const qty = parseInt(e.target.value) || 1;
-                                                                newLines[idx].quantity = qty;
-                                                                newLines[idx].lineTotal = qty * newLines[idx].unitPrice;
-                                                                setLines(newLines);
-                                                            }}
-                                                            className="w-16 text-center bg-transparent border-none text-sm font-medium text-gray-900 dark:text-white focus:outline-none"
-                                                        />
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
-                                                        {currency === "USD" ? `$${(item.unitPrice / usdToKshRate).toFixed(2)} ` : item.unitPrice.toLocaleString()}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right text-sm font-bold text-gray-900 dark:text-white">
-                                                        {currency === "USD" ? `$${(item.lineTotal / usdToKshRate).toFixed(2)} ` : item.lineTotal.toLocaleString()}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-center">
-                                                        <button
-                                                            onClick={() => setLines(lines.filter((_, i) => i !== idx))}
-                                                            className="text-gray-400 hover:text-red-500 p-1 rounded transition-colors"
-                                                        >
-                                                            <FiX size={16} />
-                                                        </button>
-                                                    </td>
+
+                                <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-sm font-black uppercase tracking-widest text-gray-500 flex items-center gap-2">
+                                            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400"><FaPlus /></div>
+                                            Line Items
+                                        </h2>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setLines([...lines, { id: `manual - ${Date.now()} `, name: "New Item", category: "products", quantity: 1, unitPrice: 0, lineTotal: 0 }])}
+                                                className="px-4 py-2 bg-gray-50 dark:bg-midnight-800 text-gray-600 dark:text-gray-300 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-all"
+                                            >
+                                                Add Row
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead className="bg-gray-50/80 dark:bg-midnight-950/80 text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest border-b border-gray-100 dark:border-midnight-800">
+                                                <tr>
+                                                    <th className="px-6 py-4">Item</th>
+                                                    <th className="px-4 py-4 text-center">Qty</th>
+                                                    <th className="px-4 py-4 text-right">Price</th>
+                                                    <th className="px-4 py-4 text-right">Total</th>
+                                                    <th className="px-4 py-4 text-center">Action</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-50 dark:divide-midnight-800">
+                                                {lines.map((item, idx) => (
+                                                    <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-midnight-800/50">
+                                                        <td className="px-6 py-3">
+                                                            <input
+                                                                type="text"
+                                                                value={item.name}
+                                                                onChange={(e) => {
+                                                                    const newLines = [...lines];
+                                                                    newLines[idx].name = e.target.value;
+                                                                    setLines(newLines);
+                                                                }}
+                                                                className="w-full bg-transparent border-none text-sm font-medium text-gray-900 dark:text-white focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <input
+                                                                type="number"
+                                                                value={item.quantity}
+                                                                onChange={(e) => {
+                                                                    const newLines = [...lines];
+                                                                    const qty = parseInt(e.target.value) || 1;
+                                                                    newLines[idx].quantity = qty;
+                                                                    newLines[idx].lineTotal = qty * newLines[idx].unitPrice;
+                                                                    setLines(newLines);
+                                                                }}
+                                                                className="w-16 text-center bg-transparent border-none text-sm font-medium text-gray-900 dark:text-white focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                            {currency === "USD" ? `$${(item.unitPrice / usdToKshRate).toFixed(2)} ` : item.unitPrice.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right text-sm font-bold text-gray-900 dark:text-white">
+                                                            {currency === "USD" ? `$${(item.lineTotal / usdToKshRate).toFixed(2)} ` : item.lineTotal.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-center">
+                                                            <button
+                                                                onClick={() => setLines(lines.filter((_, i) => i !== idx))}
+                                                                className="text-gray-400 hover:text-red-500 p-1 rounded transition-colors"
+                                                            >
+                                                                <FiX size={16} />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sidebar Section */}
+                            <div className="space-y-6">
+                                {/* Inventory Selector */}
+                                <InventorySelector
+                                    activeCategory={activeCategory}
+                                    setActiveCategory={setActiveCategory}
+                                    isSearchMode={isSearchMode}
+                                    setIsSearchMode={setIsSearchMode}
+                                    itemSearch={itemSearch}
+                                    setItemSearch={setItemSearch}
+                                    selectedId={selectedId}
+                                    setSelectedId={setSelectedId}
+                                    selectedQty={selectedQty}
+                                    setSelectedQty={setSelectedQty}
+                                    getFilteredForCategory={getFilteredForCategory}
+                                    filteredStock={filteredStock}
+                                    handleSearchSelect={handleSearchSelect}
+                                    handleCreateCustomItem={handleCreateCustomItem}
+                                    handleAddSelected={handleAddSelected}
+                                />
+
+                                {/* Summary */}
+                                <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Summary</h4>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
+                                            <span className="font-bold text-gray-900 dark:text-white">
+                                                {currency === "USD"
+                                                    ? `$${(lines.reduce((sum, l) => sum + l.lineTotal, 0) / usdToKshRate).toFixed(2)}`
+                                                    : `KES ${lines.reduce((sum, l) => sum + l.lineTotal, 0).toLocaleString()}`
+                                                }
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-lg font-black">
+                                            <span className="text-gray-900 dark:text-white">Total:</span>
+                                            <span className="text-brand-600">
+                                                {currency === "USD"
+                                                    ? `$${(lines.reduce((sum, l) => sum + l.lineTotal, 0) / usdToKshRate).toFixed(2)}`
+                                                    : `KES ${lines.reduce((sum, l) => sum + l.lineTotal, 0).toLocaleString()}`
+                                                }
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Status Control */}
+                                <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Lifecycle Status</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {(['draft', 'sent', 'paid', 'cancelled'] as const).map((s: 'draft' | 'sent' | 'paid' | 'cancelled') => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setStatus(s)}
+                                                className={`px - 3 py - 2 rounded - xl text - [10px] font - bold uppercase tracking - wider transition - all border ${status === s ? 'bg-brand-600 text-white border-brand-600 shadow-lg' : 'bg-gray-50 dark:bg-midnight-800 text-gray-500 border-transparent hover:border-gray-200'} `}
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Sidebar Section */}
-                        <div className="space-y-6">
-                            {/* Inventory Selector */}
-                            <InventorySelector
-                                activeCategory={activeCategory}
-                                setActiveCategory={setActiveCategory}
-                                isSearchMode={isSearchMode}
-                                setIsSearchMode={setIsSearchMode}
-                                itemSearch={itemSearch}
-                                setItemSearch={setItemSearch}
-                                selectedId={selectedId}
-                                setSelectedId={setSelectedId}
-                                selectedQty={selectedQty}
-                                setSelectedQty={setSelectedQty}
-                                getFilteredForCategory={getFilteredForCategory}
-                                filteredStock={filteredStock}
-                                handleSearchSelect={handleSearchSelect}
-                                handleCreateCustomItem={handleCreateCustomItem}
-                                handleAddSelected={handleAddSelected}
-                            />
-
-                            {/* Summary */}
-                            <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Summary</h4>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
-                                        <span className="font-bold text-gray-900 dark:text-white">
-                                            {currency === "USD"
-                                                ? `$${(lines.reduce((sum, l) => sum + l.lineTotal, 0) / usdToKshRate).toFixed(2)}`
-                                                : `KES ${lines.reduce((sum, l) => sum + l.lineTotal, 0).toLocaleString()}`
-                                            }
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-lg font-black">
-                                        <span className="text-gray-900 dark:text-white">Total:</span>
-                                        <span className="text-brand-600">
-                                            {currency === "USD"
-                                                ? `$${(lines.reduce((sum, l) => sum + l.lineTotal, 0) / usdToKshRate).toFixed(2)}`
-                                                : `KES ${lines.reduce((sum, l) => sum + l.lineTotal, 0).toLocaleString()}`
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Status Control */}
-                            <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Lifecycle Status</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {(['draft', 'sent', 'paid', 'cancelled'] as const).map((s: 'draft' | 'sent' | 'paid' | 'cancelled') => (
-                                        <button
-                                            key={s}
-                                            onClick={() => setStatus(s)}
-                                            className={`px - 3 py - 2 rounded - xl text - [10px] font - bold uppercase tracking - wider transition - all border ${status === s ? 'bg-brand-600 text-white border-brand-600 shadow-lg' : 'bg-gray-50 dark:bg-midnight-800 text-gray-500 border-transparent hover:border-gray-200'} `}
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

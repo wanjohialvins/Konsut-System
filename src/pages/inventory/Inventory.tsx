@@ -21,6 +21,7 @@ import { DEFAULT_CURRENCY_RATE } from "../../utils/config";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useModal } from "../../contexts/ModalContext";
+import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 // Local strictly typed item for Inventory management
 type InventoryItem = Product & { quantity: number; category: Category };
@@ -147,8 +148,6 @@ const Inventory = () => {
         }
     };
 
-
-
     const handleClearAll = async () => {
         const confirmed1 = await showConfirm("⚠️ CRITICAL WARNING ⚠️\n\nThis will permanently DELETE ALL items in your inventory.\nThis action cannot be undone.\n\nAre you sure you want to wipe everything?");
         if (!confirmed1) return;
@@ -215,6 +214,15 @@ const Inventory = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="p-6 max-w-[1600px] mx-auto space-y-8">
+                <PageHeaderSkeleton />
+                <div className="h-16 w-full bg-white dark:bg-midnight-900 rounded-3xl animate-pulse border border-gray-100 dark:border-midnight-800"></div>
+                <TableSkeleton rows={10} />
+            </div>
+        );
+    }
     return (
         <div className="p-6 max-w-[1600px] mx-auto space-y-8 animate-fade-in">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -455,73 +463,75 @@ const Inventory = () => {
                 </div>
             </div>
 
-            {editingItem && createPortal(
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white dark:bg-midnight-900 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-white/10 custom-scrollbar">
-                        <div className="px-10 py-8 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center bg-gray-50/50 dark:bg-midnight-950/50">
-                            <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tight">Modify Inventory</h3>
-                            <button onClick={() => setEditingItem(null)} className="p-3 rounded-2xl hover:bg-gray-200 dark:hover:bg-midnight-800 text-gray-400 transition-colors">✕</button>
-                        </div>
-                        <form onSubmit={handleUpdate} className="p-10 space-y-8 text-sm">
-                            <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Resource Identity</label>
-                                <input
-                                    value={editingItem.name}
-                                    onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
-                                    required
-                                />
+            {
+                editingItem && createPortal(
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-midnight-900 rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-white/10 custom-scrollbar">
+                            <div className="px-10 py-8 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center bg-gray-50/50 dark:bg-midnight-950/50">
+                                <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tight">Modify Inventory</h3>
+                                <button onClick={() => setEditingItem(null)} className="p-3 rounded-2xl hover:bg-gray-200 dark:hover:bg-midnight-800 text-gray-400 transition-colors">✕</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <form onSubmit={handleUpdate} className="p-10 space-y-8 text-sm">
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Quantity</label>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Resource Identity</label>
                                     <input
-                                        type="number"
-                                        value={editingItem.quantity}
-                                        onChange={e => setEditingItem({ ...editingItem, quantity: Number(e.target.value) })}
+                                        value={editingItem.name}
+                                        onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
                                         className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
                                         required
                                     />
                                 </div>
-                                <div className="md:col-span-3">
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Description</label>
-                                    <textarea
-                                        value={editingItem.description || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
-                                        className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none h-24 resize-none"
-                                        placeholder="Add details..."
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Quantity</label>
+                                        <input
+                                            type="number"
+                                            value={editingItem.quantity}
+                                            onChange={e => setEditingItem({ ...editingItem, quantity: Number(e.target.value) })}
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="md:col-span-3">
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Description</label>
+                                        <textarea
+                                            value={editingItem.description || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none h-24 resize-none"
+                                            placeholder="Add details..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Price (Ksh)</label>
+                                        <input
+                                            type="number"
+                                            value={editingItem.priceKsh}
+                                            onChange={e => setEditingItem({ ...editingItem, priceKsh: Number(e.target.value), priceUSD: Number((Number(e.target.value) / currencyRate).toFixed(2)) })}
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Price (USD)</label>
+                                        <input
+                                            type="number"
+                                            value={editingItem.priceUSD || ''}
+                                            onChange={e => setEditingItem({ ...editingItem, priceUSD: Number(e.target.value), priceKsh: Number((Number(e.target.value) * currencyRate).toFixed(2)) })}
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Price (Ksh)</label>
-                                    <input
-                                        type="number"
-                                        value={editingItem.priceKsh}
-                                        onChange={e => setEditingItem({ ...editingItem, priceKsh: Number(e.target.value), priceUSD: Number((Number(e.target.value) / currencyRate).toFixed(2)) })}
-                                        className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Price (USD)</label>
-                                    <input
-                                        type="number"
-                                        value={editingItem.priceUSD || ''}
-                                        onChange={e => setEditingItem({ ...editingItem, priceUSD: Number(e.target.value), priceKsh: Number((Number(e.target.value) * currencyRate).toFixed(2)) })}
-                                        className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-brand-500/10 outline-none"
-                                        placeholder="0.00"
-                                    />
-                                </div>
-                            </div>
 
-                            <div className="flex gap-4 pt-4">
-                                <button type="submit" className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-widest transition-all shadow-xl shadow-brand-500/20 active:scale-95">Update Resource</button>
-                            </div>
-                        </form>
-                    </div>
-                </div >,
-                document.body
-            )}
+                                <div className="flex gap-4 pt-4">
+                                    <button type="submit" className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-5 rounded-[1.5rem] font-black uppercase tracking-widest transition-all shadow-xl shadow-brand-500/20 active:scale-95">Update Resource</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div >,
+                    document.body
+                )
+            }
         </div >
     );
 };

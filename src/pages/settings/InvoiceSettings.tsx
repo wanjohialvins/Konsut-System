@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { FiLayout, FiSave, FiEye, FiSettings, FiCheckCircle, FiPercent, FiFileText } from "react-icons/fi";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 const InvoiceSettings = () => {
     const { showToast } = useToast();
-    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [invoiceSettings, setInvoiceSettings] = useState({
         taxRate: 0.16,
         currencyRate: 130,
@@ -34,14 +36,15 @@ const InvoiceSettings = () => {
     });
 
     useEffect(() => {
+        setInitialLoading(true);
         api.settings.get().then(s => {
             if (s?.invoiceSettings) setInvoiceSettings(prev => ({ ...prev, ...s.invoiceSettings }));
-        });
+        }).finally(() => setInitialLoading(false));
     }, []);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
         try {
             const current = await api.settings.get();
             await api.settings.save({ ...current, invoiceSettings });
@@ -51,7 +54,7 @@ const InvoiceSettings = () => {
         } catch (error) {
             showToast('error', 'Update failed');
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
@@ -77,6 +80,8 @@ const InvoiceSettings = () => {
             </div>
         </label>
     );
+
+    if (initialLoading) return <SettingsSkeleton />;
 
     return (
         <div className="p-8 max-w-[1400px] mx-auto animate-fade-in">
@@ -253,10 +258,10 @@ const InvoiceSettings = () => {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={saving}
                             className="w-full bg-brand-600 hover:bg-brand-700 text-white py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest transition-all shadow-2xl shadow-brand-500/40 active:scale-[0.98] flex items-center justify-center gap-4"
                         >
-                            <FiSave /> {loading ? 'UPDATING...' : 'APPLY CONFIG'}
+                            <FiSave /> {saving ? 'UPDATING...' : 'APPLY CONFIG'}
                         </button>
 
                         <div className="mt-6 flex items-center justify-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">

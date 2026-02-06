@@ -3,10 +3,12 @@ import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText } f
 import logoUrl from '../../assets/logo.jpg';
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 const CompanyProfile = () => {
     const { showToast } = useToast();
-    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     // Initial state moved to below DEFAULT_COMPANY definition
 
     const DEFAULT_COMPANY = {
@@ -22,17 +24,18 @@ const CompanyProfile = () => {
     const [company, setCompany] = useState(DEFAULT_COMPANY);
 
     useEffect(() => {
+        setInitialLoading(true);
         api.settings.get().then(s => {
             if (s?.company) {
                 // Merge API data with defaults to ensure no missing fields
                 setCompany(prev => ({ ...prev, ...s.company }));
             }
-        });
+        }).finally(() => setInitialLoading(false));
     }, []);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
         try {
             const current = await api.settings.get();
             await api.settings.save({ ...current, company });
@@ -40,9 +43,11 @@ const CompanyProfile = () => {
         } catch (error) {
             showToast('error', 'Update failed');
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
+
+    if (initialLoading) return <SettingsSkeleton />;
 
     return (
         <div className="p-8 max-w-5xl mx-auto animate-fade-in">
@@ -121,10 +126,10 @@ const CompanyProfile = () => {
                     <div className="pt-6">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={saving}
                             className="w-full bg-slate-950 dark:bg-brand-600 hover:bg-black dark:hover:bg-brand-700 text-white py-6 rounded-3xl font-black text-xl uppercase tracking-widest transition-all shadow-2xl shadow-brand-500/20 active:scale-[0.98] flex items-center justify-center gap-4"
                         >
-                            <FiSave /> {loading ? 'Saving Changes...' : 'Synchronize Identity'}
+                            <FiSave /> {saving ? 'Saving Changes...' : 'Synchronize Identity'}
                         </button>
                     </div>
                 </div>

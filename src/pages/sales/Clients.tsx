@@ -40,6 +40,7 @@ import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import SavingIndicator from "../../components/ui/SavingIndicator";
 import { InputMasks } from "../../utils/formatters";
+import { PageHeaderSkeleton, CardGridSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 /* -------------------------------------------------------------------------- */
 /*                                Types                                       */
@@ -417,9 +418,17 @@ const Clients: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-midnight-950 flex flex-col items-center justify-center">
-        <div className="w-16 h-16 border-4 border-brand-500 border-t-brand-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-brand-600 font-bold animate-pulse">Loading Client Database...</p>
+      <div className="p-6 bg-slate-50 dark:bg-midnight-950 min-h-screen">
+        <div className="max-w-[1600px] mx-auto space-y-8">
+          <PageHeaderSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-32 bg-white dark:bg-midnight-900 rounded-3xl animate-pulse border border-gray-100 dark:border-midnight-800"></div>
+            ))}
+          </div>
+          <div className="h-16 w-full bg-white dark:bg-midnight-900 rounded-3xl animate-pulse border border-gray-100 dark:border-midnight-800"></div>
+          <CardGridSkeleton count={6} />
+        </div>
       </div>
     );
   }

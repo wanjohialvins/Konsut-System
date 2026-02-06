@@ -29,6 +29,7 @@ import PDFPreviewModal from "../../components/modals/PDFPreviewModal";
 import EditInvoiceModal from "../../components/modals/EditInvoiceModal";
 import { usePDFPreview } from "../../hooks/usePDFPreview";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
+import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 // --- Constants ---
 const Invoices = () => {
@@ -329,9 +330,12 @@ const Invoices = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-midnight-950 flex flex-col items-center justify-center">
-        <div className="w-16 h-16 border-4 border-brand-500 border-t-brand-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-brand-600 font-bold animate-pulse">Loading Documents...</p>
+      <div className="p-6 bg-slate-50 dark:bg-midnight-950 min-h-screen">
+        <div className="max-w-[1600px] mx-auto space-y-8">
+          <PageHeaderSkeleton />
+          <div className="h-16 w-full bg-white dark:bg-midnight-900 rounded-3xl animate-pulse border border-gray-100 dark:border-midnight-800"></div>
+          <TableSkeleton rows={8} />
+        </div>
       </div>
     );
   }
