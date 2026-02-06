@@ -40,8 +40,10 @@ body {
   background-color: var(--soft-gray);
   color: #111827;
   transition: background-color 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  overflow-x: hidden;
+  /* Prevent horizontal scroll on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Remove tap highlight on mobile */
 }
 
 .dark body {
@@ -113,11 +115,11 @@ body {
   border-radius: 0.75rem !important;
 }
 
-.density-compact .rounded-[2rem] {
+.density-compact .rounded-\[2rem\] {
   border-radius: 1rem !important;
 }
 
-.density-compact .rounded-[3rem] {
+.density-compact .rounded-\[3rem\] {
   border-radius: 1.5rem !important;
 }
 

@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { FaUser, FaLock, FaSignInAlt, FaExclamationCircle, FaCheckCircle, FaTicketAlt } from 'react-icons/fa';
 import { api } from '../../services/api';
 import logo from '../../assets/logo.jpg';
+import loginBg from '../../assets/login.jpg';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -127,7 +128,10 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black font-sans bg-[url('https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center">
+        <div
+            className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black font-sans bg-cover bg-center"
+            style={{ backgroundImage: `url(${loginBg})` }}
+        >
             <div className="absolute inset-0 bg-white/40 dark:bg-black/80 backdrop-blur-sm"></div>
 
             <div className="relative z-10 w-full max-w-md p-6 md:p-8 bg-white/80 dark:bg-midnight-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 dark:border-white/10 mx-4">
