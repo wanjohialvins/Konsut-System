@@ -32,10 +32,8 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   const fetchUnread = async () => {
     try {
-      const notifs = await api.admin.getNotifications();
-      if (Array.isArray(notifs)) {
-        setUnreadCount(notifs.filter((n: { read: boolean | number }) => !n.read).length);
-      }
+      const data = await api.admin.getNotificationsCount();
+      setUnreadCount(data?.unreadCount || 0);
     } catch {
       // console.error(e);
     }
