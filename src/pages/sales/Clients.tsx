@@ -464,10 +464,10 @@ const Clients: React.FC = () => {
               <thead>
                 <tr className="bg-gray-50/50 dark:bg-midnight-950/50 border-b border-gray-100 dark:border-midnight-800">
                   <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Client Profile</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Contact Info</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Financials</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                  <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Last Active</th>
+                  <th className="hidden md:table-cell px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Contact Info</th>
+                  <th className="hidden lg:table-cell px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Financials</th>
+                  <th className="hidden md:table-cell px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
+                  <th className="hidden xl:table-cell px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Last Active</th>
                   <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Actions</th>
                 </tr>
               </thead>
@@ -492,17 +492,17 @@ const Clients: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="hidden md:table-cell px-6 py-5">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 font-medium"><FaEnvelope className="text-gray-300" size={12} /> {client.email || <span className="text-gray-300 italic">No Email</span>}</div>
                             <div className="flex items-center gap-2 text-sm text-gray-500 font-medium"><FaPhone className="text-gray-300" size={12} /> {client.phone}</div>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="hidden lg:table-cell px-6 py-5">
                           <div className="font-black text-gray-900 dark:text-white">Ksh {Math.round(Number(client.totalRevenue || 0)).toLocaleString()}</div>
                           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{client.totalInvoices} Invoices</div>
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="hidden md:table-cell px-6 py-5">
                           {(client.overdueCount || 0) > 0 ? (
                             <span className="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] font-black uppercase tracking-wide border border-rose-200 dark:border-rose-900/50">Overdue</span>
                           ) : (client.pendingCount || 0) > 0 ? (
@@ -511,7 +511,7 @@ const Clients: React.FC = () => {
                             <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wide border border-emerald-200 dark:border-emerald-900/50">Good Standing</span>
                           )}
                         </td>
-                        <td className="px-6 py-5 text-sm font-medium text-gray-500">
+                        <td className="hidden xl:table-cell px-6 py-5 text-sm font-medium text-gray-500">
                           {client.lastActive ? new Date(client.lastActive).toLocaleDateString() : <span className="opacity-50">Never</span>}
                         </td>
                         <td className="px-6 py-5 text-center" onClick={e => e.stopPropagation()}>

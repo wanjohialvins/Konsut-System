@@ -387,18 +387,18 @@ const Inventory = () => {
                     <table className="min-w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 dark:bg-midnight-950/50 border-b border-gray-100 dark:border-midnight-800">
-                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">ID Reference</th>
+                                <th className="hidden lg:table-cell px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">ID Reference</th>
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">Product Specification</th>
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Available Qty</th>
-                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Base Price ({displayCurrency})</th>
-                                <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Equity ({displayCurrency})</th>
+                                <th className="hidden md:table-cell px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Base Price ({displayCurrency})</th>
+                                <th className="hidden xl:table-cell px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Equity ({displayCurrency})</th>
                                 <th className="px-8 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Management</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 dark:divide-midnight-800/50">
                             {filteredItems.map(it => (
                                 <tr key={it.id} className="hover:bg-gray-50/50 dark:hover:bg-midnight-800/30 transition-all group">
-                                    <td className="px-8 py-6">
+                                    <td className="hidden lg:table-cell px-8 py-6">
                                         <span className="font-mono text-xs font-bold text-gray-400 bg-gray-100 dark:bg-midnight-950 px-2 py-1 rounded-lg">
                                             {it.id}
                                         </span>
@@ -426,13 +426,13 @@ const Inventory = () => {
                                             {it.quantity}
                                         </span>
                                     </td>
-                                    <td className="px-8 py-6 text-right font-bold text-gray-700 dark:text-gray-300">
+                                    <td className="hidden md:table-cell px-8 py-6 text-right font-bold text-gray-700 dark:text-gray-300">
                                         {displayCurrency === 'KSH'
                                             ? (it.priceKsh || 0).toLocaleString()
                                             : (it.priceUSD || ((it.priceKsh || 0) / currencyRate)).toFixed(2)
                                         }
                                     </td>
-                                    <td className="px-8 py-6 text-right font-black text-brand-600">
+                                    <td className="hidden xl:table-cell px-8 py-6 text-right font-black text-brand-600">
                                         {displayCurrency === 'KSH'
                                             ? ((it.priceKsh || 0) * it.quantity).toLocaleString()
                                             : ((it.priceUSD || ((it.priceKsh || 0) / currencyRate)) * it.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })

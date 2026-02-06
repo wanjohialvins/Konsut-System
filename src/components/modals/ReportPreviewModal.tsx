@@ -50,7 +50,7 @@ const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({ isOpen, onClose
                     className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col relative"
                 >
                     {/* Header */}
-                    <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 sticky top-0 z-10 backdrop-blur-xl">
+                    <div className="p-8 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 bg-slate-900/50 sticky top-0 z-10 backdrop-blur-xl">
                         <div>
                             <div className="flex items-center gap-3 mb-1">
                                 <div className="w-10 h-10 rounded-xl bg-brand-600/20 flex items-center justify-center text-brand-400">

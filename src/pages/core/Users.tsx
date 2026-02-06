@@ -200,9 +200,9 @@ const Users = () => {
                         <thead>
                             <tr className="bg-gray-50/50 dark:bg-midnight-800/50 text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider text-xs border-b border-gray-100 dark:border-midnight-800">
                                 <th className="p-5">System Identity</th>
-                                <th className="p-5 text-center">Security Role</th>
+                                <th className="hidden md:table-cell p-5 text-center">Security Role</th>
                                 <th className="p-5 text-center">Status</th>
-                                <th className="p-5 text-center">History</th>
+                                <th className="hidden lg:table-cell p-5 text-center">History</th>
                                 <th className="p-5 text-right">Settings</th>
                             </tr>
                         </thead>
@@ -218,7 +218,7 @@ const Users = () => {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-5 text-center">
+                                    <td className="hidden md:table-cell p-5 text-center">
                                         <div className="flex justify-center flex-col items-center gap-1">
                                             <RoleBadge
                                                 role={u.role}
@@ -234,7 +234,7 @@ const Users = () => {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="p-5 text-center">
+                                    <td className="hidden lg:table-cell p-5 text-center">
                                         <div className="flex flex-col items-center">
                                             <span className="text-gray-900 dark:text-white font-bold">{u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'New Account'}</span>
                                             {u.lastLogin && <span className="text-[10px] text-gray-400 uppercase font-black">{new Date(u.lastLogin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
@@ -464,8 +464,8 @@ const Users = () => {
                                                                             type="button"
                                                                             onClick={() => setLevel(lvl)}
                                                                             className={`px-3 py-1.5 rounded-md text-xs font-bold capitalize transition-all ${status === lvl
-                                                                                    ? 'bg-white dark:bg-midnight-700 text-brand-600 shadow-sm'
-                                                                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                                                                                ? 'bg-white dark:bg-midnight-700 text-brand-600 shadow-sm'
+                                                                                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                                                                                 }`}
                                                                         >
                                                                             {lvl}
