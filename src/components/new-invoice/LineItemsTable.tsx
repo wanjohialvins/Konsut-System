@@ -276,7 +276,7 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                                 </div>
                                                 <div className="w-px h-8 bg-gray-100 dark:bg-midnight-800 mx-1"></div>
 
-                                                {item.id.startsWith('TEMP-') ? (
+                                                {String(item.id || '').startsWith('TEMP-') ? (
                                                     <button
                                                         onClick={() => onSaveToStock(item)}
                                                         title="New Item! Save to Stock Library"

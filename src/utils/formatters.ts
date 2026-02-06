@@ -45,6 +45,7 @@ export const normalizeInvoice = (raw: any): Invoice => {
             }
             return Array.isArray(items) ? items.map((item: any) => ({
                 ...item,
+                id: String(item.id || ''), // FORCE STRING CAST to prevent .startsWith crash
                 unitPrice: Number(item.unitPrice || 0),
                 total: Number(item.total || 0),
                 quantity: Number(item.quantity || 0)
