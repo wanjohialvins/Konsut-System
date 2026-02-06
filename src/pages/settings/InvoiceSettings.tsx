@@ -29,7 +29,8 @@ const InvoiceSettings = () => {
         fontFamily: "Helvetica",
         footerText: "Thank you for your business!",
         termsAndConditions: "1. 60% deposit required (Standard term).\n2. Balance due upon completion.",
-        clientResponsibilities: "1. Provide clear access to the site.\n2. Ensure power and water availability."
+        clientResponsibilities: "1. Provide clear access to the site.\n2. Ensure power and water availability.",
+        paymentDetails: "Bank: I&M BANK\nBranch: RUIRU BRANCH\nAccount No (KSH): 05507023236350\nAccount No (USD): 05507023231250\nSWIFT CODE: IMBLKENA\nBANK CODE: 57 | BRANCH CODE: 055"
     });
 
     useEffect(() => {
@@ -218,6 +219,16 @@ const InvoiceSettings = () => {
                                     onChange={e => setInvoiceSettings({ ...invoiceSettings, clientResponsibilities: e.target.value })}
                                     rows={4}
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                                />
+                            </div>
+                            <div className="md:col-span-2 space-y-3">
+                                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">Payment / Bank Details (Shown on Documents)</label>
+                                <textarea
+                                    value={invoiceSettings.paymentDetails}
+                                    onChange={e => setInvoiceSettings({ ...invoiceSettings, paymentDetails: e.target.value })}
+                                    rows={5}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                                    placeholder="Enter bank, branch, and account numbers..."
                                 />
                             </div>
                             <div className="md:col-span-2 space-y-3">

@@ -47,6 +47,7 @@ export const DEFAULT_INVOICE_SETTINGS = {
     fontSize: 10,
     fontFamily: "Helvetica",
     footerText: "If you have any questions about this invoice, please contact: Tel: +254 700 420 897 | Email: info@konsutltd.co.ke | Ruiru, Kenya",
+    paymentDetails: "Bank: I&M BANK\nBranch: RUIRU BRANCH\nAccount No (KSH): 05507023236350\nAccount No (USD): 05507023231250\nSWIFT CODE: IMBLKENA\nBANK CODE: 57 | BRANCH CODE: 055",
 };
 
 export const getCompanySettings = () => {

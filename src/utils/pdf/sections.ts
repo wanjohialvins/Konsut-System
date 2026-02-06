@@ -36,17 +36,17 @@ export const drawHeader = async (doc: jsPDF, COMPANY: any, SETTINGS: any, config
         doc.setFontSize(9.5);
         doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
 
-        // Compact Address Block
-        const addressText = [COMPANY.address1, COMPANY.address2].filter(Boolean).join(", ");
-        doc.text(addressText, rightMargin, y, { align: "right" });
-        y += 5;
+        // Vertically Stacked Address & Contact Info
+        if (COMPANY.address1) { doc.text(COMPANY.address1, rightMargin, y, { align: "right" }); y += 5; }
+        if (COMPANY.address2) { doc.text(COMPANY.address2, rightMargin, y, { align: "right" }); y += 5; }
 
-        // Contact Row
-        const contactInfo = `Phone: ${COMPANY.phone} | Email: ${COMPANY.email}`;
-        doc.text(contactInfo, rightMargin, y, { align: "right" });
-        y += 5;
+        const contactLine = [
+            COMPANY.phone ? `Phone: ${COMPANY.phone}` : null,
+            COMPANY.email ? `Email: ${COMPANY.email}` : null
+        ].filter(Boolean).join(" | ");
 
-        // Tax Info (Prominent but clean)
+        if (contactLine) { doc.text(contactLine, rightMargin, y, { align: "right" }); y += 5; }
+
         if (COMPANY.pin) {
             doc.setFont(config.font, "bold");
             doc.text(`PIN: ${COMPANY.pin}`, rightMargin, y, { align: "right" });
@@ -243,14 +243,7 @@ export const drawFooterSummary = (
     const rightBoxX = config.margin + boxWidth + config.boxGap;
     const footerTopY = finalY + 10;
 
-    const bankDetails = [
-        "Bank: I&M BANK",
-        "Branch: RUIRU BRANCH",
-        `Account No (KSH): 05507023236350`,
-        `Account No (USD): 05507023231250`,
-        "SWIFT CODE: IMBLKENA",
-        "BANK CODE: 57 | BRANCH CODE: 055"
-    ];
+    const bankDetails = (SETTINGS.paymentDetails || "").split("\n").filter((l: string) => l.trim() !== "");
     const paymentHeight = 7 + (bankDetails.length * 4) + 4;
     const summaryHeight = 7 + 6 + 6 + 10 + 4;
     const maxHeight = Math.max(paymentHeight, summaryHeight);
@@ -262,12 +255,12 @@ export const drawFooterSummary = (
     }
 
     if (SETTINGS.includePaymentDetails) {
-        drawBox(doc, config.margin, topY, boxWidth, maxHeight, config, "Payment Details");
+        drawBox(doc, config.margin, topY, boxWidth, maxHeight, config, "PAYMENT DETAILS");
         let py = topY + 12;
         doc.setFont(config.font, "normal");
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(0, 0, 0);
-        bankDetails.forEach(line => { doc.text(line, config.margin + 4, py); py += 4; });
+        bankDetails.forEach((line: string) => { doc.text(line, config.margin + 4, py); py += 4; });
     }
 
     drawBox(doc, rightBoxX, topY, boxWidth, maxHeight, config, "SUMMARY");
