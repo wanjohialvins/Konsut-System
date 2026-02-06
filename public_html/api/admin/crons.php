@@ -27,10 +27,31 @@ $taskLogic = [
     },
     'optimize_db' => function () {
         $pdo = getDbConnection();
-        $tables = ['users', 'invoices', 'clients', 'stock', 'audit_logs'];
-        foreach ($tables as $t)
-            $pdo->query("OPTIMIZE TABLE `$t`");
-        return "Optimized " . count($tables) . " tables.";
+        // Corrected 'invoices' to 'documents' and added other high-churn tables
+        $tables = [
+            'users',
+            'documents',
+            'document_items',
+            'clients',
+            'stock',
+            'audit_logs',
+            'tasks',
+            'tickets',
+            'ticket_messages',
+            'login_history',
+            'notifications',
+            'settings'
+        ];
+        $optimized = [];
+        foreach ($tables as $t) {
+            try {
+                $pdo->query("OPTIMIZE TABLE `$t`");
+                $optimized[] = $t;
+            } catch (Exception $e) {
+                // Silently skip if table doesn't exist to prevent crash
+            }
+        }
+        return "Optimized " . count($optimized) . " tables.";
     },
     'prune_logs' => function () {
         $logFile = ini_get('error_log');

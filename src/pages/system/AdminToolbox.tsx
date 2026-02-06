@@ -284,12 +284,12 @@ const AdminToolbox = () => {
     const handleClearCache = async () => {
         setLoading(true);
         try {
-            // Frontend
+            // Backend first (needs auth token)
+            await api.admin.clearSystemCache();
+
+            // Then Frontend
             localStorage.clear();
             sessionStorage.clear();
-
-            // Backend
-            await api.admin.clearSystemCache();
 
             showToast('success', "Cache cleared! Reloading...");
             setTimeout(() => window.location.reload(), 1500);
@@ -502,9 +502,25 @@ const AdminToolbox = () => {
                                     <h3 className="text-lg font-bold text-white flex items-center gap-3 mb-6">
                                         <FiShield className="text-emerald-500" /> Effective Permissions
                                     </h3>
-                                    <pre className="font-mono text-xs text-emerald-400 bg-slate-950 p-6 rounded-xl overflow-x-auto border border-slate-800">
-                                        {JSON.stringify(JSON.parse(selectedUser.permissions || '{}'), null, 2)}
-                                    </pre>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {(() => {
+                                            try {
+                                                const perms = JSON.parse(selectedUser.permissions || '[]');
+                                                if (!Array.isArray(perms) || perms.length === 0) {
+                                                    return <span className="text-slate-500 italic text-sm">No specific permissions assigned.</span>;
+                                                }
+                                                return perms.map((perm: string, i: number) => (
+                                                    <span key={i} className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                        {perm.replace(/_/g, ' ')}
+                                                    </span>
+                                                ));
+                                            } catch (e) {
+                                                return <span className="text-red-400 text-sm">Error parsing permissions data.</span>;
+                                            }
+                                        })()}
+                                    </div>
                                 </div>
                             </>
                         ) : (
@@ -543,9 +559,14 @@ const AdminToolbox = () => {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2">
                                             <h4 className="font-bold text-lg text-gray-800 dark:text-white">{task.name}</h4>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${task.enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'}`}>
+                                            <button
+                                                onClick={() => updateLocalTask(task.id, 'enabled', !task.enabled)}
+                                                className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold transition-all ${task.enabled
+                                                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                                    : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}
+                                            >
                                                 {task.enabled ? 'Active' : 'Disabled'}
-                                            </span>
+                                            </button>
                                         </div>
                                         <p className="text-sm text-gray-500 mb-4">{task.description}</p>
 

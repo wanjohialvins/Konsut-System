@@ -2,6 +2,25 @@ import React from "react";
 import { FiLock, FiClock } from "react-icons/fi";
 
 const Maintenance: React.FC = () => {
+    // Check status
+    React.useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                // We use fetch directly to bypass the interceptor logic
+                const res = await fetch(import.meta.env.VITE_API_BASE_URL + '/admin/health.php');
+                if (res.ok) {
+                    // System is back online!
+                    window.location.href = '/login';
+                }
+            } catch (e) {
+                // Still down, do nothing
+            }
+        };
+
+        const interval = setInterval(checkStatus, 5000); // Check every 5s
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-white font-sans">
             <div className="max-w-md w-full text-center space-y-8 animate-fade-in">
