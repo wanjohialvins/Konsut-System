@@ -150,7 +150,7 @@ const InventorySelector: React.FC<InventorySelectorProps> = ({
                                                     <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px] mt-0.5">{item.description}</div>
                                                 </div>
                                                 <div className="text-xs font-black text-gray-600 dark:text-gray-300 whitespace-nowrap ml-2 bg-gray-100 dark:bg-midnight-950 px-2 py-1 rounded-lg">
-                                                    {item.priceKsh ? `Ksh ${item.priceKsh.toLocaleString()}` : `USD ${item.priceUSD?.toLocaleString()}`}
+                                                    {item.priceKsh ? `Ksh ${Number(item.priceKsh).toLocaleString()}` : `USD ${Number(item.priceUSD || 0).toLocaleString()}`}
                                                 </div>
                                             </button>
                                         ))

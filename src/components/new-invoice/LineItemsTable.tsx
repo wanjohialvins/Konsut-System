@@ -85,10 +85,11 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
 }) => {
 
     const formatPrice = (amount: number) => {
+        const value = Number(amount || 0); // Guard against undefined/null
         if (displayCurrency === "USD") {
-            return `$${(amount / usdToKshRate).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+            return `$${(value / usdToKshRate).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
         }
-        return amount.toLocaleString();
+        return value.toLocaleString();
     };
 
     return (
