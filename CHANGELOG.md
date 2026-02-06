@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.0] - 2026-02-06 - System Audit & Security Hardening
+
+### Added
+- **Force Logout Logic**: Added missing `force_refresh` column to `users` table to support real-time session invalidation.
+- **Admin Security**: Hardened the SQL Console with read-only enforcement and jailed the File Manager to the `uploads/` directory.
+- **Improved Feedback**: Added granular toast notifications to the Auth Debugger and Security Protocols for better administrative UX.
+
+### Fixed
+- **Data Core (Merge)**: Patched `cleanup_duplicates.php` to re-link documents/items before deleting primary records, preventing data loss.
+- **Auth Debugger**: Resolved property naming mismatch (`debug_info` vs `debugInfo`) through the API camelCase layer and added robust error handling.
+- **Global Logout**: Standardized the kill-switch mechanism to both flag users and immediately purge `auth_tokens`.
+- **API Resilience**: Wrapped sensitive admin endpoints in `try/catch` blocks to prevent JSON parsing errors on frontend.
+
+### Changed
+- **Repository Cleanup**: Removed legacy reports (`CPANEL_DEPLOYMENT.md`, `Handover_Report.md`) and re-ignored `.sql` files to keep the repo lean.
+
 ## [2.3.1] - 2026-01-31 - Production Release Candidate
 
 ### Added
