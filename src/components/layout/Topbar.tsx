@@ -20,6 +20,13 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
   const prevCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  useEffect(() => {
+    // Pre-load audio
+    const audio = new Audio(notificationSound);
+    audio.load();
+    audioRef.current = audio;
+  }, []);
+
   const fetchUnreadCount = async () => {
     if (!user) return;
     try {
@@ -28,17 +35,15 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
 
       // Only play sound if unread count increases
       if (count > prevCountRef.current) {
-        if (!audioRef.current) {
-          audioRef.current = new Audio(notificationSound);
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.warn('Notification audio playback failed:', err);
+            });
+          }
         }
-
-        // Safety checks for audio playback
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(err => {
-          // Failure to play sound usually means user hasn't interacted with page yet
-          // We silent catch to prevent app crash
-          console.warn('Notification audio blocked/failed:', err.message);
-        });
       }
 
       setUnreadCount(count);

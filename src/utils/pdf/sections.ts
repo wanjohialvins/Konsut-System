@@ -40,12 +40,8 @@ export const drawHeader = async (doc: jsPDF, COMPANY: any, SETTINGS: any, config
         if (COMPANY.address1) { doc.text(COMPANY.address1, rightMargin, y, { align: "right" }); y += 5; }
         if (COMPANY.address2) { doc.text(COMPANY.address2, rightMargin, y, { align: "right" }); y += 5; }
 
-        const contactLine = [
-            COMPANY.phone ? `Phone: ${COMPANY.phone}` : null,
-            COMPANY.email ? `Email: ${COMPANY.email}` : null
-        ].filter(Boolean).join(" | ");
-
-        if (contactLine) { doc.text(contactLine, rightMargin, y, { align: "right" }); y += 5; }
+        if (COMPANY.phone) { doc.text(`Phone: ${COMPANY.phone}`, rightMargin, y, { align: "right" }); y += 5; }
+        if (COMPANY.email) { doc.text(`Email: ${COMPANY.email}`, rightMargin, y, { align: "right" }); y += 5; }
 
         if (COMPANY.pin) {
             doc.setFont(config.font, "bold");
@@ -273,8 +269,8 @@ export const drawFooterSummary = (
     const subtotal = invoice.subtotal;
     const totalDiscount = invoice.totalDiscount || invoice.items.reduce((acc: number, item: any) => acc + (item.discount || 0), 0);
     const taxableAmount = Math.max(0, subtotal - totalDiscount);
-    const vatAmount = includeTax ? (invoice.taxAmount || (taxableAmount * vatRate)) : 0;
-    const finalTotal = invoice.grandTotal || (taxableAmount + vatAmount);
+    const vatAmount = includeTax ? (taxableAmount * vatRate) : 0;
+    const finalTotal = taxableAmount + vatAmount;
 
     doc.setFontSize(9);
     doc.setTextColor(config.secondaryColor[0], config.secondaryColor[1], config.secondaryColor[2]);
