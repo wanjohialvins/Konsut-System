@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiSend, FiClock, FiCheckCircle, FiMoreVertical, FiPaperclip } from 'react-icons/fi';
+import { DetailSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -71,11 +72,7 @@ const TicketDetails = () => {
         }
     };
 
-    if (loading) return (
-        <div className="flex items-center justify-center h-[calc(100vh-200px)] animate-pulse">
-            <div className="p-12 bg-slate-100 dark:bg-slate-900 rounded-[3rem] w-full max-w-2xl" />
-        </div>
-    );
+    if (loading) return <DetailSkeleton />;
 
     const isAdmin = user?.role === 'admin' || user?.role === 'ceo';
 

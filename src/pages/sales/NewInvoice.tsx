@@ -28,6 +28,7 @@ import InvoiceForm from "../../components/new-invoice/InvoiceForm";
 import LineItemsTable from "../../components/new-invoice/LineItemsTable";
 import InvoiceSummary from "../../components/new-invoice/InvoiceSummary";
 import InventorySelector from "../../components/new-invoice/InventorySelector";
+import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
 import SavingIndicator from "../../components/ui/SavingIndicator";
 import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
@@ -910,12 +911,7 @@ const NewInvoice: React.FC = () => {
      ---------------------------- */
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-midnight-950 flex flex-col items-center justify-center">
-        <div className="w-16 h-16 border-4 border-brand-500 border-t-brand-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-brand-600 font-bold animate-pulse">Loading Editor...</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (

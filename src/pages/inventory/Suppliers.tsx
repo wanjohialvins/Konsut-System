@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiUsers, FiPlus, FiSearch, FiPhone, FiMail, FiMapPin, FiTrash2, FiEdit3, FiGlobe, FiTruck } from "react-icons/fi";
 import { SmartInput } from "../../components/ui/SmartGuide";
+import { PageHeaderSkeleton, CardGridSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
@@ -153,7 +154,10 @@ const Suppliers = () => {
             />
 
             {loading ? (
-                <div className="py-20 text-center text-gray-400">Loading suppliers...</div>
+                <div className="animate-fade-in">
+                    <PageHeaderSkeleton />
+                    <CardGridSkeleton />
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredSuppliers.map(sup => (

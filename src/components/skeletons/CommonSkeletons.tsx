@@ -90,3 +90,66 @@ export const SettingsSkeleton = () => (
         </div>
     </div>
 );
+
+/**
+ * DashboardSkeleton - For Analytics/Business Intelligence
+ */
+export const DashboardSkeleton = () => (
+    <div className="p-6 max-w-[1600px] mx-auto animate-pulse">
+        <PageHeaderSkeleton />
+
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-white dark:bg-midnight-900 p-6 rounded-[2rem] border border-gray-100 dark:border-midnight-800 space-y-4">
+                    <div className="flex justify-between items-start">
+                        <div className="h-4 w-24 bg-gray-200 dark:bg-midnight-800 rounded"></div>
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-midnight-800"></div>
+                    </div>
+                    <div className="h-8 w-32 bg-gray-300 dark:bg-midnight-800 rounded"></div>
+                    <div className="h-3 w-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg"></div>
+                </div>
+            ))}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div className="lg:col-span-2 bg-white dark:bg-midnight-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-midnight-800 h-[400px]">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-midnight-800 rounded mb-8"></div>
+                <div className="flex items-end gap-4 h-[300px]">
+                    {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                        <div key={i} className="flex-1 bg-gray-100 dark:bg-midnight-800 rounded-t-xl" style={{ height: `${Math.random() * 80 + 20}%` }}></div>
+                    ))}
+                </div>
+            </div>
+            <div className="bg-white dark:bg-midnight-900 p-8 rounded-[2.5rem] border border-gray-100 dark:border-midnight-800 h-[400px]">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-midnight-800 rounded mb-8"></div>
+                <div className="w-48 h-48 rounded-full border-8 border-gray-100 dark:border-midnight-800 mx-auto mt-8"></div>
+            </div>
+        </div>
+
+        {/* Recent Activity Table */}
+        <TableSkeleton rows={5} />
+    </div>
+);
+
+/**
+ * DetailSkeleton - For detailed views like Ticket Details or Profile
+ */
+export const DetailSkeleton = () => (
+    <div className="max-w-7xl mx-auto p-4 md:p-8 animate-pulse space-y-8">
+        <PageHeaderSkeleton />
+        <div className="space-y-6">
+            <div className="flex justify-end">
+                <div className="w-2/3 h-32 bg-brand-50 dark:bg-brand-900/10 rounded-[2rem] rounded-tr-none"></div>
+            </div>
+            <div className="flex justify-start">
+                <div className="w-2/3 h-24 bg-gray-100 dark:bg-midnight-800 rounded-[2rem] rounded-tl-none"></div>
+            </div>
+            <div className="flex justify-end">
+                <div className="w-1/2 h-16 bg-brand-50 dark:bg-brand-900/10 rounded-[2rem] rounded-tr-none"></div>
+            </div>
+        </div>
+        <div className="h-24 w-full bg-white dark:bg-midnight-900 rounded-[2rem] border border-gray-100 dark:border-midnight-800"></div>
+    </div>
+);

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FiLock, FiAlertTriangle, FiTrash2 } from "react-icons/fi";
+import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -9,6 +10,7 @@ const SystemSecurity = () => {
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [confirmWipe, setConfirmWipe] = useState("");
     const [activeUsers, setActiveUsers] = useState<any[]>([]);
+    const [initialLoading, setInitialLoading] = useState(true);
 
     React.useEffect(() => {
         const loadSettings = async () => {
@@ -27,6 +29,8 @@ const SystemSecurity = () => {
 
             } catch {
                 console.error("Failed to sync settings");
+            } finally {
+                setInitialLoading(false);
             }
         };
         loadSettings();
@@ -60,6 +64,8 @@ const SystemSecurity = () => {
             setLoading(false);
         }
     };
+
+    if (initialLoading) return <SettingsSkeleton />;
 
     return (
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto space-y-8 animate-fade-in">

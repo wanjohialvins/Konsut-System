@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiPlus, FiMessageSquare, FiClock, FiCheckCircle, FiAlertCircle, FiSearch, FiFilter } from 'react-icons/fi';
+import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
@@ -92,9 +93,10 @@ const Tickets = () => {
 
             <div className="grid gap-4">
                 {loading ? (
-                    Array(3).fill(0).map((_, i) => (
-                        <div key={i} className="h-32 bg-slate-100 dark:bg-slate-800/50 rounded-3xl animate-pulse" />
-                    ))
+                    <div className="animate-fade-in">
+                        <PageHeaderSkeleton />
+                        <TableSkeleton rows={6} />
+                    </div>
                 ) : filteredTickets.length > 0 ? (
                     filteredTickets.map((ticket) => (
                         <div

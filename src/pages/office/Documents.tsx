@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiFolder, FiFile, FiUpload, FiDownload, FiTrash2, FiSearch, FiEye } from 'react-icons/fi';
+import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { SmartInput } from "../../components/ui/SmartGuide";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { useModal } from "../../contexts/ModalContext";
@@ -153,7 +154,10 @@ const Documents = () => {
             <div className="bg-white dark:bg-midnight-900 rounded-3xl border border-gray-100 dark:border-midnight-800 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-10 text-center text-gray-400">Loading documents...</div>
+                        <div className="p-6">
+                            <PageHeaderSkeleton />
+                            <TableSkeleton rows={8} />
+                        </div>
                     ) : (
                         <table className="w-full text-left">
                             <thead>

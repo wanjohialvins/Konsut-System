@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiMessageSquare, FiPlus, FiStar, FiClock, FiTrash2 } from 'react-icons/fi';
+import { PageHeaderSkeleton, CardGridSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { SmartTextarea } from "../../components/ui/SmartGuide";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { api } from "../../services/api";
@@ -125,7 +126,10 @@ const Memos = () => {
 
             <div className="space-y-6">
                 {loading ? (
-                    <div className="text-center text-gray-400 py-10">Loading communications...</div>
+                    <div className="animate-fade-in">
+                        <PageHeaderSkeleton />
+                        <CardGridSkeleton count={4} />
+                    </div>
                 ) : (
                     filteredMemos.map(memo => (
                         <div key={memo.id} className={`bg-white dark:bg-midnight-900 p-8 rounded-3xl border shadow-sm hover:shadow-md transition-all relative overflow-hidden group ${memo.urgent ? 'border-red-100 dark:border-red-900/30' : 'border-gray-100 dark:border-midnight-800'}`}>

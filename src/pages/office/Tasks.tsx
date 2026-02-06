@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiSearch, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2, FiEdit2, FiCalendar, FiCheckSquare, FiUser, FiBriefcase } from 'react-icons/fi';
 import { SmartInput } from "../../components/ui/SmartGuide";
+import { PageHeaderSkeleton, CardGridSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { ROLE_DEFINITIONS } from "../../config/permissions";
 import { useModal } from "../../contexts/ModalContext";
@@ -146,49 +147,56 @@ const Tasks = () => {
                 }
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {['pending', 'progress', 'completed'].map(status => (
-                    <div key={status} className="bg-gray-50 dark:bg-midnight-950 p-4 rounded-3xl border border-gray-200 dark:border-midnight-800 h-fit">
-                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 px-2">{status.replace('progress', 'In Progress')}</h3>
-                        <div className="space-y-4">
-                            {filteredTasks.filter(t => t.status === status).map(task => (
-                                <div key={task.id} className="bg-white dark:bg-midnight-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-midnight-800 hover:shadow-md transition-all group relative cursor-pointer" onClick={() => handleStatusChange(task)}>
-                                    {isAdmin && (
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }} className="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                            <FiTrash2 />
-                                        </button>
-                                    )}
-                                    <h4 className="font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-600 transition-colors pr-6">{task.title}</h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
-                                        <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>
-                                        <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
-                                            <FiCalendar size={10} /> {task.due_date}
-                                        </span>
-                                        {task.creator_name && (
-                                            <span className="px-2 py-1 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 rounded-lg flex items-center gap-1 border border-brand-100 dark:border-brand-900/30">
-                                                By: {task.creator_name}
-                                            </span>
+            {loading ? (
+                <div className="animate-fade-in">
+                    <PageHeaderSkeleton />
+                    <CardGridSkeleton count={3} />
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {['pending', 'progress', 'completed'].map(status => (
+                        <div key={status} className="bg-gray-50 dark:bg-midnight-950 p-4 rounded-3xl border border-gray-200 dark:border-midnight-800 h-fit">
+                            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 px-2">{status.replace('progress', 'In Progress')}</h3>
+                            <div className="space-y-4">
+                                {filteredTasks.filter(t => t.status === status).map(task => (
+                                    <div key={task.id} className="bg-white dark:bg-midnight-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-midnight-800 hover:shadow-md transition-all group relative cursor-pointer" onClick={() => handleStatusChange(task)}>
+                                        {isAdmin && (
+                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }} className="absolute top-2 right-2 text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                                <FiTrash2 />
+                                            </button>
                                         )}
-                                        <div className="text-gray-300 mx-1">→</div>
-                                        {task.assignee_role ? (
-                                            <span className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/30">
-                                                <FiBriefcase size={10} /> {task.assignee_role.toUpperCase()} (ROLE)
+                                        <h4 className="font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-600 transition-colors pr-6">{task.title}</h4>
+                                        <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
+                                            <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>
+                                            <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
+                                                <FiCalendar size={10} /> {task.due_date}
                                             </span>
-                                        ) : (
-                                            <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
-                                                <FiUser size={10} /> {task.assignee_name || 'Global'}
-                                            </span>
-                                        )}
+                                            {task.creator_name && (
+                                                <span className="px-2 py-1 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 rounded-lg flex items-center gap-1 border border-brand-100 dark:border-brand-900/30">
+                                                    By: {task.creator_name}
+                                                </span>
+                                            )}
+                                            <div className="text-gray-300 mx-1">→</div>
+                                            {task.assignee_role ? (
+                                                <span className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/30">
+                                                    <FiBriefcase size={10} /> {task.assignee_role.toUpperCase()} (ROLE)
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
+                                                    <FiUser size={10} /> {task.assignee_name || 'Global'}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                            {tasks.filter(t => t.status === status).length === 0 && (
-                                <div className="text-center text-gray-300 text-xs py-10 font-bold uppercase tracking-widest">No Tasks</div>
-                            )}
+                                ))}
+                                {tasks.filter(t => t.status === status).length === 0 && (
+                                    <div className="text-center text-gray-300 text-xs py-10 font-bold uppercase tracking-widest">No Tasks</div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {isAddOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

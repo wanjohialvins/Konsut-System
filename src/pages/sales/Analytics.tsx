@@ -13,6 +13,8 @@ import {
 import { FiBarChart2, FiSearch } from "react-icons/fi";
 import logoUrl from "../../assets/logo.jpg";
 import { api } from "../../services/api";
+import { generateInvoicePDF } from "../../utils/pdfGenerator";
+import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { usePermissions } from "../../hooks/usePermissions";
 import ReportPreviewModal from "../../components/modals/ReportPreviewModal";
 
