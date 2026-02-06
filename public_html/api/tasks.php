@@ -12,7 +12,7 @@ switch ($method) {
         try {
             $user = $GLOBALS['CURRENT_USER_SESSION'];
             $userId = $user['id'];
-            $userRole = $user['role'];
+            $userRole = strtolower($user['role']);
 
             $sql = "SELECT t.*, 
                            u_creator.username as creator_name, 
@@ -24,8 +24,8 @@ switch ($method) {
             if (in_array($userRole, ['admin', 'manager', 'ceo'])) {
                 $stmt = $pdo->query("$sql ORDER BY t.created_at DESC");
             } else {
-                $stmt = $pdo->prepare("$sql WHERE t.assignee_id = ? OR t.assignee_id IS NULL OR t.created_by = ? ORDER BY t.due_date ASC");
-                $stmt->execute([$userId, $userId]);
+                $stmt = $pdo->prepare("$sql WHERE t.assignee_id = ? OR t.assignee_role = ? OR t.assignee_id IS NULL OR t.created_by = ? ORDER BY t.due_date ASC");
+                $stmt->execute([$userId, $userRole, $userId]);
             }
             echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (PDOException $e) {
@@ -39,16 +39,30 @@ switch ($method) {
         $data = json_decode(file_get_contents('php://input'), true);
         try {
             $userId = $GLOBALS['CURRENT_USER_SESSION']['id'];
-            $stmt = $pdo->prepare("INSERT INTO tasks (id, title, priority, status, due_date, assignee_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $assigneeId = $data['assigneeId'] ?? $data['assignee_id'] ?? null;
+            $assigneeRole = $data['assigneeRole'] ?? $data['assignee_role'] ?? null;
+            $taskId = $data['id'] ?? ('TASK-' . time());
+
+            $stmt = $pdo->prepare("INSERT INTO tasks (id, title, priority, status, due_date, assignee_id, assignee_role, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $data['id'],
+                $taskId,
                 $data['title'],
                 $data['priority'] ?? 'medium',
                 $data['status'] ?? 'pending',
                 $data['dueDate'] ?? $data['due_date'] ?? null,
-                $data['assigneeId'] ?? $data['assignee_id'] ?? null,
+                $assigneeId,
+                $assigneeRole,
                 $userId
             ]);
+
+            // Auto-generate notification
+            $notifTitle = "New Task: " . $data['title'];
+            $notifMsg = "A new task has been assigned to " . ($assigneeRole ? "role: $assigneeRole" : "you") . ".";
+            $notifId = 'NOTIF-' . time();
+
+            $notifStmt = $pdo->prepare("INSERT INTO notifications (id, title, message, type, assignee_id, assignee_role) VALUES (?, ?, ?, 'info', ?, ?)");
+            $notifStmt->execute([$notifId, $notifTitle, $notifMsg, $assigneeId, $assigneeRole]);
+
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             http_response_code(500);
@@ -64,13 +78,14 @@ switch ($method) {
                 $stmt = $pdo->prepare("UPDATE tasks SET status=? WHERE id=?");
                 $stmt->execute([$data['status'], $data['id']]);
             } else {
-                $stmt = $pdo->prepare("UPDATE tasks SET title=?, priority=?, status=?, due_date=?, assignee_id=? WHERE id=?");
+                $stmt = $pdo->prepare("UPDATE tasks SET title=?, priority=?, status=?, due_date=?, assignee_id=?, assignee_role=? WHERE id=?");
                 $stmt->execute([
                     $data['title'],
                     $data['priority'],
                     $data['status'],
                     $data['dueDate'] ?? $data['due_date'] ?? null,
                     $data['assigneeId'] ?? $data['assignee_id'] ?? null,
+                    $data['assigneeRole'] ?? $data['assignee_role'] ?? null,
                     $data['id']
                 ]);
             }

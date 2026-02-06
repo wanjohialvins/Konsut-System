@@ -8,13 +8,43 @@ $pdo = getDbConnection();
 
 switch ($method) {
     case 'GET':
-        // Notifications are per-user usually, but simplistic system here (system-wide alerts or broadcast)
-        // Or we assume this is "Admin Notifications" as per `Notifications.tsx` using `api.admin.getNotifications`.
+        $user = $GLOBALS['CURRENT_USER_SESSION'];
+        $userId = $user['id'];
+        $userRole = strtolower($user['role']);
+
+        if (isset($_GET['action']) && $_GET['action'] === 'count') {
+            try {
+                // Count unread notifications targeting this user/role or global
+                $stmt = $pdo->prepare("
+                    SELECT COUNT(*) 
+                    FROM notifications n
+                    WHERE (n.assignee_id = ? OR n.assignee_role = ? OR (n.assignee_id IS NULL AND n.assignee_role IS NULL))
+                    AND n.id NOT IN (SELECT notification_id FROM notification_reads WHERE user_id = ?)
+                ");
+                $stmt->execute([$userId, $userRole, $userId]);
+                echo json_encode(['unreadCount' => (int) $stmt->fetchColumn()]);
+            } catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+            break;
+        }
+
         try {
-            $stmt = $pdo->query("SELECT * FROM notifications ORDER BY created_at DESC");
-            $notifs = $stmt->fetchAll();
+            // Fetch notifications with per-user read status
+            $stmt = $pdo->prepare("
+                SELECT n.*, 
+                       CASE WHEN nr.notification_id IS NOT NULL THEN 1 ELSE 0 END as read_status
+                FROM notifications n
+                LEFT JOIN notification_reads nr ON n.id = nr.notification_id AND nr.user_id = ?
+                WHERE (n.assignee_id = ? OR n.assignee_role = ? OR (n.assignee_id IS NULL AND n.assignee_role IS NULL))
+                ORDER BY n.created_at DESC
+                LIMIT 50
+            ");
+            $stmt->execute([$userId, $userId, $userRole]);
+            $notifs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             foreach ($notifs as &$n) {
-                $n['read'] = (bool) $n['read_status']; // Map db 'read_status' to frontend 'read'
+                $n['read'] = (bool) $n['read_status'];
                 unset($n['read_status']);
             }
             echo json_encode($notifs);
@@ -25,17 +55,17 @@ switch ($method) {
         break;
 
     case 'POST':
-        // Internal use mostly, or via 'Broadcast' action
         requirePermission('admin');
         $data = json_decode(file_get_contents('php://input'), true);
         try {
-            // Create notification
-            $stmt = $pdo->prepare("INSERT INTO notifications (id, title, message, type, read_status) VALUES (?, ?, ?, ?, 0)");
+            $stmt = $pdo->prepare("INSERT INTO notifications (id, title, message, type, assignee_id, assignee_role) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $data['id'],
                 $data['title'],
                 $data['message'],
-                $data['type'] ?? 'info'
+                $data['type'] ?? 'info',
+                $data['assigneeId'] ?? $data['assignee_id'] ?? null,
+                $data['assigneeRole'] ?? $data['assignee_role'] ?? null
             ]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
@@ -45,19 +75,20 @@ switch ($method) {
         break;
 
     case 'PUT':
-        // Mark as read
+        // Mark as read per user
+        $user = $GLOBALS['CURRENT_USER_SESSION'];
+        $userId = $user['id'];
         $id = $_GET['id'] ?? null;
+
         if (!$id) {
-            // Maybe bulk update?
-            $data = json_decode(file_get_contents('php://input'), true);
-            // handle logic later
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing ID']);
             exit;
         }
 
-        // Mark specific as read
         try {
-            $stmt = $pdo->prepare("UPDATE notifications SET read_status = 1 WHERE id = ?");
-            $stmt->execute([$id]);
+            $stmt = $pdo->prepare("INSERT IGNORE INTO notification_reads (user_id, notification_id) VALUES (?, ?)");
+            $stmt->execute([$userId, $id]);
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             http_response_code(500);

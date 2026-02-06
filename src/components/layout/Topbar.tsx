@@ -1,10 +1,13 @@
+import { useState, useEffect, useRef } from "react";
 import { FiBell, FiMenu, FiLogOut, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "../../hooks/useMediaQuery";
 import { useAuth } from "../../contexts/AuthContext";
+import { api } from "../../services/api";
 import UserAvatar from "../ui/UserAvatar";
 import SystemStatus from "./SystemStatus";
 import logoUrl from "../../assets/logo.jpg";
+import notificationSound from "../../assets/notification.mp3";
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -13,6 +16,44 @@ interface TopbarProps {
 const Topbar = ({ onMenuClick }: TopbarProps) => {
   const isMobile = useIsMobile();
   const { user, logout } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const prevCountRef = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio(notificationSound);
+  }, []);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const resp = await api.admin.runAction('notifications-count'); // I'll map this or use direct API
+      // Wait, api.admin has getNotifications, I should add a count method or hits the raw endpoint
+      const response = await fetch(`${window.location.origin}/api/notifications.php?action=count`, {
+        headers: {
+          'X-User-Id': String(user?.id),
+          'X-User-Role': user?.role || ''
+        }
+      });
+      const data = await response.json();
+      const count = data.unreadCount || 0;
+
+      if (count > prevCountRef.current) {
+        audioRef.current?.play().catch(e => console.log('Audio playback blocked'));
+      }
+      setUnreadCount(count);
+      prevCountRef.current = count;
+    } catch (e) {
+      // Slient fail for topbar polling
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 15000); // Polling every 15s
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   return (
     <header className="bg-white/80 dark:bg-midnight-900/80 backdrop-blur-md border-b border-gray-100 dark:border-midnight-700 sticky top-0 z-20 px-4 md:px-8 py-4 flex justify-between items-center transition-all duration-300">
@@ -56,8 +97,13 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
         </button>
 
         <Link to="/notifications" className="p-2 hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-lg transition-colors relative">
-          <FiBell size={20} className="text-gray-600 dark:text-midnight-text-secondary icon-hover-shake icon-pulse-continuous" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          <FiBell
+            size={20}
+            className={`text-gray-600 dark:text-midnight-text-secondary ${unreadCount > 0 ? 'animate-shake-continuous text-brand-600 dark:text-brand-400' : 'icon-hover-shake'}`}
+          />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+          )}
         </Link>
 
         {/* User Profile */}

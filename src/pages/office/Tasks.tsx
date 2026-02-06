@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiSearch, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2, FiEdit2, FiCalendar, FiCheckSquare, FiUser } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2, FiEdit2, FiCalendar, FiCheckSquare, FiUser, FiBriefcase } from 'react-icons/fi';
 import { SmartInput } from "../../components/ui/SmartGuide";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
+import { ROLE_DEFINITIONS } from "../../config/permissions";
 import { useModal } from "../../contexts/ModalContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -12,10 +13,11 @@ interface Task {
     title: string;
     priority: 'high' | 'medium' | 'low';
     status: 'pending' | 'progress' | 'completed';
-    dueDate: string;
-    assigneeId?: number | null;
-    assigneeName?: string;
-    creatorName?: string;
+    due_date: string;
+    assignee_id?: number | null;
+    assignee_role?: string | null;
+    assignee_name?: string;
+    creator_name?: string;
 }
 
 const Tasks = () => {
@@ -30,7 +32,7 @@ const Tasks = () => {
     // Add Modal State
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [newItem, setNewItem] = useState<Partial<any>>({
-        title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: ''
+        title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: '', assigneeRole: ''
     });
 
     const [users, setUsers] = useState<any[]>([]);
@@ -57,7 +59,8 @@ const Tasks = () => {
 
     const filteredTasks = tasks.filter(t =>
         t.title.toLowerCase().includes(search.toLowerCase()) ||
-        (t.assigneeName || '').toLowerCase().includes(search.toLowerCase())
+        (t.assignee_name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (t.assignee_role || '').toLowerCase().includes(search.toLowerCase())
     );
 
     const handleDelete = async (id: string) => {
@@ -88,16 +91,18 @@ const Tasks = () => {
         try {
             // Auto-assign self if restricted
             const canAssign = ['admin', 'manager', 'ceo'].includes(user?.role || '');
-            const finalAssigneeId = canAssign ? newItem.assigneeId : user?.id;
+            const finalAssigneeId = canAssign ? (newItem.assigneeId || null) : user?.id;
+            const finalAssigneeRole = canAssign ? (newItem.assigneeRole || null) : null;
 
             await api.tasks.create({
                 ...newItem,
                 assigneeId: finalAssigneeId,
+                assigneeRole: finalAssigneeRole,
                 id: `TASK-${Date.now()}`
             });
-            showToast('success', 'Task created');
+            showToast('success', 'Task created and broadcasted');
             setIsAddOpen(false);
-            setNewItem({ title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: '' });
+            setNewItem({ title: '', priority: 'medium', status: 'pending', due_date: '', assigneeId: '', assigneeRole: '' });
             loadTasks();
         } catch (e) {
             showToast('error', 'Failed to create task');
@@ -157,17 +162,23 @@ const Tasks = () => {
                                     <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-tighter items-center">
                                         <span className={`px-2 py-1 rounded-lg ${getPriorityColor(task.priority)}`}>{task.priority}</span>
                                         <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-500 rounded-lg flex items-center gap-1">
-                                            <FiCalendar size={10} /> {task.dueDate}
+                                            <FiCalendar size={10} /> {task.due_date}
                                         </span>
-                                        {task.creatorName && (
+                                        {task.creator_name && (
                                             <span className="px-2 py-1 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 rounded-lg flex items-center gap-1 border border-brand-100 dark:border-brand-900/30">
-                                                By: {task.creatorName}
+                                                By: {task.creator_name}
                                             </span>
                                         )}
                                         <div className="text-gray-300 mx-1">→</div>
-                                        <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
-                                            <FiUser size={10} /> {task.assigneeName || 'Global'}
-                                        </span>
+                                        {task.assignee_role ? (
+                                            <span className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/30">
+                                                <FiBriefcase size={10} /> {task.assignee_role.toUpperCase()} (ROLE)
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-1 bg-gray-100 dark:bg-midnight-800 text-gray-800 dark:text-gray-200 rounded-lg flex items-center gap-1">
+                                                <FiUser size={10} /> {task.assignee_name || 'Global'}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -216,21 +227,33 @@ const Tasks = () => {
                                 <input
                                     type="date"
                                     className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-medium outline-none focus:ring-2 focus:ring-brand-500"
-                                    value={newItem.dueDate}
-                                    onChange={e => setNewItem({ ...newItem, dueDate: e.target.value })}
+                                    value={newItem.due_date}
+                                    onChange={e => setNewItem({ ...newItem, due_date: e.target.value })}
                                     required
                                 />
                                 {(['admin', 'manager', 'ceo'].includes(user?.role || '')) ? (
-                                    <select
-                                        className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-medium outline-none focus:ring-2 focus:ring-brand-500"
-                                        value={newItem.assigneeId}
-                                        onChange={e => setNewItem({ ...newItem, assigneeId: e.target.value })}
-                                    >
-                                        <option value="">Assign To (Global)...</option>
-                                        {users.map(u => (
-                                            <option key={u.id} value={u.id}>{u.username}</option>
-                                        ))}
-                                    </select>
+                                    <div className="space-y-2">
+                                        <select
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-medium outline-none focus:ring-2 focus:ring-brand-500 text-xs"
+                                            value={newItem.assigneeRole}
+                                            onChange={e => setNewItem({ ...newItem, assigneeRole: e.target.value, assigneeId: '' })}
+                                        >
+                                            <option value="">Assign To Role...</option>
+                                            {Object.values(ROLE_DEFINITIONS).map(r => (
+                                                <option key={r.id} value={r.id}>{r.label}</option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none font-medium outline-none focus:ring-2 focus:ring-brand-500 text-xs"
+                                            value={newItem.assigneeId}
+                                            onChange={e => setNewItem({ ...newItem, assigneeId: e.target.value, assigneeRole: '' })}
+                                        >
+                                            <option value="">Assign To User...</option>
+                                            {users.map(u => (
+                                                <option key={u.id} value={u.id}>{u.username}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 ) : (
                                     <div className="flex items-center gap-2 p-3 bg-gray-100 dark:bg-midnight-950 rounded-xl border border-gray-200 dark:border-midnight-800 text-gray-500">
                                         <FiUser />

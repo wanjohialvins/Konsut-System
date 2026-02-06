@@ -89,6 +89,14 @@ try {
                     $msgStmt = $db->prepare("INSERT INTO ticket_messages (ticket_id, user_id, message) VALUES (?, ?, ?)");
                     $msgStmt->execute([$id, $user_id, $message]);
 
+                    // Notify IT role
+                    $notifTitle = "New Ticket: " . $subject;
+                    $notifMsg = "A new " . $priority . " priority ticket has been raised by User #" . $user_id;
+                    $notifId = 'NOTIF-' . time();
+
+                    $notifStmt = $db->prepare("INSERT INTO notifications (id, title, message, type, assignee_role) VALUES (?, ?, ?, 'warning', 'it')");
+                    $notifStmt->execute([$notifId, $notifTitle, $notifMsg]);
+
                     $db->commit();
                     echo json_encode(['success' => true, 'id' => $id]);
                 } catch (Exception $e) {

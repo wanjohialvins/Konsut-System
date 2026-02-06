@@ -29,13 +29,22 @@ switch ($method) {
         try {
             $stmt = $pdo->prepare("INSERT INTO memos (id, title, content, author, date, urgent) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $data['id'],
+                $data['id'] ?: 'MEMO-' . time(),
                 $data['title'],
                 $data['content'],
                 $data['author'],
                 $data['date'],
                 $data['urgent'] ? 1 : 0
             ]);
+
+            // Auto-generate notification
+            $notifTitle = "New Memo: " . $data['title'];
+            $notifMsg = "A new " . ($data['urgent'] ? "URGENT " : "") . "memo has been posted by " . $data['author'] . ".";
+            $notifId = 'NOTIF-' . time();
+
+            $notifStmt = $pdo->prepare("INSERT INTO notifications (id, title, message, type) VALUES (?, ?, ?, ?)");
+            $notifStmt->execute([$notifId, $notifTitle, $notifMsg, $data['urgent'] ? 'warning' : 'info']);
+
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             http_response_code(500);
