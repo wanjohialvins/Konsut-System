@@ -109,30 +109,61 @@ if ($method === 'GET') {
 } elseif ($method === 'PUT') {
     requirePermission('manage_invoices');
     $data = json_decode(file_get_contents('php://input'), true);
+    $userId = getRequestHeader('X-User-Id');
     $pdo->beginTransaction();
     try {
         $clientStatus = ensureClientExists($pdo, $data['customer'] ?? []);
         $customerId = $clientStatus['id'];
         $clientUpdated = $clientStatus['updated'];
 
-        $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
-        $stmt->execute([
-            $customerId,
-            $data['status'],
-            $data['issuedDate'],
-            (!empty($data['dueDate'])) ? $data['dueDate'] : null,
-            (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
-            $data['currency'] ?? 'Ksh',
-            $data['currencyRate'] ?? 1.0,
-            $subtotal = $data['subtotal'],
-            $data['taxAmount'] ?? 0,
-            $data['grandTotal'],
-            $data['clientResponsibilities'] ?? '',
-            $data['termsAndConditions'] ?? '',
-            $data['id']
-        ]);
+        // Check if document exists
+        $check = $pdo->prepare("SELECT COUNT(*) FROM documents WHERE id = ?");
+        $check->execute([$data['id']]);
+        $exists = $check->fetchColumn() > 0;
 
-        // Clear old items
+        if ($exists) {
+            // Retrieve existing created_by to preserve it? 
+            // Actually, created_by is not updated here, so it's preserved.
+
+            $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
+            $stmt->execute([
+                $customerId,
+                $data['status'],
+                $data['issuedDate'],
+                (!empty($data['dueDate'])) ? $data['dueDate'] : null,
+                (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
+                $data['currency'] ?? 'Ksh',
+                $data['currencyRate'] ?? 1.0,
+                $subtotal = $data['subtotal'],
+                $data['taxAmount'] ?? 0,
+                $data['grandTotal'],
+                $data['clientResponsibilities'] ?? '',
+                $data['termsAndConditions'] ?? '',
+                $data['id']
+            ]);
+        } else {
+            // Restore/Insert logic (Upsert)
+            $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $data['id'],
+                $customerId,
+                $data['type'], // Ensure 'type' is sent in PUT payload or fallback? NewInvoice seems to send full object for editing.
+                $data['status'] ?? 'draft',
+                $data['issuedDate'],
+                (!empty($data['dueDate'])) ? $data['dueDate'] : null,
+                (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
+                $data['currency'] ?? 'Ksh',
+                $data['currencyRate'] ?? 1.0,
+                $data['subtotal'],
+                $data['taxAmount'] ?? 0,
+                $data['grandTotal'],
+                $data['clientResponsibilities'] ?? '',
+                $data['termsAndConditions'] ?? '',
+                $userId
+            ]);
+        }
+
+        // Clear old items (if any, though 'exists' check implies none if insert, but safer to just delete in case of partial orphans)
         $pdo->prepare("DELETE FROM document_items WHERE document_id = ?")->execute([$data['id']]);
 
         // Insert new items

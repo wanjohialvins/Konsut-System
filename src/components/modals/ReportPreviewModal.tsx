@@ -32,9 +32,9 @@ const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({ isOpen, onClose
     const [generating, setGenerating] = React.useState(false);
     const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-    const handleDownload = async () => {
+    const handleDownload = async (action: 'save' | 'view' = 'save') => {
         setGenerating(true);
-        await generateReportPDF(data);
+        await generateReportPDF(data, action);
         setGenerating(false);
     };
 
@@ -65,7 +65,15 @@ const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({ isOpen, onClose
 
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={handleDownload}
+                                onClick={() => handleDownload('view')}
+                                disabled={generating}
+                                className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                            >
+                                <FaChartLine />
+                                {generating ? 'Processing...' : 'Preview PDF'}
+                            </button>
+                            <button
+                                onClick={() => handleDownload('save')}
                                 disabled={generating}
                                 className="flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50"
                             >

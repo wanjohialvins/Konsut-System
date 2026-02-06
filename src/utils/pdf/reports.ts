@@ -19,7 +19,7 @@ export interface ReportData {
     currency: 'Ksh' | 'USD';
 }
 
-export const generateReportPDF = async (data: ReportData) => {
+export const generateReportPDF = async (data: ReportData, action: 'save' | 'view' = 'save') => {
     try {
         const SETTINGS = getInvoiceSettings();
         const doc = new jsPDF({
@@ -159,8 +159,14 @@ export const generateReportPDF = async (data: ReportData) => {
         // 8. Footer
         drawFooter(doc, SETTINGS, config);
 
-        const filename = `Financial_Report_${data.period.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-        doc.save(filename);
+        if (action === 'view') {
+            const blob = doc.output('blob');
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } else {
+            const filename = `Financial_Report_${data.period.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+            doc.save(filename);
+        }
         return true;
     } catch (err) {
         console.error("Report PDF generation failed:", err);

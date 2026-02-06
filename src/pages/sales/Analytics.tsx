@@ -581,7 +581,7 @@ const Analytics: React.FC = () => {
                   <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 </div>
                 <button onClick={handleGenerateReport} className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-500/20 transition-all active:scale-95 flex items-center gap-2">
-                  <FiBarChart2 /> Preview Insights
+                  <FiBarChart2 /> Generate Report
                 </button>
               </div>
 
