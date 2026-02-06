@@ -178,6 +178,9 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  // Protected Component Guard
+  if (!user) return <DashboardSkeleton />;
+
   // New States for v2 Features
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [chartMetric, setChartMetric] = useState('revenue');
@@ -304,7 +307,7 @@ const Dashboard: React.FC = () => {
         })()}
       </div>
 
-      {['admin', 'ceo', 'manager', 'sales', 'it', 'storekeeper', 'accountant'].includes(user.role?.toLowerCase() || '') && FAB}
+      {['admin', 'ceo', 'manager', 'sales', 'it', 'storekeeper', 'accountant', 'staff'].includes(user.role?.toLowerCase() || '') && FAB}
     </div>
   );
 };
