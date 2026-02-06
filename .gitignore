@@ -74,6 +74,7 @@ config.production.php
 # Database files and backups (CRITICAL - NEVER COMMIT)
 /backend/backups/
 *.sql
+!invoice_system.sql
 *.sql.gz
 *.zip
 *.rar
