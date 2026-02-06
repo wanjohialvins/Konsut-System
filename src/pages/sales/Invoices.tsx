@@ -26,7 +26,7 @@ import { useDebounce, useKeyboardShortcut } from "../../hooks/useUtils";
 import { usePermissions } from "../../hooks/usePermissions";
 import { api } from "../../services/api";
 import PDFPreviewModal from "../../components/modals/PDFPreviewModal";
-import EditInvoiceModal from "../../components/modals/EditInvoiceModal";
+
 import { usePDFPreview } from "../../hooks/usePDFPreview";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
@@ -48,8 +48,6 @@ const Invoices = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editingStatus, setEditingStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editingDocId, setEditingDocId] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { previewUrl, previewTitle, previewPDF, closePreview } = usePDFPreview();
 
   // Debounced search for better performance
@@ -545,8 +543,7 @@ const Invoices = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setEditingDocId(inv.id);
-                                setIsEditModalOpen(true);
+                                navigate(`/new-invoice?id=${inv.id}`);
                               }}
                               className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-2 rounded-lg transition-colors"
                               title="Edit Document"
@@ -661,14 +658,7 @@ const Invoices = () => {
         title={previewTitle}
       />
 
-      {editingDocId && (
-        <EditInvoiceModal
-          isOpen={isEditModalOpen}
-          onClose={() => { setIsEditModalOpen(false); setEditingDocId(null); }}
-          invoiceId={editingDocId}
-          onSuccess={loadInvoices}
-        />
-      )}
+
     </div>
   );
 };

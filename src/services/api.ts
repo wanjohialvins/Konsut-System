@@ -53,7 +53,9 @@ const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise
                 const errorData = await response.clone().json().catch(() => ({}));
                 if (errorData.maintenance) {
                     localStorage.setItem('system_maintenance', 'true');
-                    window.location.href = '/maintenance';
+                    if (!window.location.pathname.includes('/maintenance')) {
+                        window.location.href = '/maintenance';
+                    }
                     return null as any;
                 }
             }

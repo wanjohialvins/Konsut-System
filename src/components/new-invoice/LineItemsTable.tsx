@@ -199,18 +199,18 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                         <table className="w-full text-left border-collapse">
                             <thead className="bg-gray-50/80 dark:bg-midnight-950/80 text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest border-b border-gray-100 dark:border-midnight-800">
                                 <tr>
-                                    <th className="px-8 py-5 w-[40%]">Item Description</th>
-                                    <th className="px-4 py-5 text-center w-[15%]">Quantity</th>
-                                    <th className="px-5 py-5 text-right w-[15%]">Unit Price</th>
-                                    <th className="px-5 py-5 text-right w-[12%]">Discount</th>
-                                    <th className="px-6 py-5 text-right w-[15%]">Total</th>
-                                    <th className="px-6 py-5 text-center w-[15%]">Controls</th>
+                                    <th className="px-6 py-5 w-[50%]">Item Description</th>
+                                    <th className="px-2 py-5 text-center w-[10%]">Qty</th>
+                                    <th className="px-2 py-5 text-right w-[12%]">Unit Price</th>
+                                    <th className="px-2 py-5 text-right w-[10%]">Discount</th>
+                                    <th className="px-4 py-5 text-right w-[12%]">Total</th>
+                                    <th className="px-2 py-5 text-center w-[6%]"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50 dark:divide-midnight-800">
                                 {lines.map((item, idx) => (
                                     <tr key={`${item.id}-${idx}`} className="group hover:bg-blue-50/20 dark:hover:bg-blue-900/5 transition-all">
-                                        <td className="px-8 py-6 align-top">
+                                        <td className="px-6 py-6 align-top">
                                             <div className="font-bold text-gray-900 dark:text-white text-base mb-1 group-hover:text-brand-600 transition-colors">{item.name}</div>
 
                                             <div className={`transition-all duration-300 overflow-hidden ${showDescriptions ? 'max-h-40 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
@@ -229,7 +229,7 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                                 </button>
                                             )}
                                         </td>
-                                        <td className="px-4 py-6 align-top">
+                                        <td className="px-2 py-6 align-top">
                                             <div className="flex items-center justify-center gap-1 bg-white dark:bg-midnight-950 border border-gray-200 dark:border-midnight-800 rounded-xl p-1 w-fit mx-auto shadow-sm">
                                                 <button onClick={() => onDecreaseQty(idx)} className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-lg text-gray-400 hover:text-rose-500 transition-all active:scale-90"><FaMinus size={8} /></button>
                                                 <input
@@ -249,10 +249,10 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                                 <button onClick={() => onIncreaseQty(idx)} className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-lg text-gray-400 hover:text-emerald-500 transition-all active:scale-90"><FaPlus size={8} /></button>
                                             </div>
                                         </td>
-                                        <td className="px-5 py-6 text-right font-medium text-gray-500 dark:text-gray-400 text-sm align-top pt-8">
+                                        <td className="px-2 py-6 text-right font-medium text-gray-500 dark:text-gray-400 text-sm align-top pt-8">
                                             {formatPrice(item.unitPrice)}
                                         </td>
-                                        <td className="px-5 py-6 text-right align-top pt-6">
+                                        <td className="px-2 py-6 text-right align-top pt-6">
                                             <DiscountInput
                                                 value={displayCurrency === 'USD' ? (item.discount || 0) / usdToKshRate : (item.discount || 0)}
                                                 placeholder="0"
@@ -261,10 +261,10 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                                     onUpdateLineItem(idx, 'discount', actualDiscount);
                                                     onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - actualDiscount);
                                                 }}
-                                                className="w-20 text-right bg-gray-50 dark:bg-midnight-950 border border-gray-200 dark:border-midnight-800 rounded-lg p-2 text-sm font-bold text-rose-500 placeholder-gray-300 outline-none focus:ring-2 focus:ring-rose-500/20"
+                                                className="w-full text-right bg-gray-50 dark:bg-midnight-950 border border-gray-200 dark:border-midnight-800 rounded-lg p-2 text-sm font-bold text-rose-500 placeholder-gray-300 outline-none focus:ring-2 focus:ring-rose-500/20"
                                             />
                                         </td>
-                                        <td className="px-6 py-6 text-right font-black text-gray-900 dark:text-white text-base align-top pt-8">
+                                        <td className="px-4 py-6 text-right font-black text-gray-900 dark:text-white text-base align-top pt-8">
                                             {formatPrice(item.lineTotal)}
                                         </td>
                                         <td className="px-6 py-6 align-top">
