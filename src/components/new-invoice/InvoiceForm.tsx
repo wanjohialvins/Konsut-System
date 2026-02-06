@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaUser, FaRegCalendarAlt as FaCalendarAlt, FaSearch } from "react-icons/fa";
 import type { InvoiceType, Customer } from '../../types/types';
 import { api } from '../../services/api';
+import { InputMasks } from '../../utils/formatters';
 
 interface InvoiceFormProps {
     customerName: string;
@@ -134,7 +135,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     <input
                         placeholder="+254 7..."
                         value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        onChange={(e) => setCustomerPhone(InputMasks.phone(e.target.value))}
                         className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerPhone ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
                         autoComplete='off'
                     />
@@ -166,7 +167,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     <input
                         placeholder="P0..."
                         value={customerKraPin}
-                        onChange={(e) => setCustomerKraPin(e.target.value)}
+                        onChange={(e) => setCustomerKraPin(InputMasks.kraPin(e.target.value))}
                         className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerKraPin ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
                         autoComplete='off'
                     />

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { FaInfoCircle, FaSave, FaEye, FaFilePdf, FaExchangeAlt } from "react-icons/fa";
+import SavingIndicator from '../ui/SavingIndicator';
 
 interface InvoiceSummaryProps {
     subtotal: number;
@@ -15,6 +16,10 @@ interface InvoiceSummaryProps {
     onSave: () => void;
     onPreview: () => void;
     onDownload: () => void;
+    isLoading?: boolean;
+    isSaving?: boolean;
+    isOffline?: boolean;
+    lastSaved?: string;
 }
 
 const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
@@ -29,8 +34,14 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
     setShowDescriptions,
     onSave,
     onPreview,
-    onDownload
+    onDownload,
+    isLoading = false,
+    isSaving = false,
+    isOffline = false,
+    lastSaved
 }) => {
+    const isBusy = isLoading || isSaving;
+
 
     const formatVal = (val: number) => {
         return displayCurrency === "USD"
@@ -46,6 +57,10 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
             </h2>
 
             <div className="space-y-4 mb-8">
+                <div className="flex justify-between text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">
+                    <span>Persistence Status</span>
+                    <SavingIndicator isSaving={isSaving} isOffline={isOffline} lastSaved={lastSaved} />
+                </div>
                 <div className="flex justify-between text-gray-500 dark:text-gray-400 text-sm font-bold">
                     <span>Subtotal</span>
                     <span className="text-gray-900 dark:text-white">{displayCurrency === "USD" ? "$" : "Ksh"} {formatVal(subtotal)}</span>
@@ -67,16 +82,30 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
             </div>
 
             <div className="space-y-3">
-                <button onClick={onSave} title="Save Document" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-3 transform hover:scale-[1.02] active:scale-[0.98]">
-                    <FaSave size={16} /> Save Document
+                <button
+                    onClick={onSave}
+                    disabled={isBusy || isOffline}
+                    title="Save Document"
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center justify-center gap-3 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
+                >
+                    <FaSave size={16} /> {isLoading ? "Processing..." : "Save Document"}
                 </button>
 
                 <div className="grid grid-cols-2 gap-3">
-                    <button onClick={onPreview} className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all flex items-center justify-center gap-2">
-                        <FaEye /> Preview PDF
+                    <button
+                        onClick={onPreview}
+                        disabled={isBusy}
+                        className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <FaEye /> Preview
                     </button>
 
-                    <button onClick={onDownload} title="Download PDF" className="w-full py-4 bg-white dark:bg-midnight-800 border-2 border-brand-100 dark:border-midnight-700 text-brand-600 dark:text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-brand-50 dark:hover:bg-midnight-700 transition-all flex items-center justify-center gap-2">
+                    <button
+                        onClick={onDownload}
+                        disabled={isBusy || isOffline}
+                        title="Download PDF"
+                        className="w-full py-4 bg-white dark:bg-midnight-800 border-2 border-brand-100 dark:border-midnight-700 text-brand-600 dark:text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-brand-50 dark:hover:bg-midnight-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         <FaFilePdf /> Download
                     </button>
                 </div>

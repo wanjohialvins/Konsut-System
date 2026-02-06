@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiUsers, FiPlus, FiSearch, FiPhone, FiMail, FiMapPin, FiTrash2, FiEdit3, FiGlobe, FiTruck } from "react-icons/fi";
 import { SmartInput } from "../../components/ui/SmartGuide";
 import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { useAutoSave } from "../../hooks/useAutoSave";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import SavingIndicator from "../../components/ui/SavingIndicator";
+import { InputMasks } from "../../utils/formatters";
+
 
 interface Supplier {
     id: string;
@@ -28,6 +33,44 @@ const Suppliers = () => {
     const [newItem, setNewItem] = useState<Partial<Supplier>>({
         name: '', category: 'General', contact_person: '', phone: '', email: '', status: 'Active'
     });
+
+    // --- Persistence ---
+    const isOnline = useOnlineStatus();
+    const DRAFT_KEY = "konsut_supplier_new_draft";
+
+    const autoSaveData = useMemo(() => ({
+        ...newItem,
+        lastSaved: new Date().toISOString()
+    }), [newItem]);
+
+    const isSaving = useAutoSave(DRAFT_KEY, autoSaveData, 1500, !isAddOpen);
+    const isBusy = loading || isSaving;
+
+    const loadDraft = useCallback(() => {
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+            try {
+                const d = JSON.parse(saved);
+                setNewItem({
+                    name: d.name || "",
+                    category: d.category || "General",
+                    contact_person: d.contact_person || "",
+                    phone: d.phone || "",
+                    email: d.email || "",
+                    status: d.status || "Active"
+                });
+                showToast("info", "Recovered unsaved supplier draft");
+            } catch (e) {
+                console.error("Failed to load supplier draft", e);
+            }
+        }
+    }, [showToast]);
+
+    useEffect(() => {
+        if (isAddOpen) {
+            loadDraft();
+        }
+    }, [isAddOpen, loadDraft]);
 
     const loadSuppliers = useCallback(async () => {
         try {
@@ -73,6 +116,7 @@ const Suppliers = () => {
             showToast('success', 'Supplier added');
             setIsAddOpen(false);
             setNewItem({ name: '', category: 'General', contact_person: '', phone: '', email: '', status: 'Active' });
+            localStorage.removeItem(DRAFT_KEY);
             loadSuppliers();
         } catch (e) {
             showToast('error', 'Failed to add supplier');
@@ -149,8 +193,13 @@ const Suppliers = () => {
 
             {isAddOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl w-full max-w-md shadow-2xl">
-                        <h2 className="text-xl font-black mb-6 dark:text-white">Add Supplier</h2>
+                    <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-midnight-800">
+                        <div className="flex flex-col mb-6">
+                            <h2 className="text-xl font-black dark:text-white uppercase tracking-tight">Add Supplier</h2>
+                            <div className="mt-1">
+                                <SavingIndicator isSaving={isSaving} isOffline={!isOnline} lastSaved={autoSaveData.lastSaved} />
+                            </div>
+                        </div>
                         <form onSubmit={handleAdd} className="space-y-4">
                             <input
                                 placeholder="Company Name"
@@ -176,7 +225,7 @@ const Suppliers = () => {
                                     placeholder="Phone"
                                     className="w-full bg-gray-50 dark:bg-midnight-950 p-3 rounded-xl border-none"
                                     value={newItem.phone}
-                                    onChange={e => setNewItem({ ...newItem, phone: e.target.value })}
+                                    onChange={e => setNewItem({ ...newItem, phone: InputMasks.phone(e.target.value) })}
                                 />
                                 <input
                                     placeholder="Email"
@@ -186,8 +235,14 @@ const Suppliers = () => {
                                 />
                             </div>
                             <div className="flex gap-4 mt-6">
-                                <button type="button" onClick={() => setIsAddOpen(false)} className="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Cancel</button>
-                                <button type="submit" className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700">Save</button>
+                                <button type="button" onClick={() => { setIsAddOpen(false); setNewItem({ name: '', category: 'General', contact_person: '', phone: '', email: '', status: 'Active' }); }} className="flex-1 py-3 text-gray-400 hover:text-gray-600 font-bold hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-xl transition-colors">Cancel</button>
+                                <button
+                                    type="submit"
+                                    disabled={isBusy || !isOnline}
+                                    className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                                >
+                                    {loading ? "Saving..." : "Save"}
+                                </button>
                             </div>
                         </form>
                     </div>

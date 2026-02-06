@@ -5,6 +5,10 @@ import { useModal } from "../../contexts/ModalContext";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { useAutoSave } from "../../hooks/useAutoSave";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import SavingIndicator from "../../components/ui/SavingIndicator";
+import { useMemo, useCallback } from "react";
 
 type Category = "products" | "mobilization" | "services";
 
@@ -22,6 +26,45 @@ const AddStock = () => {
     const [formPriceKsh, setFormPriceKsh] = useState<number>(0);
     const [formPriceUSD, setFormPriceUSD] = useState<number>(0);
     const [formDescription, setFormDescription] = useState<string>("");
+
+    // --- Persistence ---
+    const isOnline = useOnlineStatus();
+    const DRAFT_KEY = "konsut_stock_new_draft";
+
+    const autoSaveData = useMemo(() => ({
+        formName,
+        formQty,
+        formPriceKsh,
+        formPriceUSD,
+        formDescription,
+        activeCategory,
+        lastSaved: new Date().toISOString()
+    }), [formName, formQty, formPriceKsh, formPriceUSD, formDescription, activeCategory]);
+
+    const isSaving = useAutoSave(DRAFT_KEY, autoSaveData, 1500);
+    const isBusy = loading || isSaving;
+
+    const loadDraft = useCallback(() => {
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+            try {
+                const d = JSON.parse(saved);
+                setFormName(d.formName || "");
+                setFormQty(d.formQty || 1);
+                setFormPriceKsh(d.formPriceKsh || 0);
+                setFormPriceUSD(d.formPriceUSD || 0);
+                setFormDescription(d.formDescription || "");
+                setActiveCategory(d.activeCategory || "products");
+                showToast("info", "Recovered unsaved stock draft");
+            } catch (e) {
+                console.error("Failed to load stock draft", e);
+            }
+        }
+    }, [showToast]);
+
+    useEffect(() => {
+        loadDraft();
+    }, [loadDraft]);
 
     useEffect(() => {
         api.settings.get().then(s => {
@@ -60,6 +103,7 @@ const AddStock = () => {
 
             await api.stock.create(payload);
             showToast('success', 'Resource initialized in cloud');
+            localStorage.removeItem(DRAFT_KEY);
             navigate('/stock/inventory');
         } catch {
             showToast('error', 'Cloud sync failed');
@@ -155,12 +199,17 @@ const AddStock = () => {
         <div className="p-6 max-w-4xl mx-auto animate-fade-in mb-20">
             <header className="mb-12 flex items-center justify-between">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-4">
-                        <div className="p-4 bg-brand-600 text-white rounded-[2rem] shadow-2xl shadow-brand-500/20">
-                            <FaBoxOpen size={32} />
+                    <div className="flex flex-col">
+                        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-4">
+                            <div className="p-4 bg-brand-600 text-white rounded-[2rem] shadow-2xl shadow-brand-500/20">
+                                <FaBoxOpen size={32} />
+                            </div>
+                            Pre-load Assets
+                        </h1>
+                        <div className="mt-2 ml-2">
+                            <SavingIndicator isSaving={isSaving} isOffline={!isOnline} lastSaved={autoSaveData.lastSaved} />
                         </div>
-                        Pre-load Assets
-                    </h1>
+                    </div>
                     <p className="text-gray-500 dark:text-gray-400 mt-3 font-medium text-lg">Initialize new resources into the company ecosystem</p>
                 </div>
                 <Link to="/stock/inventory" className="p-4 bg-gray-100 dark:bg-midnight-900 rounded-2xl text-gray-500 hover:text-brand-600 transition-all">
@@ -215,6 +264,13 @@ const AddStock = () => {
                             <input
                                 value={formName}
                                 onChange={e => setFormName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const next = document.getElementById('base-cost-ksh');
+                                        if (next) next.focus();
+                                    }
+                                }}
                                 placeholder="Ex. Solar Inverter X-3000..."
                                 className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-[1.5rem] p-6 text-xl font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all"
                                 required
@@ -225,9 +281,17 @@ const AddStock = () => {
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Base Cost (Ksh)</label>
                                 <input
+                                    id="base-cost-ksh"
                                     type="number"
                                     value={formPriceKsh || ""}
                                     onChange={e => onKshChange(Number(e.target.value))}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            const next = document.getElementById('base-qty');
+                                            if (next) next.focus();
+                                        }
+                                    }}
                                     className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-[1.5rem] p-6 text-xl font-bold text-gray-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all"
                                     required
                                 />
@@ -245,6 +309,7 @@ const AddStock = () => {
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Available Quantity</label>
                                 <input
+                                    id="base-qty"
                                     type="number"
                                     value={formQty}
                                     onChange={e => setFormQty(Number(e.target.value))}
@@ -267,8 +332,8 @@ const AddStock = () => {
 
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="w-full bg-slate-950 dark:bg-brand-600 hover:bg-black dark:hover:bg-brand-700 text-white py-8 rounded-[2rem] font-black text-2xl uppercase tracking-[0.1em] transition-all shadow-2xl shadow-brand-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4"
+                            disabled={isBusy || !isOnline}
+                            className="w-full bg-slate-950 dark:bg-brand-600 hover:bg-black dark:hover:bg-brand-700 text-white py-8 rounded-[2rem] font-black text-2xl uppercase tracking-[0.1em] transition-all shadow-2xl shadow-brand-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4"
                         >
                             <FiPlus /> {loading ? 'Initializing...' : 'Add To Database'}
                         </button>

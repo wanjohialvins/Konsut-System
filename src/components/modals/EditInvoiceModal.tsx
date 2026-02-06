@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiX, FiSave } from "react-icons/fi";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -6,6 +6,10 @@ import type { Invoice, InvoiceItem, Product, Category } from "../../types/types"
 import { FaBolt, FaPlus } from "react-icons/fa";
 import InventorySelector from "../new-invoice/InventorySelector";
 import { DEFAULT_CURRENCY_RATE } from "../../utils/config";
+import { useAutoSave } from "../../hooks/useAutoSave";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import SavingIndicator from '../ui/SavingIndicator';
+import { InputMasks } from '../../utils/formatters';
 
 interface EditInvoiceModalProps {
     isOpen: boolean;
@@ -90,6 +94,51 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
         }
     }, [invoiceId, showToast]);
 
+    // --- Persistence ---
+    const isOnline = useOnlineStatus();
+    const DRAFT_KEY = `konsut_edit_draft_${invoiceId}`;
+
+    const autoSaveData = useMemo(() => ({
+        customerName,
+        customerPhone,
+        customerEmail,
+        customerAddress,
+        customerKraPin,
+        issuedDate,
+        dueDate,
+        lines,
+        currency,
+        usdToKshRate,
+        status,
+        lastSaved: new Date().toISOString()
+    }), [customerName, customerPhone, customerEmail, customerAddress, customerKraPin, issuedDate, dueDate, lines, currency, usdToKshRate, status]);
+
+    const isSaving = useAutoSave(DRAFT_KEY, autoSaveData, 1500);
+    const isBusy = loading || isSaving;
+
+    const loadDraft = useCallback(() => {
+        const saved = localStorage.getItem(DRAFT_KEY);
+        if (saved) {
+            try {
+                const d = JSON.parse(saved);
+                setCustomerName(d.customerName || "");
+                setCustomerPhone(d.customerPhone || "");
+                setCustomerEmail(d.customerEmail || "");
+                setCustomerAddress(d.customerAddress || "");
+                setCustomerKraPin(d.customerKraPin || "");
+                setIssuedDate(d.issuedDate || "");
+                setDueDate(d.dueDate || "");
+                setLines(d.lines || []);
+                setCurrency(d.currency || "Ksh");
+                setUsdToKshRate(d.usdToKshRate || DEFAULT_CURRENCY_RATE);
+                setStatus(d.status || "draft");
+                showToast("info", "Recovered unsaved changes from local storage");
+            } catch (e) {
+                console.error("Failed to load draft", e);
+            }
+        }
+    }, [DRAFT_KEY, showToast]);
+
     const loadStock = useCallback(async () => {
         try {
             const stockData = await api.stock.getAll();
@@ -111,10 +160,17 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
 
     useEffect(() => {
         if (isOpen && invoiceId) {
-            loadInvoice();
-            loadStock();
+            // First check for local draft
+            const hasDraft = !!localStorage.getItem(DRAFT_KEY);
+            if (hasDraft) {
+                loadDraft();
+                loadStock();
+            } else {
+                loadInvoice();
+                loadStock();
+            }
         }
-    }, [isOpen, invoiceId, loadInvoice, loadStock]);
+    }, [isOpen, invoiceId, loadInvoice, loadStock, loadDraft, DRAFT_KEY]);
 
     // Inventory Selector Handlers
     const getFilteredForCategory = (cat: Category) => {
@@ -216,6 +272,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
 
             await api.invoices.update(updatedInvoice);
             showToast("success", "Document updated successfully");
+            localStorage.removeItem(DRAFT_KEY);
             onSuccess();
             onClose();
         } catch (error: any) {
@@ -244,10 +301,11 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
+                        <SavingIndicator isSaving={isSaving} isOffline={!isOnline} lastSaved={autoSaveData.lastSaved} />
                         <button
                             onClick={handleSave}
-                            disabled={loading}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-brand-600/20 active:scale-95 transition-all disabled:opacity-50"
+                            disabled={isBusy || !isOnline}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-brand-600/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <FiSave size={14} /> {loading ? "Saving..." : "Save Changes"}
                         </button>
@@ -276,7 +334,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
                                         type="tel"
                                         placeholder="Phone"
                                         value={customerPhone}
-                                        onChange={(e) => setCustomerPhone(e.target.value)}
+                                        onChange={(e) => setCustomerPhone(InputMasks.phone(e.target.value))}
                                         className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                                     />
                                     <input
@@ -297,7 +355,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({ isOpen, onClose, in
                                         type="text"
                                         placeholder="KRA PIN"
                                         value={customerKraPin}
-                                        onChange={(e) => setCustomerKraPin(e.target.value)}
+                                        onChange={(e) => setCustomerKraPin(InputMasks.kraPin(e.target.value))}
                                         className="px-4 py-3 bg-gray-50 dark:bg-midnight-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                                     />
                                 </div>

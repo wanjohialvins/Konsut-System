@@ -28,6 +28,9 @@ import InvoiceForm from "../../components/new-invoice/InvoiceForm";
 import LineItemsTable from "../../components/new-invoice/LineItemsTable";
 import InvoiceSummary from "../../components/new-invoice/InvoiceSummary";
 import InventorySelector from "../../components/new-invoice/InventorySelector";
+import SavingIndicator from "../../components/ui/SavingIndicator";
+import { useAutoSave } from "../../hooks/useAutoSave";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 
 // Types
 import { DEFAULT_CURRENCY_RATE } from "../../utils/config";
@@ -305,45 +308,35 @@ const NewInvoice: React.FC = () => {
     loadInitialData();
   }, [loadInitialData]);
 
-  const saveAllData = useCallback((additionalData: Record<string, unknown> = {}) => {
-    const dataToSave = {
-      customerId,
-      customerName,
-      customerPhone,
-      customerEmail,
-      customerAddress,
-      customerKraPin,
-      issuedDate,
-      dueDate,
-      lines,
-      showDescriptions,
-      includeDescriptionsInPDF,
-      usdToKshRate,
-      activeDocumentType,
-      includeClientResponsibilities,
-      clientResponsibilities,
-      includeTermsAndConditions,
-      termsAndConditions,
-      ...additionalData,
-      lastSaved: new Date().toISOString()
-    };
-
-    try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(dataToSave));
-      localStorage.setItem(USD_TO_KSH_KEY, String(usdToKshRate));
-      return true;
-    } catch {
-      console.error("Failed to save data");
-      return false;
-    }
-  }, [customerId, customerName, customerPhone, customerEmail, customerAddress, customerKraPin, issuedDate, dueDate, lines, showDescriptions, includeDescriptionsInPDF, usdToKshRate, activeDocumentType, includeClientResponsibilities, clientResponsibilities, includeTermsAndConditions, termsAndConditions]);
-
   /* ----------------------------
      Auto-save on data changes
      ---------------------------- */
-  useEffect(() => {
-    saveAllData();
-  }, [saveAllData]);
+  const isOnline = useOnlineStatus();
+
+  const autoSaveData = useMemo(() => ({
+    customerId,
+    customerName,
+    customerPhone,
+    customerEmail,
+    customerAddress,
+    customerKraPin,
+    issuedDate,
+    dueDate,
+    lines,
+    showDescriptions,
+    includeDescriptionsInPDF,
+    usdToKshRate,
+    activeDocumentType,
+    includeClientResponsibilities,
+    clientResponsibilities,
+    includeTermsAndConditions,
+    termsAndConditions,
+    lastSaved: new Date().toISOString()
+  }), [customerId, customerName, customerPhone, customerEmail, customerAddress, customerKraPin, issuedDate, dueDate, lines, showDescriptions, includeDescriptionsInPDF, usdToKshRate, activeDocumentType, includeClientResponsibilities, clientResponsibilities, includeTermsAndConditions, termsAndConditions]);
+
+  const isSaving = useAutoSave(DRAFT_KEY, autoSaveData, 1500);
+
+  // Validation
 
   // Validation
   const validateCustomerInfo = () => {
@@ -680,12 +673,13 @@ const NewInvoice: React.FC = () => {
       localStorage.setItem("konsut_pdf_history", JSON.stringify(pdfHistory.slice(0, 50))); // Keep last 50
 
       // Save current state with PDF info
-      saveAllData({
+      // Handled by autoSaveData memo if needed, otherwise manual LS update for transient flags
+      localStorage.setItem(`${DRAFT_KEY}_last_pdf_action`, JSON.stringify({
         action: "generate_pdf",
         pdfFileName: pdfRecord.fileName,
         quoteNumber: invoiceData.id,
         timestamp: new Date().toISOString()
-      });
+      }));
 
       showToast("success", "PDF generated and saved successfully");
     } catch {
@@ -1188,6 +1182,10 @@ const NewInvoice: React.FC = () => {
                 onSave={saveDocument}
                 onPreview={handlePreview}
                 onDownload={generatePDF}
+                isLoading={loading}
+                isSaving={isSaving}
+                isOffline={!isOnline}
+                lastSaved={autoSaveData.lastSaved}
               />
             </div>
           </div>

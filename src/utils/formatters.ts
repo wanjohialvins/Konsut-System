@@ -48,3 +48,30 @@ export const normalizeInvoice = (raw: any): Invoice => {
         permissions: Array.isArray(raw.permissions) ? raw.permissions : [],
     } as Invoice;
 };
+
+// Input Masking Utilities
+export const InputMasks = {
+    /**
+     * Masks phone number to +254 XXX XXX XXX format or similar
+     */
+    phone: (val: string): string => {
+        const digits = val.replace(/\D/g, '');
+        if (digits.startsWith('0')) {
+            // Local format 07... -> +254 7...
+            const sliced = digits.slice(1);
+            return `+254 ${sliced.slice(0, 3)} ${sliced.slice(3, 6)} ${sliced.slice(6, 9)}`.trim();
+        }
+        if (digits.startsWith('254')) {
+            return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 9)} ${digits.slice(9, 12)}`.trim();
+        }
+        return val; // Allow freeform if it doesn't match expected patterns
+    },
+
+    /**
+     * Standardizes KRA PIN (11 chars, Alpha-Numeric, Uppercase)
+     */
+    kraPin: (val: string): string => {
+        return val.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11);
+    }
+};
+

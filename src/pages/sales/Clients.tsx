@@ -36,6 +36,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import PDFPreviewModal from "../../components/modals/PDFPreviewModal";
 import { usePDFPreview } from "../../hooks/usePDFPreview";
+import { useAutoSave } from "../../hooks/useAutoSave";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import SavingIndicator from "../../components/ui/SavingIndicator";
+import { InputMasks } from "../../utils/formatters";
 
 /* -------------------------------------------------------------------------- */
 /*                                Types                                       */
@@ -100,6 +104,47 @@ const Clients: React.FC = () => {
     company: "",
     kraPin: ""
   });
+
+  // --- Persistence ---
+  const isOnline = useOnlineStatus();
+  const DRAFT_KEY = editingClient ? `konsut_client_edit_${editingClient.id}` : `konsut_client_new_draft`;
+
+  const autoSaveData = useMemo(() => ({
+    ...formData,
+    lastSaved: new Date().toISOString()
+  }), [formData]);
+
+  const isSaving = useAutoSave(DRAFT_KEY, autoSaveData, 1500, !showForm);
+  const isBusy = loading || isSaving;
+
+  const loadDraft = useCallback(() => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (saved) {
+      try {
+        const d = JSON.parse(saved);
+        setFormData({
+          name: d.name || "",
+          phone: d.phone || "",
+          email: d.email || "",
+          address: d.address || "",
+          company: d.company || "",
+          kraPin: d.kraPin || ""
+        });
+        showToast("info", "Recovered unsaved draft");
+      } catch (e) {
+        console.error("Failed to load client draft", e);
+      }
+    }
+  }, [DRAFT_KEY, showToast]);
+
+  useEffect(() => {
+    if (showForm) {
+      const hasDraft = !!localStorage.getItem(DRAFT_KEY);
+      if (hasDraft) {
+        loadDraft();
+      }
+    }
+  }, [showForm, DRAFT_KEY, loadDraft]);
 
   /* -------------------------------------------------------------------------- */
   /*                                Data Loading                                */
@@ -312,6 +357,7 @@ const Clients: React.FC = () => {
       setShowForm(false);
       setEditingClient(null);
       setFormData({ name: "", phone: "", email: "", address: "", company: "", kraPin: "" });
+      localStorage.removeItem(DRAFT_KEY);
     } catch {
       showToast('error', 'Failed to save to cloud');
     } finally {
@@ -542,18 +588,40 @@ const Clients: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white dark:bg-midnight-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-up border border-gray-100 dark:border-midnight-800">
             <div className="bg-gray-50/50 dark:bg-midnight-950/50 p-6 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center">
-              <h2 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tight">{editingClient ? "Edit Client" : "Add New Client"}</h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-white dark:bg-midnight-800 p-2 rounded-full shadow-sm"><FaTimes /></button>
+              <div className="flex flex-col">
+                <h2 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tight">{editingClient ? "Edit Client" : "Add New Client"}</h2>
+                <div className="mt-1">
+                  <SavingIndicator isSaving={isSaving} isOffline={!isOnline} lastSaved={autoSaveData.lastSaved} />
+                </div>
+              </div>
+              <button onClick={() => { setShowForm(false); setEditingClient(null); setFormData({ name: "", phone: "", email: "", address: "", company: "", kraPin: "" }); }} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-white dark:bg-midnight-800 p-2 rounded-full shadow-sm"><FaTimes /></button>
             </div>
             <form onSubmit={handleSave} className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Name</label>
-                  <input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white" placeholder="John Doe" />
+                  <input
+                    id="client-name"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const next = document.getElementById('client-phone');
+                        if (next) next.focus();
+                      }
+                    }}
+                    className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white" placeholder="John Doe"
+                  />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Phone</label>
-                  <input value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white" placeholder="+254..." />
+                  <input
+                    id="client-phone"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: InputMasks.phone(e.target.value) })}
+                    className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white" placeholder="+254..."
+                  />
                 </div>
               </div>
               <div>
@@ -567,7 +635,7 @@ const Clients: React.FC = () => {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">KRA PIN</label>
-                  <input value={formData.kraPin} onChange={e => setFormData({ ...formData, kraPin: e.target.value })} className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white" placeholder="P0..." />
+                  <input value={formData.kraPin} onChange={e => setFormData({ ...formData, kraPin: InputMasks.kraPin(e.target.value) })} className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white" placeholder="P0..." />
                 </div>
               </div>
               <div>
@@ -575,7 +643,11 @@ const Clients: React.FC = () => {
                 <textarea value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full bg-gray-50 dark:bg-midnight-950 border-none p-3 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-medium dark:text-white resize-none" rows={2} />
               </div>
 
-              <button type="submit" className="w-full bg-brand-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/30 transform hover:scale-[1.02] active:scale-[0.98]">
+              <button
+                type="submit"
+                disabled={isBusy || !isOnline}
+                className="w-full bg-brand-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/30 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {editingClient ? "Update Client Profile" : "Create Client Profile"}
               </button>
             </form>

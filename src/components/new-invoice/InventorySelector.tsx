@@ -106,6 +106,15 @@ const InventorySelector: React.FC<InventorySelectorProps> = ({
                                 placeholder="Type name or description..."
                                 value={itemSearch}
                                 onChange={e => setItemSearch(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        if (filteredStock.length > 0) {
+                                            handleSearchSelect(filteredStock[0]);
+                                        } else if (itemSearch.trim()) {
+                                            handleCreateCustomItem(itemSearch);
+                                        }
+                                    }
+                                }}
                             />
                             {/* Results Dropdown */}
                             {itemSearch && (
@@ -160,6 +169,11 @@ const InventorySelector: React.FC<InventorySelectorProps> = ({
                         className="w-full bg-white dark:bg-midnight-900 border-none p-4 rounded-xl text-center font-bold outline-none focus:ring-2 focus:ring-brand-500 dark:text-white shadow-sm"
                         value={selectedQty[activeCategory]}
                         onChange={(e) => setSelectedQty((q) => ({ ...q, [activeCategory]: Number(e.target.value) }))}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleAddSelected(activeCategory);
+                            }
+                        }}
                     />
                 </div>
 
