@@ -133,12 +133,10 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                     {/* Price & Discount */}
                                     <div className="text-right flex flex-col items-end gap-1">
                                         <div className="text-xs text-gray-400 font-medium">Discount</div>
-                                        <input
-                                            type="number"
-                                            value={item.discount || ''}
+                                        <DiscountInput
+                                            value={item.discount}
                                             placeholder="0"
-                                            onChange={(e) => {
-                                                const val = parseFloat(e.target.value) || 0;
+                                            onChange={(val) => {
                                                 onUpdateLineItem(idx, 'discount', val);
                                                 onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - val);
                                             }}
@@ -210,12 +208,10 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                             {formatPrice(item.unitPrice)}
                                         </td>
                                         <td className="px-5 py-6 text-right align-top pt-6">
-                                            <input
-                                                type="number"
-                                                value={item.discount || ''}
+                                            <DiscountInput
+                                                value={item.discount}
                                                 placeholder="0"
-                                                onChange={(e) => {
-                                                    const val = parseFloat(e.target.value) || 0;
+                                                onChange={(val) => {
                                                     onUpdateLineItem(idx, 'discount', val);
                                                     onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - val);
                                                 }}
@@ -263,4 +259,49 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
     );
 };
 
+// Helper Component for Money Inputs (Prevents cursor jumping/decimal loss)
+const DiscountInput = ({ value, onChange, placeholder, className }: { value: number | undefined, onChange: (val: number) => void, placeholder?: string, className?: string }) => {
+    const [localValue, setLocalValue] = React.useState<string>(value ? value.toString() : '');
+
+    React.useEffect(() => {
+        // Only update local if the number value actually changes significantly from What we have
+        const numericLocal = parseFloat(localValue);
+        // If incoming value is different from our local numeric representation, sync it.
+        // But if local is "10." and incoming is 10, DON'T sync (keep "10.")
+        if (value !== undefined && value !== numericLocal) {
+            setLocalValue(value.toString());
+        } else if (value === undefined && localValue !== '') {
+            // Handle reset
+            if (numericLocal !== 0) setLocalValue('');
+        }
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value;
+        setLocalValue(raw);
+
+        // Only emit changes if valid number
+        if (raw === '') {
+            onChange(0);
+        } else {
+            const parsed = parseFloat(raw);
+            if (!isNaN(parsed)) {
+                onChange(parsed);
+            }
+        }
+    };
+
+    return (
+        <input
+            type="number"
+            value={localValue}
+            placeholder={placeholder}
+            onChange={handleChange}
+            step="0.01"
+            className={className || "w-20 text-right bg-white dark:bg-midnight-800 border border-gray-200 dark:border-midnight-700 rounded-lg p-1 text-xs font-bold text-rose-500 outline-none focus:ring-2 focus:ring-rose-500/20"}
+        />
+    );
+};
+
 export default LineItemsTable;
+```
