@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.1] - 2026-02-06 - Phase 1.1: System-wide UX Roll-out and Backend Integration
+
+### Added
+- **System-wide UX Improvements**: Integrated auto-save, visual status indicators, and offline detection into Clients, Stock, and Suppliers modules.
+- **Improved Data Consistency**: Applied phone and KRA PIN input masking system-wide.
+- **Keyboard-First Navigation**: Added "Enter" key support for faster inventory and client management.
+- **Backend Core Update**: Added missing `company` field support to the `clients` table and APIs.
+- **Data Core Migration**: Added `migrate_clients.php` to synchronize database schema with frontend requirements.
+
 ## [2.4.0] - 2026-02-06 - System Audit & Security Hardening
 
 ### Added

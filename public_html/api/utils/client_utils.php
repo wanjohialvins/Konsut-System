@@ -13,9 +13,10 @@ function ensureClientExists($pdo, $customer)
     $stmt->execute([$customer['id']]);
     if ($stmt->fetch()) {
         // Update existing client info
-        $update = $pdo->prepare("UPDATE clients SET name=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
+        $update = $pdo->prepare("UPDATE clients SET name=?, company=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
         $update->execute([
             $customer['name'],
+            $customer['company'] ?? '',
             $customer['email'] ?? '',
             $customer['phone'] ?? '',
             $customer['address'] ?? '',
@@ -26,10 +27,11 @@ function ensureClientExists($pdo, $customer)
     }
 
     // Create new
-    $stmt = $pdo->prepare("INSERT INTO clients (id, name, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO clients (id, name, company, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([
         $customer['id'],
         $customer['name'],
+        $customer['company'] ?? '',
         $customer['email'] ?? '',
         $customer['phone'] ?? '',
         $customer['address'] ?? '',

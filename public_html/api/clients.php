@@ -45,10 +45,11 @@ switch ($method) {
     case 'POST':
         requirePermission('manage_clients');
         $data = json_decode(file_get_contents('php://input'), true);
-        $stmt = $pdo->prepare("INSERT INTO clients (id, name, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO clients (id, name, company, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['id'],
             $data['name'],
+            $data['company'] ?? '',
             $data['email'] ?? '',
             $data['phone'] ?? '',
             $data['address'] ?? '',
@@ -60,9 +61,10 @@ switch ($method) {
     case 'PUT':
         requirePermission('manage_clients');
         $data = json_decode(file_get_contents('php://input'), true);
-        $stmt = $pdo->prepare("UPDATE clients SET name=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE clients SET name=?, company=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
         $stmt->execute([
             $data['name'],
+            $data['company'] ?? '',
             $data['email'] ?? '',
             $data['phone'] ?? '',
             $data['address'] ?? '',
