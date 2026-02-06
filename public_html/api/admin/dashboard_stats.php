@@ -1,5 +1,9 @@
 require_once '../config.php';
-requirePermission('view_dashboard');
+if (!isset($GLOBALS['CURRENT_USER_SESSION'])) {
+http_response_code(401);
+echo json_encode(['error' => 'Unauthorized']);
+exit;
+}
 
 $pdo = getDbConnection();
 
