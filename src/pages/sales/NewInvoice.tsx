@@ -423,23 +423,37 @@ const NewInvoice: React.FC = () => {
      Quantity controls (increment/decrement)
      ---------------------------- */
   const increaseQty = (index: number) => {
-    const updated = [...lines];
-    updated[index].quantity += 1;
-    updated[index].lineTotal = updated[index].unitPrice * updated[index].quantity;
-    setLines(updated);
+    setLines((prevLines) => {
+      const updated = [...prevLines];
+      const item = { ...updated[index] };
+      item.quantity += 1;
+      const discount = item.discount || 0;
+      item.lineTotal = (item.unitPrice * item.quantity) - discount;
+      updated[index] = item;
+      return updated;
+    });
   };
 
   const decreaseQty = (index: number) => {
-    const updated = [...lines];
-    updated[index].quantity = Math.max(1, updated[index].quantity - 1);
-    updated[index].lineTotal = updated[index].unitPrice * updated[index].quantity;
-    setLines(updated);
+    setLines((prevLines) => {
+      const updated = [...prevLines];
+      const item = { ...updated[index] };
+      item.quantity = Math.max(1, item.quantity - 1);
+      const discount = item.discount || 0;
+      item.lineTotal = (item.unitPrice * item.quantity) - discount;
+      updated[index] = item;
+      return updated;
+    });
   };
 
   const updateLineItem = (index: number, field: keyof InvoiceLine, value: any) => {
-    const updated = [...lines];
-    updated[index] = { ...updated[index], [field]: value };
-    setLines(updated);
+    setLines((prevLines) => {
+      const updated = [...prevLines];
+      const item = { ...updated[index] };
+      (item as any)[field] = value;
+      updated[index] = item;
+      return updated;
+    });
   };
 
   const removeLine = async (index: number) => {
