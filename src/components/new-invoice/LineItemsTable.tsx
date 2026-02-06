@@ -178,11 +178,12 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                     <div className="text-right flex flex-col items-end gap-1">
                                         <div className="text-xs text-gray-400 font-medium">Discount</div>
                                         <DiscountInput
-                                            value={item.discount}
+                                            value={displayCurrency === 'USD' ? (item.discount || 0) / usdToKshRate : (item.discount || 0)}
                                             placeholder="0"
                                             onChange={(val) => {
-                                                onUpdateLineItem(idx, 'discount', val);
-                                                onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - val);
+                                                const actualDiscount = displayCurrency === 'USD' ? val * usdToKshRate : val;
+                                                onUpdateLineItem(idx, 'discount', actualDiscount);
+                                                onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - actualDiscount);
                                             }}
                                             className="w-20 text-right bg-white dark:bg-midnight-800 border border-gray-200 dark:border-midnight-700 rounded-lg p-1 text-xs font-bold text-rose-500 outline-none"
                                         />
@@ -253,11 +254,12 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                         </td>
                                         <td className="px-5 py-6 text-right align-top pt-6">
                                             <DiscountInput
-                                                value={item.discount}
+                                                value={displayCurrency === 'USD' ? (item.discount || 0) / usdToKshRate : (item.discount || 0)}
                                                 placeholder="0"
                                                 onChange={(val) => {
-                                                    onUpdateLineItem(idx, 'discount', val);
-                                                    onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - val);
+                                                    const actualDiscount = displayCurrency === 'USD' ? val * usdToKshRate : val;
+                                                    onUpdateLineItem(idx, 'discount', actualDiscount);
+                                                    onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - actualDiscount);
                                                 }}
                                                 className="w-20 text-right bg-gray-50 dark:bg-midnight-950 border border-gray-200 dark:border-midnight-800 rounded-lg p-2 text-sm font-bold text-rose-500 placeholder-gray-300 outline-none focus:ring-2 focus:ring-rose-500/20"
                                             />
