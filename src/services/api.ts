@@ -214,7 +214,7 @@ export const api = {
             return request<any>(query, { method: 'POST' });
         },
         getActiveUsers: () => request<{ success: boolean; users: any[] }>('admin/actions.php?action=get-active-users', { method: 'POST' }),
-        debugAuth: (credentials: Record<string, string>) => request<{ success: boolean; debug_info: any }>('admin/debug_auth.php', { method: 'POST', body: JSON.stringify(credentials) }),
+        debugAuth: (credentials: Record<string, string>) => request<{ success: boolean; debugInfo: any }>('admin/debug_auth.php', { method: 'POST', body: JSON.stringify(credentials) }),
         getSystemHealth: () => request<any>('admin/health.php'),
         getNotifications: () => request('notifications.php'),
         markNotificationRead: (id: string) => request(`notifications.php?id=${id}`, { method: 'PUT' }),
