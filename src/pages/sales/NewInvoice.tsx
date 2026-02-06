@@ -534,11 +534,8 @@ const NewInvoice: React.FC = () => {
       // Update local state immediately to matching ID to prevent race conditions during navigation
       setLoading(false); // Ensure loading is off
 
-      // Force navigation with replaced state
-      const targetUrl = `/new-invoice?id=${invoiceObj.id}&type=${activeDocumentType}`;
-      if (window.location.search !== `?id=${invoiceObj.id}&type=${activeDocumentType}`) {
-        navigate(targetUrl, { replace: true });
-      }
+      // Navigate to list view on success
+      navigate('/invoices');
     } catch (e: unknown) {
       const errorMsg = e instanceof Error ? e.message : 'Failed to save to cloud';
       showToast("error", errorMsg);
