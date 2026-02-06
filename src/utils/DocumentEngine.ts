@@ -16,7 +16,8 @@ export class DocumentEngine {
     static calculateLineItem(
         item: InvoiceItem
     ): { lineTotal: number } {
-        const lineTotal = item.unitPrice * item.quantity;
+        const discount = item.discount || 0;
+        const lineTotal = (item.unitPrice * item.quantity) - discount;
         return { lineTotal };
     }
 
@@ -27,18 +28,29 @@ export class DocumentEngine {
         items: InvoiceItem[],
         taxRate: TaxRate = 0.16,
         includeTax: boolean = true
-    ): InvoiceTotals {
+    ): InvoiceTotals & { totalDiscount: number, taxableAmount: number } {
         let subtotal = 0;
+        let totalDiscount = 0;
 
         for (const item of items) {
-            subtotal += (item.unitPrice * item.quantity);
+            // Gross Subtotal (Price * Qty)
+            const grossLineTotal = item.unitPrice * item.quantity;
+            subtotal += grossLineTotal;
+
+            // Accumulate Discount
+            if (item.discount) {
+                totalDiscount += item.discount;
+            }
         }
 
-        const taxAmount = includeTax ? (subtotal * taxRate) : 0;
-        const grandTotal = subtotal + taxAmount;
+        const taxableAmount = Math.max(0, subtotal - totalDiscount);
+        const taxAmount = includeTax ? (taxableAmount * taxRate) : 0;
+        const grandTotal = taxableAmount + taxAmount;
 
         return {
-            subtotal,
+            subtotal,      // Gross Subtotal
+            totalDiscount, // Total Discount
+            taxableAmount, // Net Amount (Subtotal - Discount)
             taxAmount,
             grandTotal
         };

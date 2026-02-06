@@ -237,8 +237,18 @@ const NewInvoice: React.FC = () => {
           setCustomerEmail(customer.email);
           setCustomerAddress(customer.address);
           setCustomerKraPin(customer.kraPin);
-          setIssuedDate(invoiceToEdit.issuedDate || new Date().toISOString().split('T')[0]);
-          setDueDate(invoiceToEdit.dueDate || invoiceToEdit.quotationValidUntil || "");
+          // DATE FIX: safely parse dates
+          const safeDate = (d: string | undefined): string => {
+            if (!d) return "";
+            try {
+              return d.includes('T') ? d.split('T')[0] : d;
+            } catch {
+              return "";
+            }
+          };
+
+          setIssuedDate(safeDate(invoiceToEdit.issuedDate) || new Date().toISOString().split('T')[0]);
+          setDueDate(safeDate(invoiceToEdit.dueDate) || safeDate(invoiceToEdit.quotationValidUntil) || "");
           setLines(invoiceToEdit.items || []);
           if (invoiceToEdit.currencyRate) setUsdToKshRate(invoiceToEdit.currencyRate);
 
@@ -468,7 +478,7 @@ const NewInvoice: React.FC = () => {
       }
 
       const invSettings = getInvoiceSettings();
-      const { subtotal: calcSubtotal, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
+      const { subtotal: calcSubtotal, totalDiscount: calcTotalDiscount, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
 
       const invoiceObj: Invoice = {
         id: docId,
@@ -480,6 +490,7 @@ const NewInvoice: React.FC = () => {
         customer: { id: customerId, name: customerName, phone: customerPhone, email: customerEmail, address: customerAddress, kraPin: customerKraPin },
         items: lines,
         subtotal: calcSubtotal,
+        totalDiscount: calcTotalDiscount,
         tax: taxAmount,
         taxAmount: taxAmount, // Added for backend compatibility
         currency: "Ksh", // Added for backend compatibility
@@ -505,7 +516,15 @@ const NewInvoice: React.FC = () => {
 
       showToast("success", `${activeDocumentType.charAt(0).toUpperCase() + activeDocumentType.slice(1)} ${docId} saved to cloud`);
       localStorage.removeItem(DRAFT_KEY);
-      navigate(`/new-invoice?id=${invoiceObj.id}&type=${activeDocumentType}`, { replace: true });
+
+      // Update local state immediately to matching ID to prevent race conditions during navigation
+      setLoading(false); // Ensure loading is off
+
+      // Force navigation with replaced state
+      const targetUrl = `/new-invoice?id=${invoiceObj.id}&type=${activeDocumentType}`;
+      if (window.location.search !== `?id=${invoiceObj.id}&type=${activeDocumentType}`) {
+        navigate(targetUrl, { replace: true });
+      }
     } catch (e: unknown) {
       const errorMsg = e instanceof Error ? e.message : 'Failed to save to cloud';
       showToast("error", errorMsg);
@@ -517,7 +536,7 @@ const NewInvoice: React.FC = () => {
   const handlePreview = async () => {
     if (lines.length === 0) return showToast("error", "Add items first");
     const invSettings = getInvoiceSettings();
-    const { subtotal: calcSubtotal, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
+    const { subtotal: calcSubtotal, totalDiscount: calcTotalDiscount, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
 
     const previewData = {
       id: editId || "PREVIEW",
@@ -528,6 +547,7 @@ const NewInvoice: React.FC = () => {
       customer: { id: customerId, name: customerName, phone: customerPhone, email: customerEmail, address: customerAddress, kraPin: customerKraPin },
       items: lines,
       subtotal: calcSubtotal,
+      totalDiscount: calcTotalDiscount,
       taxAmount,
       grandTotal: calcGrandTotal,
       currencyRate: usdToKshRate,
@@ -566,7 +586,7 @@ const NewInvoice: React.FC = () => {
       }
 
       const invSettings = getInvoiceSettings();
-      const { subtotal: calcSubtotal, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
+      const { subtotal: calcSubtotal, totalDiscount: calcTotalDiscount, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
 
       const invoiceData = {
         id: finalId,
@@ -584,6 +604,7 @@ const NewInvoice: React.FC = () => {
         },
         items: lines,
         subtotal: calcSubtotal,
+        totalDiscount: calcTotalDiscount,
         tax: taxAmount,
         taxAmount: taxAmount,
         grandTotal: calcGrandTotal,
@@ -672,7 +693,7 @@ const NewInvoice: React.FC = () => {
   /* ----------------------------
      Calculations for UI Display
      ---------------------------- */
-  const { subtotal, grandTotal } = useMemo(() => {
+  const { subtotal, totalDiscount, grandTotal } = useMemo(() => {
     const settings = getInvoiceSettings();
     return DocumentEngine.calculateTotals(lines, settings.taxRate, settings.includeTax);
   }, [lines]);
@@ -719,7 +740,7 @@ const NewInvoice: React.FC = () => {
         }
       }
 
-      const { subtotal: calcSubtotal, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines);
+      const { subtotal: calcSubtotal, totalDiscount: calcTotalDiscount, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines);
 
       const newInvoice: Invoice = {
         id: newId,
@@ -738,6 +759,7 @@ const NewInvoice: React.FC = () => {
         },
         items: lines,
         subtotal: calcSubtotal,
+        totalDiscount: calcTotalDiscount,
         tax: taxAmount,
         taxAmount: taxAmount, // Added for backend compatibility
         currency: "Ksh", // Added for backend compatibility
@@ -1144,6 +1166,7 @@ const NewInvoice: React.FC = () => {
             <div id="invoice-save-area">
               <InvoiceSummary
                 subtotal={subtotal}
+                totalDiscount={totalDiscount}
                 grandTotal={grandTotal}
                 displayCurrency={displayCurrency}
                 setDisplayCurrency={setDisplayCurrency}

@@ -142,12 +142,13 @@ export const drawItemsTable = (
     formatCurrency: (v: number) => string,
     options: any
 ) => {
-    const tableHeader = ["Description", "Qty", "Unit Price", "Total"];
+    const tableHeader = ["Description", "Qty", "Unit Price", "Discount", "Total"];
     const tableBody = invoice.items.map((l: any) => [
         options.includeDescriptions && l.description ? `${l.name}\n${l.description}` : l.name,
         String(l.quantity),
         formatCurrency(l.unitPrice),
-        formatCurrency(l.unitPrice * l.quantity),
+        l.discount ? formatCurrency(l.discount) : "-",
+        formatCurrency(l.lineTotal || ((l.unitPrice * l.quantity) - (l.discount || 0))),
     ]);
 
     autoTable(doc, {
@@ -157,7 +158,13 @@ export const drawItemsTable = (
         theme: "grid",
         styles: { fontSize: SETTINGS.fontSize || 9, cellPadding: 3, font: config.font, textColor: [0, 0, 0], lineColor: [150, 150, 150], lineWidth: 0.1 },
         headStyles: { fillColor: config.primaryColor, textColor: 255, fontStyle: "bold", halign: "center" },
-        columnStyles: { 0: { halign: "left" }, 1: { halign: "center" }, 2: { halign: "right" }, 3: { halign: "right" } },
+        columnStyles: {
+            0: { halign: "left" },
+            1: { halign: "center" },
+            2: { halign: "right" },
+            3: { halign: "right", textColor: [220, 38, 38] }, // Red text for discount? Maybe just right align.
+            4: { halign: "right" }
+        },
         alternateRowStyles: { fillColor: [245, 247, 250] },
         margin: { left: config.margin, right: config.margin },
     });
@@ -213,14 +220,29 @@ export const drawFooterSummary = (
     const vatRate = SETTINGS.taxRate || 0.16;
     const includeTax = SETTINGS.includeTax !== false;
     const subtotal = invoice.subtotal;
-    const vatAmount = includeTax ? (invoice.taxAmount || invoice.tax || (subtotal * vatRate)) : 0;
-    const finalTotal = invoice.grandTotal || (subtotal + vatAmount);
+    // Calculate total discount if not provided
+    const totalDiscount = invoice.totalDiscount || invoice.items.reduce((acc: number, item: any) => acc + (item.discount || 0), 0);
+
+    // Net Amount = Subtotal - Discount
+    const taxableAmount = Math.max(0, subtotal - totalDiscount);
+
+    // Tax is calculated on TAXABLE AMOUNT (Net), not Gross Subtotal
+    const vatAmount = includeTax ? (invoice.taxAmount || (taxableAmount * vatRate)) : 0;
+    const finalTotal = invoice.grandTotal || (taxableAmount + vatAmount);
 
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     doc.text("Subtotal", sumLabelX, sy);
     doc.text(`${currency} ${formatCurrency(subtotal)}`, sumValX, sy, { align: "right" });
     sy += 6;
+
+    if (totalDiscount > 0) {
+        doc.setTextColor(220, 38, 38); // Red
+        doc.text("Discount", sumLabelX, sy);
+        doc.text(`- ${currency} ${formatCurrency(totalDiscount)}`, sumValX, sy, { align: "right" });
+        doc.setTextColor(0, 0, 0); // Reset
+        sy += 6;
+    }
 
     if (includeTax) {
         doc.text(`VAT (${(vatRate * 100).toFixed(0)}%)`, sumLabelX, sy);

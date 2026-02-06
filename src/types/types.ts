@@ -21,7 +21,8 @@ export interface InvoiceItem {
   description?: string;
   quantity: number;
   unitPrice: number; // Ksh
-  lineTotal: number; // unitPrice * qty
+  discount?: number; // Discount Value per line item
+  lineTotal: number; // (unitPrice * qty) - discount
 }
 
 export interface Customer {
@@ -58,6 +59,7 @@ export interface Invoice {
   customer: Customer;
   items: InvoiceItem[];
   subtotal: number;
+  totalDiscount?: number; // Total discount across all items
   tax: number;
   taxAmount?: number; // Added for backend compatibility (optional)
   grandTotal: number;

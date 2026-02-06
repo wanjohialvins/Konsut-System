@@ -130,10 +130,21 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                         <button onClick={() => onIncreaseQty(idx)} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-midnight-800 rounded-lg shadow-sm text-emerald-500"><FaPlus size={10} /></button>
                                     </div>
 
-                                    {/* Price */}
-                                    <div className="text-right">
-                                        <div className="text-xs text-gray-400 font-medium"> Total</div>
-                                        <div className="text-lg font-black text-gray-900 dark:text-white">{formatPrice(item.lineTotal)}</div>
+                                    {/* Price & Discount */}
+                                    <div className="text-right flex flex-col items-end gap-1">
+                                        <div className="text-xs text-gray-400 font-medium">Discount</div>
+                                        <input
+                                            type="number"
+                                            value={item.discount || ''}
+                                            placeholder="0"
+                                            onChange={(e) => {
+                                                const val = parseFloat(e.target.value) || 0;
+                                                onUpdateLineItem(idx, 'discount', val);
+                                                onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - val);
+                                            }}
+                                            className="w-20 text-right bg-white dark:bg-midnight-800 border border-gray-200 dark:border-midnight-700 rounded-lg p-1 text-xs font-bold text-rose-500 outline-none"
+                                        />
+                                        <div className="text-lg font-black text-gray-900 dark:text-white mt-1">{formatPrice(item.lineTotal)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +158,8 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                 <tr>
                                     <th className="px-8 py-5 w-[40%]">Item Description</th>
                                     <th className="px-4 py-5 text-center w-[15%]">Quantity</th>
-                                    <th className="px-6 py-5 text-right w-[15%]">Unit Price</th>
+                                    <th className="px-5 py-5 text-right w-[15%]">Unit Price</th>
+                                    <th className="px-5 py-5 text-right w-[12%]">Discount</th>
                                     <th className="px-6 py-5 text-right w-[15%]">Total</th>
                                     <th className="px-6 py-5 text-center w-[15%]">Controls</th>
                                 </tr>
@@ -184,7 +196,9 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                                         const val = parseInt(e.target.value) || 0;
                                                         if (val >= 1) {
                                                             onUpdateLineItem(idx, 'quantity', val);
-                                                            onUpdateLineItem(idx, 'lineTotal', val * item.unitPrice);
+                                                            // Trigger update logic
+                                                            const discount = item.discount || 0;
+                                                            onUpdateLineItem(idx, 'lineTotal', (val * item.unitPrice) - discount);
                                                         }
                                                     }}
                                                     className="w-10 text-center font-black text-sm text-gray-700 dark:text-gray-200 bg-transparent outline-none"
@@ -192,8 +206,21 @@ const LineItemsTable: React.FC<LineItemsTableProps> = ({
                                                 <button onClick={() => onIncreaseQty(idx)} className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-lg text-gray-400 hover:text-emerald-500 transition-all active:scale-90"><FaPlus size={8} /></button>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-6 text-right font-medium text-gray-500 dark:text-gray-400 text-sm align-top pt-8">
+                                        <td className="px-5 py-6 text-right font-medium text-gray-500 dark:text-gray-400 text-sm align-top pt-8">
                                             {formatPrice(item.unitPrice)}
+                                        </td>
+                                        <td className="px-5 py-6 text-right align-top pt-6">
+                                            <input
+                                                type="number"
+                                                value={item.discount || ''}
+                                                placeholder="0"
+                                                onChange={(e) => {
+                                                    const val = parseFloat(e.target.value) || 0;
+                                                    onUpdateLineItem(idx, 'discount', val);
+                                                    onUpdateLineItem(idx, 'lineTotal', (item.quantity * item.unitPrice) - val);
+                                                }}
+                                                className="w-20 text-right bg-gray-50 dark:bg-midnight-950 border border-gray-200 dark:border-midnight-800 rounded-lg p-2 text-sm font-bold text-rose-500 placeholder-gray-300 outline-none focus:ring-2 focus:ring-rose-500/20"
+                                            />
                                         </td>
                                         <td className="px-6 py-6 text-right font-black text-gray-900 dark:text-white text-base align-top pt-8">
                                             {formatPrice(item.lineTotal)}

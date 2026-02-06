@@ -68,7 +68,7 @@ if ($method === 'GET') {
         $userId = getRequestHeader('X-User-Id');
         // file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . " | User ID: " . var_export($userId, true) . "\n", FILE_APPEND);
 
-        $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, totalDiscount, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['id'],
             $customerId,
@@ -80,6 +80,7 @@ if ($method === 'GET') {
             $data['currency'] ?? 'Ksh',
             $data['currencyRate'] ?? 1.0,
             $data['subtotal'],
+            $data['totalDiscount'] ?? 0.00,
             $data['taxAmount'] ?? 0,
             $data['grandTotal'],
             $data['clientResponsibilities'] ?? '',
@@ -87,7 +88,7 @@ if ($method === 'GET') {
             $userId
         ]);
 
-        $itemStmt = $pdo->prepare("INSERT INTO document_items (document_id, product_id, name, description, quantity, unitPrice, total) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $itemStmt = $pdo->prepare("INSERT INTO document_items (document_id, product_id, name, description, quantity, unitPrice, discount, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         foreach ($data['items'] as $item) {
             $itemStmt->execute([
                 $data['id'],
@@ -96,7 +97,8 @@ if ($method === 'GET') {
                 $item['description'] ?? '',
                 $item['quantity'],
                 $item['unitPrice'],
-                $item['unitPrice'] * $item['quantity']
+                $item['discount'] ?? 0.00,
+                $item['lineTotal'] ?? (($item['unitPrice'] * $item['quantity']) - ($item['discount'] ?? 0))
             ]);
         }
         $pdo->commit();
@@ -125,7 +127,7 @@ if ($method === 'GET') {
             // Retrieve existing created_by to preserve it? 
             // Actually, created_by is not updated here, so it's preserved.
 
-            $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
+            $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, totalDiscount=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
             $stmt->execute([
                 $customerId,
                 $data['status'],
@@ -134,7 +136,8 @@ if ($method === 'GET') {
                 (!empty($data['quotationValidUntil'])) ? $data['quotationValidUntil'] : null,
                 $data['currency'] ?? 'Ksh',
                 $data['currencyRate'] ?? 1.0,
-                $subtotal = $data['subtotal'],
+                $data['subtotal'],
+                $data['totalDiscount'] ?? 0.00,
                 $data['taxAmount'] ?? 0,
                 $data['grandTotal'],
                 $data['clientResponsibilities'] ?? '',
@@ -143,7 +146,7 @@ if ($method === 'GET') {
             ]);
         } else {
             // Restore/Insert logic (Upsert)
-            $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO documents (id, customer_id, type, status, issuedDate, dueDate, quotationValidUntil, currency, currencyRate, subtotal, totalDiscount, taxAmount, grandTotal, clientResponsibilities, termsAndConditions, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $data['id'],
                 $customerId,
@@ -155,6 +158,7 @@ if ($method === 'GET') {
                 $data['currency'] ?? 'Ksh',
                 $data['currencyRate'] ?? 1.0,
                 $data['subtotal'],
+                $data['totalDiscount'] ?? 0.00,
                 $data['taxAmount'] ?? 0,
                 $data['grandTotal'],
                 $data['clientResponsibilities'] ?? '',
@@ -167,7 +171,7 @@ if ($method === 'GET') {
         $pdo->prepare("DELETE FROM document_items WHERE document_id = ?")->execute([$data['id']]);
 
         // Insert new items
-        $itemStmt = $pdo->prepare("INSERT INTO document_items (document_id, product_id, name, description, quantity, unitPrice, total) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $itemStmt = $pdo->prepare("INSERT INTO document_items (document_id, product_id, name, description, quantity, unitPrice, discount, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         foreach ($data['items'] as $item) {
             $itemStmt->execute([
                 $data['id'],
@@ -176,7 +180,8 @@ if ($method === 'GET') {
                 $item['description'] ?? '',
                 $item['quantity'],
                 $item['unitPrice'],
-                $item['unitPrice'] * $item['quantity']
+                $item['discount'] ?? 0.00,
+                $item['lineTotal'] ?? (($item['unitPrice'] * $item['quantity']) - ($item['discount'] ?? 0))
             ]);
         }
         $pdo->commit();

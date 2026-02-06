@@ -4,6 +4,7 @@ import { FaInfoCircle, FaSave, FaEye, FaFilePdf, FaExchangeAlt } from "react-ico
 
 interface InvoiceSummaryProps {
     subtotal: number;
+    totalDiscount?: number;
     grandTotal: number;
     displayCurrency: "Ksh" | "USD";
     setDisplayCurrency: React.Dispatch<React.SetStateAction<"Ksh" | "USD">>;
@@ -18,6 +19,7 @@ interface InvoiceSummaryProps {
 
 const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
     subtotal,
+    totalDiscount = 0,
     grandTotal,
     displayCurrency,
     setDisplayCurrency,
@@ -30,13 +32,11 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
     onDownload
 }) => {
 
-    const displaySubtotal = displayCurrency === "USD"
-        ? (subtotal / usdToKshRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    const displayGrandTotal = displayCurrency === "USD"
-        ? (grandTotal / usdToKshRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatVal = (val: number) => {
+        return displayCurrency === "USD"
+            ? (val / usdToKshRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
 
     return (
         <div className="bg-white dark:bg-midnight-900 p-8 rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-midnight-800 sticky top-6">
@@ -48,15 +48,21 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({
             <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-gray-500 dark:text-gray-400 text-sm font-bold">
                     <span>Subtotal</span>
-                    <span className="text-gray-900 dark:text-white">{displayCurrency === "USD" ? "$" : "Ksh"} {displaySubtotal}</span>
+                    <span className="text-gray-900 dark:text-white">{displayCurrency === "USD" ? "$" : "Ksh"} {formatVal(subtotal)}</span>
                 </div>
+                {totalDiscount > 0 && (
+                    <div className="flex justify-between text-rose-500 dark:text-rose-400 text-sm font-bold">
+                        <span>Discount</span>
+                        <span>- {displayCurrency === "USD" ? "$" : "Ksh"} {formatVal(totalDiscount)}</span>
+                    </div>
+                )}
                 <div className="flex justify-between text-gray-500 dark:text-gray-400 text-sm font-bold">
                     <span>VAT (16%)</span>
-                    <span className="text-gray-400">-</span>
+                    <span className="text-gray-900 dark:text-white">{displayCurrency === "USD" ? "$" : "Ksh"} {formatVal(grandTotal - (subtotal - totalDiscount))}</span>
                 </div>
                 <div className="pt-4 border-t-2 border-dashed border-gray-100 dark:border-midnight-800 flex justify-between items-center mt-2">
                     <span className="font-black text-xl text-gray-900 dark:text-white">Total</span>
-                    <span className="font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-400">{displayCurrency === "USD" ? "$" : "Ksh"} {displayGrandTotal}</span>
+                    <span className="font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-400">{displayCurrency === "USD" ? "$" : "Ksh"} {formatVal(grandTotal)}</span>
                 </div>
             </div>
 
