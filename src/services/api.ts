@@ -221,7 +221,13 @@ export const api = {
         deleteNotification: (id: string) => request(`notifications.php?id=${id}`, { method: 'DELETE' }),
         backup: () => request<any>('admin/backup.php'),
         cleanupDuplicates: (type: 'all' | 'stock' | 'clients' = 'all', mode: 'commit' | 'dry_run' = 'commit') => request<{ merged: { stock: number; clients: number } }>(`admin/cleanup_duplicates.php?type=${type}&mode=${mode}`, { method: 'POST' }),
-        getDashboardStats: () => request<any>('admin/dashboard_stats.php'),
+        getDashboardStats: (start?: string, end?: string) => {
+            let query = 'admin/dashboard_stats.php';
+            if (start && end) {
+                query += `?start=${start}&end=${end}`;
+            }
+            return request<any>(query);
+        },
         getAnalyticsStats: (days: number) => request<any>(`admin/analytics_stats.php?days=${days}`),
         executeSql: (query: string) => request<{ success: boolean; results?: any[]; count?: number; message?: string; error?: string }>('admin/sql.php', { method: 'POST', body: JSON.stringify({ query }) }),
         getCrons: () => request<{ tasks: any[] }>('admin/crons.php'),
