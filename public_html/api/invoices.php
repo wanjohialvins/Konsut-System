@@ -35,6 +35,7 @@ if ($method === 'GET') {
         } else {
             sendError('Invoice not found', 404);
         }
+    } else {
         // List invoices with basic info
         $type = $_GET['type'] ?? null;
         $clientId = $_GET['clientId'] ?? null;
