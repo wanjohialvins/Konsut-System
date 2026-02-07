@@ -47,6 +47,9 @@ const HelpCenter = () => {
         { q: "Can I save a manual line item to Stock?", a: "Yes. If you type a custom item, click the small 'Save' icon next to the price field. It will be instantly added to your Inventory for future use." },
         { q: "What happens if I delete a client?", a: "Deleting a client is soft-restricted if they have active invoices to preserve financial integrity. Archive them instead." },
         { q: "Is my data backed up?", a: "Yes, if you use the System Control 'Backup' feature, you can download a full JSON manifest of your data." },
+        { q: "I made a mistake. Can I undo it?", a: "(New v2.4) Yes! Go to System > Audit Logs. Find your action and click the 'Reverse' button. This works for creating, updating, or deleting items. You can also view 'Data Snapshots' to see exactly what changed." },
+        { q: "How do I add stock quickly?", a: "Use the new '+' button in the Inventory table. It opens a rapid-entry modal where you just type the quantity to add, and it updates instantly." },
+        { q: "My client list is empty but I have invoices?", a: "Go to the Clients page and click 'Sync from Documents'. The system will scan your invoice history and rebuild your client database automatically." },
     ];
 
     const filteredFaqs = faqs.filter(f =>

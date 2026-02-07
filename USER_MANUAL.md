@@ -1,6 +1,6 @@
 # KONSUT System - Professional User Manual
 
-**Version 2.3.0** | **Last Updated**: January 31, 2026
+**Version 2.4.0** | **Last Updated**: February 7, 2026
 
 Welcome to the KONSUT System - your comprehensive business management platform. This manual provides complete guidance for all user roles, from basic operations to advanced administration.
 
@@ -16,8 +16,9 @@ Welcome to the KONSUT System - your comprehensive business management platform. 
 6. [Client Management](#6-client-management)
 7. [Analytics & Reporting](#7-analytics--reporting)
 8. [System Administration](#8-system-administration)
-9. [Security & Permissions](#9-security--permissions)
-10. [Troubleshooting](#10-troubleshooting)
+9. [Audit & Reversal (New)](#9-audit--reversal)
+10. [Security & Permissions](#10-security--permissions)
+11. [Troubleshooting](#11-troubleshooting)
 
 ---
 
@@ -159,6 +160,11 @@ Generated PDFs include:
    - Weight (for freight calculation)
 3. **Save**
 
+#### Rapid Stock Add (New in v2.4)
+1. In the Inventory table, click the small **+** (Plus) button next to any item's stock count.
+2. Enter the quantity to arrive.
+3. Click **Add Stock**. The system updates the total instantly.
+
 #### Bulk Import
 1. Click **Import CSV/Excel**
 2. Select your file
@@ -219,6 +225,7 @@ View for each client:
 - **View Invoices**: See all transactions
 - **Export**: Download client data as CSV
 - **Delete**: Remove client (Admin only)
+- **Sync from Documents**: Rebuild your client list based on past invoice data (Useful if client list is empty).
 
 ---
 
@@ -327,7 +334,37 @@ Monitor:
 
 ---
 
-## 9. Security & Permissions
+328: ---
+329: 
+330: ## 9. Audit & Reversal
+331: 
+332: **Location**: System > Audit Logs
+333: 
+334: ### Activity Tracking
+335: - Every system action (Login, Create, Update, Delete) is logged.
+336: - Logs include: Timestamp, User, Action Type, Entity ID, and IP Address.
+337: 
+338: ### Data Snapshots (v2.4)
+339: - Click **View Data Snapshot** on any log entry.
+340: - **Before**: Shows the data exactly as it was *before* the action.
+341: - **After**: Shows the data *after* the action.
+342: - This allows precise verification of what changed (e.g., checking if a price was changed from 100 to 200).
+343: 
+344: ### Reversing Actions
+345: *Available to Admin only*
+346: 
+347: 1. Locate the action you want to undo in the Audit Logs.
+348: 2. Click the **Reverse** button (Red counter-clockwise arrow).
+349: 3. Confirm the action.
+350: - **If you Reverse a CREATE**: The item is deleted.
+351: - **If you Reverse a DELETE**: The item is restored using the "Before" snapshot.
+352: - **If you Reverse an UPDATE**: The item is reverted to its "Before" state.
+353: 
+354: *Note: Legacy logs (created before v2.4 update) cannot be reversed as they lack snapshot data.*
+355: 
+356: ---
+357: 
+358: ## 10. Security & Permissions
 
 ### Session Management
 - Sessions refresh automatically every 5 minutes

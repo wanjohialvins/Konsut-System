@@ -114,7 +114,7 @@ const SystemVitals = () => {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
-                            className={`px - 6 py - 2 rounded - lg text - xs font - black uppercase tracking - widest transition - all ${activeTab === tab ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                            className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                                 } `}
                         >
                             {tab}

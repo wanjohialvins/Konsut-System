@@ -1,6 +1,6 @@
 # KONSUT System - Enterprise Business Management Platform
 
-![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.4.0-blue.svg)
 ![License](https://img.shields.io/badge/license-Proprietary-red.svg)
 ![Status](https://img.shields.io/badge/status-Production-green.svg)
 
@@ -12,7 +12,7 @@ A professional-grade, full-stack business management system built with React 19,
 
 ### 📄 Document Management
 - **Multi-Format Invoicing**: Create Quotations, Proforma Invoices, and Tax Invoices
-- **Inline Quick Edit**: Edit documents directly from the list view with a modern modal interface (New in v2.3)
+- **Inline Quick Edit**: Edit documents directly from the list view with a modern modal interface
 - **Professional PDF Generation**: Export documents with company branding, QR codes, and watermarks
 - **Smart Conversion**: Convert quotations to invoices with preserved numbering
 - **Auto-Save Drafts**: Never lose work with automatic local and cloud persistence
@@ -20,17 +20,24 @@ A professional-grade, full-stack business management system built with React 19,
 
 ### 📦 Inventory Control
 - **Multi-Category System**: Products, Services, and Mobilization equipment
+- **Quick Stock Add**: One-click stock adjustment modal for rapid updates (New in v2.4)
 - **Dual Currency Support**: KES and USD with automatic conversion
-- **CSV Import/Export**: Bulk operations for inventory management
+- **CSV Import/Export**: Robust bulk operations with smart parsing
 - **Low Stock Alerts**: Automatic flagging of items below threshold
 - **Smart Merge**: Intelligent duplicate detection and consolidation
 
 ### 👥 Client Relationship Management
 - **Comprehensive Profiles**: Store contact details, company info, and KRA PINs
-- **Purchase History**: Track lifetime value and transaction count
+- **Bulk Synchronization**: "Sync from Documents" feature to rebuild client DB from invoice history
 - **Auto-Generation**: Client profiles created automatically from invoices
 - **Advanced Search**: Filter by name, phone, email, or PIN
 - **Export Capabilities**: CSV export with complete statistics
+
+### 🛡️ Audit & Security (Major Update v2.4)
+- **True Reversal**: Undo actions (Create, Update, Delete) with a single click using snapshot recovery
+- **Data Snapshots**: View JSON diffs (`data_before` vs `data_after`) for every change
+- **Destructive SQL Mode**: Execute raw SQL (INSERT/UPDATE/DELETE) with mandatory audit logging
+- **Granular Database Control**: Truncate specific tables or perform a hardened "Nuclear Reset"
 
 ### 📊 Analytics & Reporting (Enhanced v2.3)
 - **Financial Pulse AI**: Real-time intelligence and growth projections
@@ -98,7 +105,8 @@ konsut-system/
 │       ├── memos.php           # Internal communications
 │       ├── notifications.php   # Notification system
 │       ├── vault.php           # Document storage
-│       └── database.sql        # Schema definition
+│       ├── database.sql        # Schema definition
+│       └── audit_migration.sql # Audit Log Schema Upgrade (v2.4)
 ├── src/
 │   ├── components/             # Reusable React components
 │   │   ├── Layout.tsx          # Main application layout
