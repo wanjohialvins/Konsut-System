@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiCloud, FiCloudOff, FiRefreshCw, FiCheckCircle } from 'react-icons/fi';
+import { FiCloudOff, FiRefreshCw, FiCheckCircle } from 'react-icons/fi';
 
 interface SavingIndicatorProps {
     isSaving: boolean;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiSearch, FiFilter, FiDownload, FiColumns, FiGrid, FiList, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiDownload, FiColumns, FiList, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import { SmartInput } from './SmartGuide';
 
 interface SortOption {

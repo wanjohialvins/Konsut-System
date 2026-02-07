@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { FiActivity, FiSearch, FiServer, FiCpu, FiDatabase, FiCheck, FiUser, FiShield, FiKey, FiLock, FiTerminal, FiGlobe, FiTrash2, FiEye, FiSettings } from "react-icons/fi";
+import { FiActivity, FiSearch, FiServer, FiCpu, FiDatabase, FiUser, FiShield, FiKey, FiLock, FiTerminal, FiTrash2, FiEye, FiSettings } from "react-icons/fi";
 import { AdminToolboxSkeleton } from "../../components/skeletons/PageSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -20,8 +20,7 @@ const AdminToolbox = () => {
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
     // Utils State
-    const [pingResult, setPingResult] = useState<string | null>(null);
-    const [clientInfo, setClientInfo] = useState<any>(null);
+
 
     // SQL Console State
     const [sqlQuery, setSqlQuery] = useState("");
@@ -62,25 +61,7 @@ const AdminToolbox = () => {
         }
     };
 
-    const gatherClientInfo = () => {
-        const info = {
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            screen: `${window.screen.width}x${window.screen.height}`,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            storage: 'Unknown'
-        };
 
-        if (navigator.storage && navigator.storage.estimate) {
-            navigator.storage.estimate().then(est => {
-                const used = ((est.usage || 0) / 1024 / 1024).toFixed(2);
-                const quota = ((est.quota || 0) / 1024 / 1024).toFixed(2);
-                setClientInfo({ ...info, storage: `${used} MB / ${quota} MB` });
-            });
-        } else {
-            setClientInfo(info);
-        }
-    };
 
     const filteredUsers = useMemo(() => {
         return users.filter(u =>
@@ -142,17 +123,7 @@ const AdminToolbox = () => {
         }
     };
 
-    const runPingTest = async () => {
-        setPingResult("Pinging...");
-        const start = performance.now();
-        try {
-            await api.meta.get();
-            const end = performance.now();
-            setPingResult(`${(end - start).toFixed(2)} ms`);
-        } catch {
-            setPingResult("Request Failed");
-        }
-    };
+
 
     const handleRunSql = async () => {
         if (!sqlQuery.trim()) return;

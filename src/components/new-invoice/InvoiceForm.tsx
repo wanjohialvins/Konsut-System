@@ -21,6 +21,12 @@ interface InvoiceFormProps {
     setDueDate: (val: string) => void;
     activeDocumentType: InvoiceType;
     validationErrors: Record<string, string>;
+    // Phase 2 Validation
+    onBlurName?: () => void;
+    onBlurEmail?: () => void;
+    onBlurKra?: () => void;
+    emailWarning?: string | null;
+    phoneWarning?: string | null;
 }
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({
@@ -40,6 +46,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     setDueDate,
     activeDocumentType,
     validationErrors,
+    onBlurName,
+    onBlurEmail,
+    onBlurKra,
+    emailWarning,
+    phoneWarning
 }) => {
     const [suggestions, setSuggestions] = useState<Customer[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -98,7 +109,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                             onFocus={() => {
                                 if (customerName.length > 1) setIsSearching(true);
                             }}
-                            onBlur={() => setTimeout(() => setIsSearching(false), 200)}
+                            onBlur={() => {
+                                setTimeout(() => setIsSearching(false), 200);
+                                if (onBlurName) onBlurName();
+                            }}
                             className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerName ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
                             autoComplete='off'
                         />
@@ -139,6 +153,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                         className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerPhone ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
                         autoComplete='off'
                     />
+                    {phoneWarning && <span className="text-[10px] font-bold text-amber-500 mt-1 block">{phoneWarning}</span>}
                 </div>
 
                 <div>
@@ -147,9 +162,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                         placeholder="email@example.com"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
+                        onBlur={onBlurEmail}
                         className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerEmail ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
                         autoComplete='off'
                     />
+                    {emailWarning && <span className="text-[10px] font-bold text-amber-500 mt-1 block">{emailWarning}</span>}
                 </div>
                 <div>
                     <label className="text-xs font-bold text-gray-400 ml-1 mb-1 block uppercase">Physical Address</label>
@@ -168,6 +185,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                         placeholder="P0..."
                         value={customerKraPin}
                         onChange={(e) => setCustomerKraPin(InputMasks.kraPin(e.target.value))}
+                        onBlur={onBlurKra}
                         className={`w-full bg-gray-50 dark:bg-midnight-950 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-gray-900 dark:text-white ${validationErrors.customerKraPin ? "ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10" : ""}`}
                         autoComplete='off'
                     />

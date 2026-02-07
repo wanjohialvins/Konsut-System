@@ -77,6 +77,7 @@ export interface Invoice {
 
   createdAt?: string;
   updatedAt?: string;
+  idempotencyKey?: string;
 }
 
 export interface User {

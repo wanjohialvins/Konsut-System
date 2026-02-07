@@ -5,9 +5,52 @@ require_once 'config.php';
 $pdo = getDbConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Helper to normalize and trim
+function normalizeInput($data)
+{
+    return [
+        'id' => isset($data['id']) ? trim($data['id']) : null,
+        'name' => isset($data['name']) ? trim($data['name']) : '',
+        'company' => isset($data['company']) ? trim($data['company']) : '',
+        'email' => isset($data['email']) ? trim($data['email']) : '',
+        'phone' => isset($data['phone']) ? trim($data['phone']) : '',
+        'address' => isset($data['address']) ? trim($data['address']) : '',
+        'kraPin' => isset($data['kraPin']) ? strtoupper(trim($data['kraPin'])) : ''
+    ];
+}
+
 switch ($method) {
     case 'GET':
         requirePermission('view_clients');
+
+        // Uniqueness Check requested?
+        if (isset($_GET['check_field']) && isset($_GET['check_value'])) {
+            $field = $_GET['check_field'];
+            $value = trim($_GET['check_value']);
+            $excludeId = $_GET['exclude_id'] ?? null;
+
+            if (!in_array($field, ['email', 'phone', 'kraPin'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid check field']);
+                exit;
+            }
+
+            $query = "SELECT id, name FROM clients WHERE $field = ? AND deleted_at IS NULL";
+            $params = [$value];
+
+            if ($excludeId) {
+                $query .= " AND id != ?";
+                $params[] = $excludeId;
+            }
+
+            $stmt = $pdo->prepare($query);
+            $stmt->execute($params);
+            $match = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            sendResponse(['exists' => !!$match, 'match' => $match]);
+            exit;
+        }
+
         // Initialize empty in case of failure
         $clients = [];
         try {
@@ -44,31 +87,64 @@ switch ($method) {
 
     case 'POST':
         requirePermission('manage_clients');
-        $data = json_decode(file_get_contents('php://input'), true);
+        $raw = json_decode(file_get_contents('php://input'), true);
+        $data = normalizeInput($raw);
+
+        // Critical Validation
+        if (empty($data['name'])) {
+            http_response_code(400);
+            sendResponse(['success' => false, 'message' => 'Name is required']);
+            exit;
+        }
+
+        // Check duplicates (Server-side Enforcement)
+        if (!empty($data['email'])) {
+            $stmt = $pdo->prepare("SELECT id FROM clients WHERE email = ? AND deleted_at IS NULL");
+            $stmt->execute([$data['email']]);
+            if ($stmt->fetch()) {
+                http_response_code(409); // Conflict
+                sendResponse(['success' => false, 'message' => 'Email already exists']);
+                exit;
+            }
+        }
+
         $stmt = $pdo->prepare("INSERT INTO clients (id, name, company, email, phone, address, kraPin) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['id'],
             $data['name'],
-            $data['company'] ?? '',
-            $data['email'] ?? '',
-            $data['phone'] ?? '',
-            $data['address'] ?? '',
-            $data['kraPin'] ?? ''
+            $data['company'],
+            $data['email'],
+            $data['phone'],
+            $data['address'],
+            $data['kraPin']
         ]);
         sendResponse(['success' => true]);
         break;
 
     case 'PUT':
         requirePermission('manage_clients');
-        $data = json_decode(file_get_contents('php://input'), true);
+        $raw = json_decode(file_get_contents('php://input'), true);
+        $data = normalizeInput($raw);
+
+        // Check duplicates (Server-side Enforcement)
+        if (!empty($data['email'])) {
+            $stmt = $pdo->prepare("SELECT id FROM clients WHERE email = ? AND id != ? AND deleted_at IS NULL");
+            $stmt->execute([$data['email'], $data['id']]);
+            if ($stmt->fetch()) {
+                http_response_code(409);
+                sendResponse(['success' => false, 'message' => 'Email already exists']);
+                exit;
+            }
+        }
+
         $stmt = $pdo->prepare("UPDATE clients SET name=?, company=?, email=?, phone=?, address=?, kraPin=? WHERE id=?");
         $stmt->execute([
             $data['name'],
-            $data['company'] ?? '',
-            $data['email'] ?? '',
-            $data['phone'] ?? '',
-            $data['address'] ?? '',
-            $data['kraPin'] ?? '',
+            $data['company'],
+            $data['email'],
+            $data['phone'],
+            $data['address'],
+            $data['kraPin'],
             $data['id']
         ]);
         sendResponse(['success' => true]);

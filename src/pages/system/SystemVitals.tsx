@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiActivity, FiSearch, FiServer, FiCpu, FiDatabase, FiCheck, FiX } from "react-icons/fi";
+import { FiActivity, FiCpu, FiAlertCircle, FiClock, FiServer, FiDatabase, FiSearch } from "react-icons/fi";
 import { SystemVitalsSkeleton } from "../../components/skeletons/PageSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
@@ -40,8 +40,8 @@ const SystemVitals = () => {
         setClientInfo({
             userAgent: navigator.userAgent,
             platform: navigator.platform,
-            screen: `${window.screen.width}x${window.screen.height}`,
-            depth: `${window.screen.colorDepth}-bit`,
+            screen: `${window.screen.width}x${window.screen.height} `,
+            depth: `${window.screen.colorDepth} -bit`,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             storage: 'Unknown'
         });
@@ -77,7 +77,7 @@ const SystemVitals = () => {
 
             if (res.debugInfo.found) {
                 if (res.debugInfo.match) {
-                    showToast('success', `Credentials Valid! Role: ${res.debugInfo.role}`);
+                    showToast('success', `Credentials Valid! Role: ${res.debugInfo.role} `);
                 } else {
                     showToast('error', 'Incorrect Password');
                 }
@@ -114,8 +114,8 @@ const SystemVitals = () => {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
-                            className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                                }`}
+                            className={`px - 6 py - 2 rounded - lg text - xs font - black uppercase tracking - widest transition - all ${activeTab === tab ? 'bg-brand-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                                } `}
                         >
                             {tab}
                         </button>
@@ -275,7 +275,7 @@ const SystemVitals = () => {
                     {pingResult && (
                         <div className="mt-8 animate-fade-in">
                             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Result</p>
-                            <h2 className={`text-5xl font-black ${pingResult.includes('Failed') ? 'text-red-500' : 'text-emerald-500'}`}>{pingResult}</h2>
+                            <h2 className={`text - 5xl font - black ${pingResult.includes('Failed') ? 'text-red-500' : 'text-emerald-500'} `}>{pingResult}</h2>
                         </div>
                     )}
                 </div>

@@ -53,6 +53,8 @@ try {
                         $upd = $pdo->prepare("UPDATE stock SET quantity = ? WHERE id = ?");
                         $upd->execute([$totalQty, $primary['id']]);
 
+                        $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
+
                         // Re-link existing document items to the primary product
                         $relink = $pdo->prepare("UPDATE document_items SET product_id = ? WHERE product_id IN ($placeholders)");
                         $relink->execute(array_merge([$primary['id']], $idsToDelete));

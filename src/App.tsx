@@ -11,6 +11,7 @@ import AdminToolbox from "./pages/system/AdminToolbox";
 import Accountability from "./pages/intelligence/Accountability";
 import SystemVitals from "./pages/system/SystemVitals";
 import SystemData from "./pages/system/SystemData";
+import Import from "./pages/system/Import";
 import SystemSecurity from "./pages/system/SystemSecurity";
 import SystemBroadcast from "./pages/system/SystemBroadcast";
 import Tasks from "./pages/office/Tasks";
@@ -48,7 +49,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Login from "./pages/auth/Login";
 import ResetPassword from "./pages/auth/ResetPassword";
 import ProtectedRoute from "./components/common/ProtectedRoute";
-import AccessDenied from "./pages/core/AccessDenied";
 
 /**
  * Main App Component
@@ -103,6 +103,7 @@ const App = () => {
                       {/* Core Intelligence Modules */}
                       <Route path="system/vitals" element={<SystemVitals />} />
                       <Route path="system/data" element={<SystemData />} />
+                      <Route path="system/import" element={<Import />} />
                       <Route path="system/security" element={<SystemSecurity />} />
                       <Route path="system/broadcast" element={<SystemBroadcast />} />
 

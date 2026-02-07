@@ -14,6 +14,8 @@ if (file_exists(__DIR__ . '/config.production.php')) {
     include_once __DIR__ . '/config.production.php';
 }
 
+require_once __DIR__ . '/utils/security.php';
+
 // 2. Fallback Defaults (if not set in production config)
 if (!defined('DB_HOST'))
     define('DB_HOST', 'localhost');
@@ -40,6 +42,13 @@ header("Content-Type: application/json; charset=UTF-8");
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
+}
+
+// Global Rate Limiting (Phase 5)
+// Allow 100 requests per minute per IP
+if (!checkRateLimit($_SERVER['REMOTE_ADDR'] ?? 'unknown', 300, 60)) {
+    http_response_code(429);
+    die(json_encode(['error' => 'Too Many Requests', 'retry_after' => 60]));
 }
 
 date_default_timezone_set('UTC');

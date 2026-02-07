@@ -32,6 +32,8 @@ import { CreateDocumentSkeleton } from "../../components/skeletons/PageSkeletons
 import SavingIndicator from "../../components/ui/SavingIndicator";
 import { useAutoSave } from "../../hooks/useAutoSave";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import { useUniquenessCheck } from "../../hooks/useUniquenessCheck";
+import { normalizeText, trimText, generateIdempotencyKey } from "../../utils/utils";
 
 // Types
 import { DEFAULT_CURRENCY_RATE } from "../../utils/config";
@@ -97,9 +99,34 @@ const NewInvoice: React.FC = () => {
   const todayISO = new Date().toISOString().slice(0, 10);
   const [issuedDate, setIssuedDate] = useState<string>(todayISO);
   const [dueDate, setDueDate] = useState<string>("");
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>(undefined);
+  // Phase 3: Idempotency
+  const [idempotencyKey] = useState<string>(() => generateIdempotencyKey());
 
   // Validation errors
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  // --- Phase 2: Data Integrity & Validation ---
+  // Real-time Uniqueness Checks
+  const { warning: emailWarning, isChecking: checkingEmail } = useUniquenessCheck('clients', 'email', customerEmail, customerId);
+  const { warning: phoneWarning, isChecking: checkingPhone } = useUniquenessCheck('clients', 'phone', customerPhone, customerId);
+
+  // Normalization Handlers
+  const handleBlurName = () => setCustomerName(prev => trimText(prev));
+  const handleBlurEmail = () => setCustomerEmail(prev => trimText(prev));
+
+  // KRA PIN: Force Uppercase + Trim on Blur
+  const handleBlurKra = () => setCustomerKraPin(prev => normalizeText(prev));
+
+  // Display Warnings
+  useEffect(() => {
+    if (emailWarning) showToast('warning', emailWarning);
+  }, [emailWarning, showToast]);
+
+  useEffect(() => {
+    if (phoneWarning) showToast('warning', phoneWarning);
+  }, [phoneWarning, showToast]);
+
 
 
 
@@ -272,6 +299,9 @@ const NewInvoice: React.FC = () => {
             setIncludeTermsAndConditions(true);
             setTermsAndConditions(invoiceToEdit.termsAndConditions);
           }
+          if (invoiceToEdit.updatedAt) {
+            setUpdatedAt(invoiceToEdit.updatedAt);
+          }
         }
       } else if (clientIdParam) {
         const clients = await api.clients.getAll();
@@ -340,8 +370,9 @@ const NewInvoice: React.FC = () => {
     clientResponsibilities,
     includeTermsAndConditions,
     termsAndConditions,
+    updatedAt,
     lastSaved: new Date().toISOString()
-  }), [customerId, customerName, customerPhone, customerEmail, customerAddress, customerKraPin, issuedDate, dueDate, lines, showDescriptions, includeDescriptionsInPDF, usdToKshRate, activeDocumentType, includeClientResponsibilities, clientResponsibilities, includeTermsAndConditions, termsAndConditions]);
+  }), [customerId, customerName, customerPhone, customerEmail, customerAddress, customerKraPin, issuedDate, dueDate, lines, showDescriptions, includeDescriptionsInPDF, usdToKshRate, activeDocumentType, includeClientResponsibilities, clientResponsibilities, includeTermsAndConditions, termsAndConditions, updatedAt]);
 
   const isSaving = useAutoSave(DRAFT_KEY, autoSaveData, 1500);
 
@@ -481,6 +512,13 @@ const NewInvoice: React.FC = () => {
       return;
     }
 
+    if (loading) return;
+
+    if (!isOnline) {
+      showToast("error", "You are offline. Connection required to save.");
+      return;
+    }
+
     if (lines.length === 0) {
       showToast("error", "Add at least one item");
       return;
@@ -514,9 +552,8 @@ const NewInvoice: React.FC = () => {
         currencyRate: usdToKshRate,
         status: "draft",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        clientResponsibilities: includeClientResponsibilities ? clientResponsibilities : undefined,
-        termsAndConditions: includeTermsAndConditions ? termsAndConditions : undefined,
+        updatedAt: updatedAt, // Send original version for optimistic locking
+        idempotencyKey: idempotencyKey, // Phase 3: Idempotency
       };
 
       let res;
@@ -538,15 +575,24 @@ const NewInvoice: React.FC = () => {
 
       // Navigate to list view on success
       navigate('/invoices');
-    } catch (e: unknown) {
-      const errorMsg = e instanceof Error ? e.message : 'Failed to save to cloud';
-      showToast("error", errorMsg);
+    } catch (e: any) {
+      const errorMsg = e.message || 'Failed to save to cloud';
+      if (errorMsg.includes('Conflict') || errorMsg.includes('modified by another user')) {
+        showToast("error", "VERSION CONFLICT: This document was modified by another user. Please refresh and re-apply your changes.");
+      } else {
+        showToast("error", errorMsg);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handlePreview = async () => {
+    if (!isOnline) {
+      showToast("error", "You are offline. Connection required to save.");
+      return;
+    }
+
     if (lines.length === 0) return showToast("error", "Add items first");
     const invSettings = getInvoiceSettings();
     const { subtotal: calcSubtotal, totalDiscount: calcTotalDiscount, taxAmount, grandTotal: calcGrandTotal } = DocumentEngine.calculateTotals(lines, invSettings.taxRate, invSettings.includeTax);
@@ -1089,6 +1135,11 @@ const NewInvoice: React.FC = () => {
                 setDueDate={setDueDate}
                 activeDocumentType={activeDocumentType}
                 validationErrors={validationErrors}
+                onBlurName={handleBlurName}
+                onBlurEmail={handleBlurEmail}
+                onBlurKra={handleBlurKra}
+                emailWarning={emailWarning}
+                phoneWarning={phoneWarning}
               />
             </div>
 
