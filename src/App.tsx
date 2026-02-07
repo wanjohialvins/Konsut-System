@@ -49,6 +49,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Login from "./pages/auth/Login";
 import ResetPassword from "./pages/auth/ResetPassword";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import AccessDenied from "./pages/core/AccessDenied";
 
 /**
  * Main App Component

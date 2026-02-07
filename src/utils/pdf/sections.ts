@@ -264,10 +264,16 @@ export const drawFooterSummary = (
     const sumLabelX = rightBoxX + 6;
     const sumValX = config.pageWidth - config.margin - 6;
 
-    const vatRate = SETTINGS.taxRate || 0.16;
+    const vatRate = Number(SETTINGS.taxRate) || 0.16;
     const includeTax = SETTINGS.includeTax !== false;
-    const subtotal = invoice.subtotal;
-    const totalDiscount = invoice.totalDiscount || invoice.items.reduce((acc: number, item: any) => acc + (item.discount || 0), 0);
+    const subtotal = Number(invoice.subtotal) || 0;
+
+    // Calculate discount safely
+    const totalDiscount = Number(invoice.totalDiscount) || invoice.items.reduce((acc: number, item: any) => {
+        const d = Number(item.discount) || 0;
+        return acc + d;
+    }, 0);
+
     const taxableAmount = Math.max(0, subtotal - totalDiscount);
     const vatAmount = includeTax ? (taxableAmount * vatRate) : 0;
     const finalTotal = taxableAmount + vatAmount;

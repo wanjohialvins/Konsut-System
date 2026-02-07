@@ -35,6 +35,7 @@ export const generateInvoicePDF = async (
         };
 
         const formatCurrency = (val: number) => {
+            if (val === undefined || val === null || isNaN(val)) return "0.00";
             const amount = currency === "USD" ? val / rate : val;
             return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };
