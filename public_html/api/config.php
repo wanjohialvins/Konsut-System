@@ -77,7 +77,7 @@ if (DEBUG_MODE) {
 function sendResponse($data, $code = 200)
 {
     http_response_code($code);
-    echo json_encode($data);
+    echo json_encode($data, JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
     exit;
 }
 

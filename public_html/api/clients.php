@@ -63,7 +63,7 @@ switch ($method) {
                     (SELECT COUNT(*) FROM documents d WHERE d.customer_id = c.id AND LOWER(d.type) = 'invoice' AND LOWER(d.status) IN ('pending', 'sent', 'draft') AND d.deleted_at IS NULL) as pendingCount,
                     (SELECT COUNT(*) FROM documents d WHERE d.customer_id = c.id AND LOWER(d.type) = 'invoice' AND LOWER(d.status) = 'overdue' AND d.deleted_at IS NULL) as overdueCount
                 FROM clients c
-                WHERE c.deleted_at IS NULL
+                WHERE (c.deleted_at IS NULL OR c.deleted_at = '0000-00-00 00:00:00')
                 ORDER BY c.name ASC
             ";
             $stmt = $pdo->query($query);
@@ -88,6 +88,65 @@ switch ($method) {
     case 'POST':
         requirePermission('manage_clients');
         $raw = json_decode(file_get_contents('php://input'), true);
+
+        // Bulk Sync Action
+        if (isset($_GET['action']) && $_GET['action'] === 'bulk_sync') {
+            $count = 0;
+            $updated = 0;
+            $pdo->beginTransaction();
+            try {
+                $checkStmt = $pdo->prepare("SELECT id FROM clients WHERE (email = ? AND email != '') OR (name = ? AND phone = ?)");
+                $updateStmt = $pdo->prepare("UPDATE clients SET name=?, company=?, phone=?, address=?, kraPin=?, updated_at=NOW() WHERE id=?");
+                $insertStmt = $pdo->prepare("INSERT INTO clients (id, name, company, email, phone, address, kraPin, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+
+                foreach ($raw as $client) {
+                    $data = normalizeInput($client);
+
+                    // Simple validation
+                    if (empty($data['name']))
+                        continue;
+
+                    // Check existence (by Email OR Name+Phone composite)
+                    $checkStmt->execute([$data['email'], $data['name'], $data['phone']]);
+                    $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($existing) {
+                        // Update existing (optional: only if provided data is substantial?)
+                        // For now, we update to ensure latest info from invoice is captured
+                        $updateStmt->execute([
+                            $data['name'],
+                            $data['company'],
+                            $data['phone'],
+                            $data['address'],
+                            $data['kraPin'],
+                            $existing['id']
+                        ]);
+                        $updated++;
+                    } else {
+                        // Insert new
+                        $id = $data['id'] ?: 'CLI-' . uniqid();
+                        $insertStmt->execute([
+                            $id,
+                            $data['name'],
+                            $data['company'],
+                            $data['email'],
+                            $data['phone'],
+                            $data['address'],
+                            $data['kraPin']
+                        ]);
+                        $count++;
+                    }
+                }
+                $pdo->commit();
+                sendResponse(['success' => true, 'imported' => $count, 'updated' => $updated]);
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                http_response_code(500);
+                sendResponse(['success' => false, 'error' => $e->getMessage()]);
+            }
+            break;
+        }
+
         $data = normalizeInput($raw);
 
         // Critical Validation

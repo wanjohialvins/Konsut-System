@@ -138,9 +138,7 @@ export const api = {
         update: (data: Customer) => request<{ success: boolean }>('clients.php', { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id: string) => request<{ success: boolean }>(`clients.php?id=${id}`, { method: 'DELETE' }),
         bulkCreateOrUpdate: async (clients: Customer[]) => {
-            for (const client of clients) {
-                await request<{ success: boolean }>('clients.php', { method: 'POST', body: JSON.stringify(client) });
-            }
+            await request<{ success: boolean; imported: number; updated: number }>('clients.php?action=bulk_sync', { method: 'POST', body: JSON.stringify(clients) });
         },
         deleteAll: async () => {
             await request<{ success: boolean }>('clients.php?all=true', { method: 'DELETE' });
