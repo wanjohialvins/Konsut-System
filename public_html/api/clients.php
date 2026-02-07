@@ -57,21 +57,21 @@ switch ($method) {
             $query = "
                 SELECT 
                     c.*,
-                    COUNT(CASE WHEN LOWER(d.type) = 'invoice' THEN 1 END) as totalInvoices,
-                    SUM(CASE WHEN LOWER(d.type) = 'invoice' AND LOWER(d.status) != 'cancelled' THEN d.grandTotal ELSE 0 END) as totalRevenue,
-                    MAX(d.issuedDate) as lastActive,
-                    SUM(CASE WHEN LOWER(d.type) = 'invoice' AND LOWER(d.status) IN ('pending', 'sent', 'draft') THEN 1 ELSE 0 END) as pendingCount,
-                    SUM(CASE WHEN LOWER(d.type) = 'invoice' AND LOWER(d.status) = 'overdue' THEN 1 ELSE 0 END) as overdueCount
+                    (SELECT COUNT(*) FROM documents d WHERE d.customer_id = c.id AND LOWER(d.type) = 'invoice' AND d.deleted_at IS NULL) as totalInvoices,
+                    (SELECT COALESCE(SUM(d.grandTotal), 0) FROM documents d WHERE d.customer_id = c.id AND LOWER(d.type) = 'invoice' AND LOWER(d.status) != 'cancelled' AND d.deleted_at IS NULL) as totalRevenue,
+                    (SELECT MAX(d.issuedDate) FROM documents d WHERE d.customer_id = c.id AND d.deleted_at IS NULL) as lastActive,
+                    (SELECT COUNT(*) FROM documents d WHERE d.customer_id = c.id AND LOWER(d.type) = 'invoice' AND LOWER(d.status) IN ('pending', 'sent', 'draft') AND d.deleted_at IS NULL) as pendingCount,
+                    (SELECT COUNT(*) FROM documents d WHERE d.customer_id = c.id AND LOWER(d.type) = 'invoice' AND LOWER(d.status) = 'overdue' AND d.deleted_at IS NULL) as overdueCount
                 FROM clients c
-                LEFT JOIN documents d ON c.id = d.customer_id AND d.deleted_at IS NULL
                 WHERE c.deleted_at IS NULL
-                GROUP BY c.id
                 ORDER BY c.name ASC
             ";
             $stmt = $pdo->query($query);
             $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            // Log error silently or handle
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+            exit;
         }
 
         // Cast numeric strings to appropriate types
