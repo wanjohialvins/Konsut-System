@@ -64,7 +64,15 @@ export const getInvoiceSettings = () => {
     try {
         const stored = localStorage.getItem("invoiceSettings");
         const parsed = stored ? JSON.parse(stored) : {};
-        return { ...DEFAULT_INVOICE_SETTINGS, ...parsed };
+        const settings = { ...DEFAULT_INVOICE_SETTINGS, ...parsed };
+
+        // Safety: Ensure numeric values
+        settings.taxRate = Number(settings.taxRate);
+        if (isNaN(settings.taxRate)) settings.taxRate = 0.16;
+
+        settings.currencyRate = Number(settings.currencyRate) || DEFAULT_CURRENCY_RATE;
+
+        return settings;
     } catch (e) {
         return DEFAULT_INVOICE_SETTINGS;
     }

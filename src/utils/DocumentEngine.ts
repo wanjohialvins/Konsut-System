@@ -16,12 +16,15 @@ export class DocumentEngine {
     static calculateLineItem(
         item: InvoiceItem
     ): { lineTotal: number } {
-        const discount = item.discount || 0;
+        const qty = Number(item.quantity) || 0;
+        const price = Number(item.unitPrice) || 0;
+        const discount = Number(item.discount) || 0;
+
         let lineTotal;
         if (discount > 0) {
-            lineTotal = (item.unitPrice * item.quantity) - discount;
+            lineTotal = (price * qty) - discount;
         } else {
-            lineTotal = item.unitPrice * item.quantity;
+            lineTotal = price * qty;
         }
         return { lineTotal };
     }
@@ -38,13 +41,17 @@ export class DocumentEngine {
         let totalDiscount = 0;
 
         for (const item of items) {
+            const qty = Number(item.quantity) || 0;
+            const price = Number(item.unitPrice) || 0;
+            const discount = Number(item.discount) || 0;
+
             // Gross Subtotal (Price * Qty)
-            const grossLineTotal = item.unitPrice * item.quantity;
+            const grossLineTotal = price * qty;
             subtotal += grossLineTotal;
 
             // Accumulate Discount
-            if (item.discount) {
-                totalDiscount += item.discount;
+            if (discount > 0) {
+                totalDiscount += discount;
             }
         }
 
@@ -55,7 +62,11 @@ export class DocumentEngine {
             taxableAmount = subtotal;
         }
 
-        const taxAmount = includeTax ? (taxableAmount * taxRate) : 0;
+        // Ensure no NaN propagates
+        taxableAmount = Number(taxableAmount) || 0;
+        const rate = Number(taxRate) || 0;
+
+        const taxAmount = includeTax ? (taxableAmount * rate) : 0;
         const grandTotal = taxableAmount + taxAmount;
 
         return {

@@ -59,6 +59,8 @@ const Inventory = () => {
     // --- Toggles & Modals ---
     const [showDescriptions, setShowDescriptions] = useState(false);
     const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+    const [quickAddItem, setQuickAddItem] = useState<InventoryItem | null>(null); // New State
+    const [quickAddQty, setQuickAddQty] = useState<number>(1); // New State
     const [showLowStock, setShowLowStock] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -145,6 +147,22 @@ const Inventory = () => {
             showToast('success', 'Item updated');
         } catch {
             showToast('error', 'Update failed');
+        }
+    };
+
+    const handleQuickAddSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!quickAddItem) return;
+        try {
+            const newQuantity = (quickAddItem.quantity || 0) + quickAddQty;
+            const payload = { ...quickAddItem, quantity: newQuantity, unitPrice: quickAddItem.priceKsh, unitPriceUsd: quickAddItem.priceUSD };
+            await api.stock.update(payload);
+            setQuickAddItem(null);
+            setQuickAddQty(1);
+            loadData();
+            showToast('success', `Added ${quickAddQty} to stock`);
+        } catch {
+            showToast('error', 'Stock update failed');
         }
     };
 
@@ -448,6 +466,13 @@ const Inventory = () => {
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => { setQuickAddItem(it); setQuickAddQty(1); }}
+                                                className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-600 hover:text-white transition-all shadow-lg shadow-emerald-500/10"
+                                                title="Quick Add Stock"
+                                            >
+                                                <FaPlus />
+                                            </button>
                                             <button onClick={() => setEditingItem(it)} className="p-3 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-lg shadow-blue-500/10">
                                                 <FaEdit />
                                             </button>
@@ -529,6 +554,42 @@ const Inventory = () => {
                             </form>
                         </div>
                     </div >,
+                    document.body
+                )
+            }
+
+            {
+                quickAddItem && createPortal(
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-midnight-900 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-white/10">
+                            <div className="px-8 py-6 border-b border-gray-100 dark:border-midnight-800 flex justify-between items-center bg-gray-50/50 dark:bg-midnight-950/50">
+                                <h3 className="font-black text-xl text-gray-900 dark:text-white uppercase tracking-tight">Quick Add Stock</h3>
+                                <button onClick={() => setQuickAddItem(null)} className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-midnight-800 text-gray-400 transition-colors">✕</button>
+                            </div>
+                            <form onSubmit={handleQuickAddSubmit} className="p-8 space-y-6">
+                                <div>
+                                    <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4">Adding stock to <span className="text-brand-600 dark:text-white">{quickAddItem.name}</span></p>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Quantity to Add</label>
+                                    <div className="flex items-center gap-4">
+                                        <button type="button" onClick={() => setQuickAddQty(Math.max(1, quickAddQty - 1))} className="p-4 bg-gray-100 dark:bg-midnight-800 rounded-xl font-black text-lg hover:bg-gray-200 dark:hover:bg-midnight-700 transition-colors">-</button>
+                                        <input
+                                            type="number"
+                                            value={quickAddQty}
+                                            onChange={e => setQuickAddQty(Math.max(1, Number(e.target.value)))}
+                                            className="w-full bg-gray-50 dark:bg-midnight-950 border-none rounded-2xl px-5 py-4 text-center text-gray-900 dark:text-white font-black text-xl focus:ring-4 focus:ring-brand-500/10 outline-none"
+                                            min="1"
+                                            required
+                                            autoFocus
+                                        />
+                                        <button type="button" onClick={() => setQuickAddQty(quickAddQty + 1)} className="p-4 bg-gray-100 dark:bg-midnight-800 rounded-xl font-black text-lg hover:bg-gray-200 dark:hover:bg-midnight-700 transition-colors">+</button>
+                                    </div>
+                                </div>
+                                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-emerald-500/20 active:scale-95">
+                                    Confirm Add
+                                </button>
+                            </form>
+                        </div>
+                    </div>,
                     document.body
                 )
             }

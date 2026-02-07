@@ -460,8 +460,8 @@ const NewInvoice: React.FC = () => {
       const updated = [...prevLines];
       const item = { ...updated[index] };
       item.quantity += 1;
-      const discount = item.discount || 0;
-      item.lineTotal = (item.unitPrice * item.quantity) - discount;
+      const { lineTotal } = DocumentEngine.calculateLineItem(item);
+      item.lineTotal = lineTotal;
       updated[index] = item;
       return updated;
     });
@@ -472,8 +472,8 @@ const NewInvoice: React.FC = () => {
       const updated = [...prevLines];
       const item = { ...updated[index] };
       item.quantity = Math.max(1, item.quantity - 1);
-      const discount = item.discount || 0;
-      item.lineTotal = (item.unitPrice * item.quantity) - discount;
+      const { lineTotal } = DocumentEngine.calculateLineItem(item);
+      item.lineTotal = lineTotal;
       updated[index] = item;
       return updated;
     });
@@ -484,6 +484,12 @@ const NewInvoice: React.FC = () => {
       const updated = [...prevLines];
       const item = { ...updated[index] };
       (item as any)[field] = value;
+
+      if (field === 'quantity' || field === 'unitPrice' || field === 'discount') {
+        const { lineTotal } = DocumentEngine.calculateLineItem(item);
+        item.lineTotal = lineTotal;
+      }
+
       updated[index] = item;
       return updated;
     });
