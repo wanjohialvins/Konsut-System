@@ -13,12 +13,13 @@ try {
             a.id, 
             a.user_id, 
             a.action, 
-            a.details as data_after, 
-            '' as data_before,
-            'SYSTEM' as entity_type,
-            '0' as entity_id,
+            a.details,
+            a.data_before,
+            a.data_after,
+            a.entity_type,
+            a.entity_id,
             '0.0.0.0' as ip_address,
-            a.timestamp as created_at, 
+            DATE_FORMAT(a.timestamp, '%Y-%m-%dT%H:%i:%sZ') as created_at, 
             u.username, 
             u.role 
         FROM audit_logs a 

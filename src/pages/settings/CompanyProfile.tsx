@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText } from "react-icons/fi";
 import logoUrl from '../../assets/logo.jpg';
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 const CompanyProfile = () => {
     const { showToast } = useToast();
+    const { user } = useAuth();
     const [saving, setSaving] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     // Initial state moved to below DEFAULT_COMPANY definition
+
+    // Determine edit permission
+    const canEditWeb = useMemo(() => {
+        const role = user?.role?.toLowerCase() || '';
+        return role === 'admin' || role === 'ceo';
+    }, [user]);
 
     const DEFAULT_COMPANY = {
         name: "KONSUT LTD",
@@ -156,23 +164,20 @@ const CompanyProfile = () => {
                         />
                     </div>
 
-                    <div className="bg-brand-600 text-white rounded-[2.5rem] p-10 shadow-2xl shadow-brand-500/20 relative overflow-hidden group">
+                    <div
+                        onClick={() => window.open(company.website?.startsWith('http') ? company.website : `https://${company.website}`, '_blank')}
+                        className="bg-brand-600 text-white rounded-[2.5rem] p-10 shadow-2xl shadow-brand-500/20 relative overflow-hidden group cursor-pointer"
+                    >
                         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full transition-transform group-hover:scale-150 duration-700"></div>
-                        <a href="https://www.konsut.co.ke" target="_blank" rel="noopener noreferrer" className="block text-xs font-black uppercase tracking-widest opacity-80 mb-2 hover:opacity-100 hover:text-white transition-opacity">Web Identity</a>
+                        <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Web Identity</p>
                         <div className="flex items-center gap-4">
-                            <a
-                                href={company.website?.startsWith('http') ? company.website : `https://${company.website}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-white hover:scale-110 transition-transform cursor-pointer"
-                                title="Visit Website"
-                            >
-                                <FiGlobe size={24} />
-                            </a>
+                            <FiGlobe size={24} className="text-white hover:scale-110 transition-transform" />
                             <input
                                 value={company.website}
                                 onChange={e => setCompany({ ...company, website: e.target.value })}
-                                className="bg-transparent border-none p-0 text-xl font-black placeholder-white/40 focus:ring-0 w-full"
+                                onClick={(e) => canEditWeb && e.stopPropagation()}
+                                readOnly={!canEditWeb}
+                                className={`bg-transparent border-none p-0 text-xl font-black placeholder-white/40 focus:ring-0 w-full ${!canEditWeb ? 'pointer-events-none' : ''}`}
                                 placeholder="www.yoursite.com"
                             />
                         </div>

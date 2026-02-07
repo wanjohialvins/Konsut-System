@@ -14,10 +14,11 @@ interface AuditLog {
     action: string;
     entity_type: string;
     entity_id: string;
-    data_before: string;
-    data_after: string;
+    data_before: string | null; // Can be JSON string or null
+    data_after: string | null;  // Can be JSON string or null
     ip_address: string;
     created_at: string;
+    details?: string;
 }
 
 const AuditLogs = () => {
@@ -80,7 +81,7 @@ const AuditLogs = () => {
 
     const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-    const renderJson = (title: string, data: string) => {
+    const renderJson = (title: string, data: string | null) => {
         try {
             if (!data || data === '{}' || data === 'null') return <div className="text-gray-400 italic">No change data</div>;
             const parsed = typeof data === 'string' ? JSON.parse(data) : data;
@@ -163,10 +164,12 @@ const AuditLogs = () => {
                                     <tr key={log.id} className="hover:bg-gray-50/50 dark:hover:bg-midnight-800/30 transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             <div className="flex flex-col gap-2">
-                                                {isAdmin && log.action !== 'REVERT' && (
+                                                {isAdmin && log.action !== 'REVERT' && log.action !== 'SQL_EXEC_DESTRUCTIVE' && (
                                                     <button
                                                         onClick={() => handleRevert(log.id as any)}
-                                                        className="px-3 py-1 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1 w-fit"
+                                                        disabled={!log.data_before && !log.action.includes('CREATE') && !log.action.includes('INSERT')}
+                                                        className="px-3 py-1 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-xs font-bold transition-all flex items-center gap-1 w-fit disabled:opacity-30 disabled:cursor-not-allowed"
+                                                        title={!log.data_before && !log.action.includes('CREATE') ? "Undo not available (No snapshot)" : "Revert this action"}
                                                     >
                                                         <FiRotateCcw size={12} /> Reverse
                                                     </button>
