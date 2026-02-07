@@ -22,12 +22,69 @@ $statuses = file_exists($statusFile) ? json_decode(file_get_contents($statusFile
 // Define Task Logic (The "Code" part remains hardcoded for security, but config drives the metadata)
 $taskLogic = [
     'backup_full' => function () {
-        // Logic from backup.php
-        return "Backup generated successfully (Simulated).";
+        $pdo = getDbConnection();
+        $tables = [
+            'users',
+            'clients', // or customers
+            'stock',
+            'suppliers',
+            'vault_documents',
+            'tasks',
+            'memos',
+            'notifications',
+            'documents',
+            'document_items',
+            'invoice_items',
+            'settings',
+            'audit_logs',
+            'login_history',
+            'sequences'
+        ];
+
+        $backup = [
+            'metadata' => [
+                'generated_at' => date('Y-m-d H:i:s'),
+                'version' => '2.0',
+                'mode' => 'cron'
+            ],
+            'data' => []
+        ];
+
+        foreach ($tables as $table) {
+            try {
+                $check = $pdo->query("SHOW TABLES LIKE '$table'");
+                if ($check->rowCount() > 0) {
+                    $stmt = $pdo->query("SELECT * FROM `$table`"); // strict backticks
+                    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $backup['data'][$table] = $rows;
+                }
+            } catch (Exception $e) {
+                // Ignore missing tables
+            }
+        }
+
+        $backupDir = __DIR__ . '/../../backups';
+        if (!is_dir($backupDir))
+            mkdir($backupDir, 0755, true);
+
+        $filename = 'system_backup_' . date('Y-m-d_H-i-s') . '.json';
+        $path = $backupDir . '/' . $filename;
+
+        if (file_put_contents($path, json_encode($backup, JSON_PRETTY_PRINT))) {
+            // cleanup old backups (keep last 7 days)
+            $files = glob($backupDir . '/*.json');
+            $now = time();
+            foreach ($files as $file) {
+                if ($now - filemtime($file) > 7 * 24 * 60 * 60) {
+                    unlink($file);
+                }
+            }
+            return "Backup created: $filename";
+        }
+        throw new Exception("Failed to write backup file.");
     },
     'optimize_db' => function () {
         $pdo = getDbConnection();
-        // Corrected 'invoices' to 'documents' and added other high-churn tables
         $tables = [
             'users',
             'documents',
@@ -40,32 +97,69 @@ $taskLogic = [
             'ticket_messages',
             'login_history',
             'notifications',
-            'settings'
+            'settings',
+            'sequences'
         ];
         $optimized = [];
         foreach ($tables as $t) {
             try {
-                $pdo->query("OPTIMIZE TABLE `$t`");
-                $optimized[] = $t;
+                $check = $pdo->query("SHOW TABLES LIKE '$t'");
+                if ($check->rowCount() > 0) {
+                    $pdo->query("OPTIMIZE TABLE `$t`");
+                    $optimized[] = $t;
+                }
             } catch (Exception $e) {
-                // Silently skip if table doesn't exist to prevent crash
             }
         }
         return "Optimized " . count($optimized) . " tables.";
     },
     'prune_logs' => function () {
         $logFile = ini_get('error_log');
-        if (file_exists($logFile)) {
+        if ($logFile && file_exists($logFile)) {
             if (filesize($logFile) > 5 * 1024 * 1024) {
                 file_put_contents($logFile, '');
                 return "Log file pruned.";
             }
             return "Log file small. Skipped.";
         }
-        return "No log file.";
+        return "No log file configuration found.";
     },
     'sync_sequences' => function () {
-        return "Sequences aligned.";
+        $pdo = getDbConnection();
+        $types = ['invoice' => 'INV', 'quotation' => 'QUO', 'proforma' => 'PRO'];
+        $todaysDatePart = date('md'); // e.g., 0207
+        $updates = [];
+
+        foreach ($types as $type => $prefix) {
+            // pattern: PREFIX-MMDD-SEQ
+            // We want the max sequence for TODAY
+            $sql = "SELECT id FROM documents WHERE type = ? AND id LIKE ? ORDER BY id DESC LIMIT 1";
+            $like = "{$prefix}-{$todaysDatePart}-%";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$type, $like]);
+            $lastId = $stmt->fetchColumn();
+
+            if ($lastId) {
+                // Parse "INV-0207-05" -> 5
+                $parts = explode('-', $lastId);
+                if (count($parts) === 3) {
+                    $maxSeq = (int) $parts[2];
+
+                    // Update sequences table if needed
+                    $seqStmt = $pdo->prepare("SELECT current_value FROM sequences WHERE type = ?");
+                    $seqStmt->execute([$type]);
+                    $curr = $seqStmt->fetchColumn();
+
+                    if ($curr !== false && $maxSeq > $curr) {
+                        $upd = $pdo->prepare("UPDATE sequences SET current_value = ? WHERE type = ?");
+                        $upd->execute([$maxSeq, $type]);
+                        $updates[] = "$type set to $maxSeq";
+                    }
+                }
+            }
+        }
+        return empty($updates) ? "Sequences aligned." : "Syned: " . implode(', ', $updates);
     }
 ];
 

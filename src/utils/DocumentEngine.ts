@@ -17,7 +17,12 @@ export class DocumentEngine {
         item: InvoiceItem
     ): { lineTotal: number } {
         const discount = item.discount || 0;
-        const lineTotal = (item.unitPrice * item.quantity) - discount;
+        let lineTotal;
+        if (discount > 0) {
+            lineTotal = (item.unitPrice * item.quantity) - discount;
+        } else {
+            lineTotal = item.unitPrice * item.quantity;
+        }
         return { lineTotal };
     }
 
@@ -43,7 +48,13 @@ export class DocumentEngine {
             }
         }
 
-        const taxableAmount = Math.max(0, subtotal - totalDiscount);
+        let taxableAmount: number;
+        if (totalDiscount > 0) {
+            taxableAmount = Math.max(0, subtotal - totalDiscount);
+        } else {
+            taxableAmount = subtotal;
+        }
+
         const taxAmount = includeTax ? (taxableAmount * taxRate) : 0;
         const grandTotal = taxableAmount + taxAmount;
 
