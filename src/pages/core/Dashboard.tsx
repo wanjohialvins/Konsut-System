@@ -50,7 +50,20 @@ interface DashboardData {
 
 // --- Shared Components ---
 
-const StatCard = ({ label, value, icon: Icon, color, bg, link, trend, onClick }: any) => (
+// --- Shared Components ---
+
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  link?: string;
+  trend?: string;
+  onClick?: () => void;
+}
+
+const StatCard = ({ label, value, icon: Icon, color, bg, link, trend, onClick }: StatCardProps) => (
   <div onClick={onClick} className={`block group ${onClick ? 'cursor-pointer' : ''}`}>
     <Link to={onClick ? '#' : (link || "#")} className="block relative">
       <div className="bg-white dark:bg-midnight-900 p-6 rounded-3xl shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-midnight-800 relative overflow-hidden transition-all duration-300 hover:translate-y-[-4px]">
@@ -69,7 +82,13 @@ const StatCard = ({ label, value, icon: Icon, color, bg, link, trend, onClick }:
   </div>
 );
 
-const SectionHeader = ({ title, icon: Icon, color = "text-gray-900" }: any) => (
+interface SectionHeaderProps {
+  title: string;
+  icon?: React.ElementType;
+  color?: string;
+}
+
+const SectionHeader = ({ title, icon: Icon, color = "text-gray-900" }: SectionHeaderProps) => (
   <h2 className={`text-sm font-black ${color} dark:text-white mb-6 flex items-center gap-2 uppercase tracking-widest`}>
     {Icon && <Icon className="opacity-80" />} {title}
   </h2>
@@ -77,7 +96,13 @@ const SectionHeader = ({ title, icon: Icon, color = "text-gray-900" }: any) => (
 
 // --- Role Dashboards ---
 
-const CEODashboard = ({ data, chartMetric, setChartMetric }: any) => {
+interface CEODashboardProps {
+  data: DashboardData;
+  chartMetric: string;
+  setChartMetric: (m: string) => void;
+}
+
+const CEODashboard = ({ data, chartMetric, setChartMetric }: CEODashboardProps) => {
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">

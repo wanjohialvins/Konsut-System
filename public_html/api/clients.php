@@ -206,6 +206,8 @@ switch ($method) {
             $data['kraPin'],
             $data['id']
         ]);
+        // Update updated_at
+        $pdo->prepare("UPDATE clients SET updated_at = NOW() WHERE id = ?")->execute([$data['id']]);
         sendResponse(['success' => true]);
         break;
 

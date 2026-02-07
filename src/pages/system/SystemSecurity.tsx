@@ -10,6 +10,7 @@ const SystemSecurity = () => {
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [confirmWipe, setConfirmWipe] = useState("");
     const [activeUsers, setActiveUsers] = useState<any[]>([]);
+    const [tableStats, setTableStats] = useState<{ name: string; rows_count: number; size: number }[]>([]);
     const [initialLoading, setInitialLoading] = useState(true);
 
     React.useEffect(() => {
@@ -23,9 +24,12 @@ const SystemSecurity = () => {
                 }
 
                 // Load active users
-                // Load active users
                 const userRes = await api.admin.getActiveUsers();
                 if (userRes.success && Array.isArray(userRes.users)) setActiveUsers(userRes.users);
+
+                // Load DB stats
+                const stats = await api.settings.getDatabaseStats();
+                if (Array.isArray(stats)) setTableStats(stats);
 
             } catch {
                 console.error("Failed to sync settings");
@@ -36,7 +40,7 @@ const SystemSecurity = () => {
         loadSettings();
     }, []);
 
-    const runAction = async (action: string) => {
+    const runAction = async (action: string, payload?: any) => {
         setLoading(true);
         try {
             if (action === 'nuke') {
@@ -55,6 +59,12 @@ const SystemSecurity = () => {
             } else if (action === 'purge-logs') {
                 const res: any = await api.admin.runAction('purge-logs');
                 showToast('success', res.message || 'Logs purged');
+            } else if (action === 'truncate') {
+                await api.settings.truncateTable(payload);
+                showToast('success', `Table ${payload} wiped.`);
+                // Refresh stats
+                const stats = await api.settings.getDatabaseStats();
+                if (Array.isArray(stats)) setTableStats(stats);
             }
         } catch (e: unknown) {
             const errorMsg = e instanceof Error ? e.message : 'Execution failure';
@@ -159,6 +169,53 @@ const SystemSecurity = () => {
                                 Execute
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                {/* Tactical Wipe Section */}
+                <div className="bg-white dark:bg-midnight-900 p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-midnight-800 mt-8">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-6">
+                        <FiTrash2 className="text-orange-500" />
+                        Tactical Data Wipe
+                    </h3>
+                    <p className="text-gray-500 text-sm mb-6">Selectively clear individual tables. <span className="font-bold text-red-500">Warning: Actions are irreversible.</span></p>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-gray-100 dark:border-midnight-800 text-xs uppercase tracking-wider text-gray-400">
+                                    <th className="p-4">Table Name</th>
+                                    <th className="p-4">Rows</th>
+                                    <th className="p-4">Size (KB)</th>
+                                    <th className="p-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 dark:divide-midnight-800">
+                                {tableStats.map((table) => (
+                                    <tr key={table.name} className="hover:bg-gray-50 dark:hover:bg-midnight-950 transition-colors">
+                                        <td className="p-4 font-mono text-sm text-gray-700 dark:text-gray-300">{table.name}</td>
+                                        <td className="p-4 text-sm text-gray-500">{table.rows_count}</td>
+                                        <td className="p-4 text-sm text-gray-500">{Math.round(table.size / 1024)} KB</td>
+                                        <td className="p-4 text-right">
+                                            {['users', 'auth_tokens'].includes(table.name) ? (
+                                                <span className="text-xs font-bold text-gray-300 italic px-3 py-1">Protected</span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(`Are you ABSOLUTELY SURE you want to wipe table '${table.name}'? This cannot be undone.`)) {
+                                                            runAction('truncate', table.name);
+                                                        }
+                                                    }}
+                                                    className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 text-xs font-bold uppercase rounded hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                                                >
+                                                    Wipe
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

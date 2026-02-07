@@ -3,40 +3,63 @@
  */
 
 export const parseCSV = (text: string): Record<string, string>[] => {
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) return [];
 
-    // Parse headers
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+    // Robust CSV functions
+    const parseLine = (line: string) => {
+        const row: string[] = [];
+        let cur = '';
+        let inQuote = false;
+        for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            const next = line[i + 1];
+            if (inQuote) {
+                if (c === '"' && next === '"') {
+                    cur += '"';
+                    i++;
+                } else if (c === '"') {
+                    inQuote = false;
+                } else {
+                    cur += c;
+                }
+            } else {
+                if (c === '"') {
+                    inQuote = true;
+                } else if (c === ',') {
+                    row.push(cur.trim());
+                    cur = '';
+                } else {
+                    cur += c;
+                }
+            }
+        }
+        row.push(cur.trim());
+        return row;
+    };
 
-    const result = [];
+    // Parse headers
+    const headers = parseLine(lines[0]).map(h => h.toLowerCase());
+
+    const result: Record<string, string>[] = [];
 
     // Parse rows
     for (let i = 1; i < lines.length; i++) {
-        // Handle quotes simply (doesn't handle newlines in quotes, but sufficient for simple data)
-        const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-
-        if (row.length === 0) continue;
+        const row = parseLine(lines[i]);
+        if (row.length === 0 || (row.length === 1 && !row[0])) continue;
 
         const obj: Record<string, string> = {};
         headers.forEach((h, index) => {
-            let val = row[index] ? row[index].trim().replace(/^"|"$/g, '') : '';
-            // Try convert to number if looks like one
-            if (!isNaN(Number(val)) && val !== '') {
-                // Keep phone numbers as strings? For stock, they are usually numbers.
-                // But for SKU/ID it might be mixed.
-                // We'll trust the consumer to cast.
-            }
+            const val = row[index] || '';
             obj[h] = val;
         });
-
         result.push(obj);
     }
 
     return result;
 };
 
-export const generateCSV = (data: Record<string, any>[], headers?: string[]): string => {
+export const generateCSV = (data: Record<string, unknown>[], headers?: string[]): string => {
     if (!data.length) return '';
     const head = headers || Object.keys(data[0]);
     const rows = data.map(obj =>

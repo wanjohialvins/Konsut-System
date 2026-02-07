@@ -100,3 +100,6 @@ __pycache__/
 .eslintcache
 .stylelintcache
 node_modules/.cache/
+
+# User created folder
+online/

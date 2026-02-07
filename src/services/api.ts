@@ -189,6 +189,8 @@ export const api = {
         get: () => request<any>('settings.php'),
         save: (data: Record<string, any>) => request<{ success: boolean }>('settings.php', { method: 'POST', body: JSON.stringify(data) }),
         clearAll: () => request<{ success: boolean }>('settings.php?action=clear', { method: 'DELETE' }),
+        getDatabaseStats: () => request<{ name: string; rows_count: number; size: number }[]>('settings.php?action=database_stats', { method: 'POST' }),
+        truncateTable: (table: string) => request<{ success: boolean }>('settings.php?action=truncate_table', { method: 'POST', body: JSON.stringify({ table }) }),
     },
     users: {
         getAll: () => request<User[]>('users.php'),
