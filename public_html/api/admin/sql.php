@@ -15,14 +15,30 @@ if (empty($sql)) {
     sendError('Query is empty', 400);
 }
 
+$isDestructive = $input['destructive'] ?? false;
+
 // Security: Read-Only Enforcement
 $forbiddenKeywords = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', 'TRUNCATE', 'GRANT', 'REVOKE', 'CREATE', 'REPLACE'];
 $upperSql = strtoupper($sql);
 
-foreach ($forbiddenKeywords as $keyword) {
-    // Check for keyword surrounded by word boundaries to avoid false positives (e.g. "UPDATE_DATE" column)
-    if (preg_match('/\b' . $keyword . '\b/', $upperSql)) {
-        sendError("Security Alert: Command '$keyword' is not allowed in this console.", 403);
+if ($isDestructive) {
+    // High-level permission check for destructive actions
+    requirePermission('system_control');
+
+    // Audit execution
+    $userId = getRequestHeader('X-User-Id');
+    if ($userId) {
+        $pdo = getDbConnection();
+        $stmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())");
+        $stmt->execute([$userId, 'SQL_EXEC_DESTRUCTIVE', "Query: $sql"]);
+    }
+} else {
+    // Normal Read-Only check
+    foreach ($forbiddenKeywords as $keyword) {
+        // Check for keyword surrounded by word boundaries to avoid false positives (e.g. "UPDATE_DATE" column)
+        if (preg_match('/\b' . $keyword . '\b/', $upperSql)) {
+            sendError("Security Alert: Command '$keyword' is not allowed in Read-Only mode. Enable Destructive Mode to execute.", 403);
+        }
     }
 }
 

@@ -158,7 +158,7 @@ const CompanyProfile = () => {
 
                     <div className="bg-brand-600 text-white rounded-[2.5rem] p-10 shadow-2xl shadow-brand-500/20 relative overflow-hidden group">
                         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full transition-transform group-hover:scale-150 duration-700"></div>
-                        <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Web Identity</p>
+                        <a href="https://www.konsut.co.ke" target="_blank" rel="noopener noreferrer" className="block text-xs font-black uppercase tracking-widest opacity-80 mb-2 hover:opacity-100 hover:text-white transition-opacity">Web Identity</a>
                         <div className="flex items-center gap-4">
                             <a
                                 href={company.website?.startsWith('http') ? company.website : `https://${company.website}`}

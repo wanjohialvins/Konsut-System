@@ -27,6 +27,7 @@ const AdminToolbox = () => {
     const [sqlResults, setSqlResults] = useState<any[] | null>(null);
     const [sqlMessage, setSqlMessage] = useState("");
     const [sqlError, setSqlError] = useState("");
+    const [destructiveMode, setDestructiveMode] = useState(false);
 
     // Config Editor State
     const [config, setConfig] = useState<Record<string, string>>({});
@@ -132,7 +133,7 @@ const AdminToolbox = () => {
         setSqlMessage("");
         setSqlError("");
         try {
-            const res = await api.admin.executeSql(sqlQuery);
+            const res = await api.admin.executeSql(sqlQuery, destructiveMode);
             if (res.success) {
                 if (res.results) {
                     setSqlResults(res.results);
@@ -682,22 +683,38 @@ const AdminToolbox = () => {
                             <h3 className="text-xl font-bold text-white flex items-center gap-3">
                                 <FiDatabase className="text-indigo-400" /> RAW SQL Executor
                             </h3>
-                            <button
-                                onClick={handleRunSql}
-                                disabled={loading}
-                                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold uppercase tracking-widest text-xs transition-colors disabled:opacity-50"
-                            >
-                                {loading ? 'Executing...' : 'Run Query'}
-                            </button>
+                            <div className="flex items-center gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={destructiveMode}
+                                            onChange={e => setDestructiveMode(e.target.checked)}
+                                        />
+                                        <div className="w-10 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </div>
+                                    <span className={`text-xs font-bold uppercase tracking-wider ${destructiveMode ? 'text-red-500 animate-pulse' : 'text-slate-500'}`}>
+                                        Destructive Mode
+                                    </span>
+                                </label>
+                                <button
+                                    onClick={handleRunSql}
+                                    disabled={loading}
+                                    className={`px-6 py-2 rounded-lg font-bold uppercase tracking-widest text-xs transition-colors disabled:opacity-50 ${destructiveMode ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                                >
+                                    {loading ? 'Executing...' : destructiveMode ? 'RUN DESTRUCTIVE' : 'Run Query'}
+                                </button>
+                            </div>
                         </div>
                         <textarea
                             value={sqlQuery}
                             onChange={e => setSqlQuery(e.target.value)}
-                            placeholder="SELECT * FROM users..."
-                            className="w-full h-40 bg-slate-950 text-emerald-400 font-mono text-sm p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-colors placeholder-slate-700 mb-2"
+                            placeholder={destructiveMode ? "INSERT INTO users..." : "SELECT * FROM users..."}
+                            className={`w-full h-40 bg-slate-950 text-emerald-400 font-mono text-sm p-4 rounded-xl border outline-none transition-colors placeholder-slate-700 mb-2 ${destructiveMode ? 'border-red-900/50 focus:border-red-500' : 'border-slate-800 focus:border-indigo-500'}`}
                         />
                         <p className="text-slate-500 text-xs">
-                            <span className="font-bold text-amber-500">WARNING:</span> Direct database access. Only SELECT/SHOW commands are allowed. Data modification is blocked by security protocol.
+                            <span className={`font-bold ${destructiveMode ? 'text-red-500' : 'text-amber-500'}`}>WARNING:</span> {destructiveMode ? 'YOU ARE IN DESTRUCTIVE MODE. CHANGES ARE PERMANENT.' : 'Direct database access. Only SELECT/SHOW commands are allowed. Enable Destructive Mode to write.'}
                         </p>
 
                         {(sqlMessage || sqlError) && (

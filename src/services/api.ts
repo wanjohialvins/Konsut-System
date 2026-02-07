@@ -235,7 +235,7 @@ export const api = {
             return request<any>(query);
         },
         getAnalyticsStats: (days: number) => request<any>(`admin/analytics_stats.php?days=${days}`),
-        executeSql: (query: string) => request<{ success: boolean; results?: any[]; count?: number; message?: string; error?: string }>('admin/sql.php', { method: 'POST', body: JSON.stringify({ query }) }),
+        executeSql: (query: string, destructive: boolean = false) => request<{ success: boolean; results?: any[]; count?: number; message?: string; error?: string }>('admin/sql.php', { method: 'POST', body: JSON.stringify({ query, destructive }) }),
         getCrons: () => request<{ tasks: any[] }>('admin/crons.php'),
         runCron: (taskId: string) => request<{ success: boolean; message: string; last_run: string }>('admin/crons.php?action=run', { method: 'POST', body: JSON.stringify({ task_id: taskId }) }),
         updateCronSchedule: (taskId: string, schedule: string, frequency: string, enabled: boolean) => request<{ success: boolean; message: string }>('admin/crons.php?action=update_schedule', { method: 'POST', body: JSON.stringify({ task_id: taskId, schedule, frequency, enabled }) }),
