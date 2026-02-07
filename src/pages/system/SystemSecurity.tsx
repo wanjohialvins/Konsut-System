@@ -3,9 +3,11 @@ import { FiLock, FiAlertTriangle, FiTrash2 } from "react-icons/fi";
 import { SecuritySkeleton } from "../../components/skeletons/PageSkeletons";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { useModal } from "../../contexts/ModalContext";
 
 const SystemSecurity = () => {
     const { showToast } = useToast();
+    const { showConfirm, showPrompt } = useModal();
     const [loading, setLoading] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [confirmWipe, setConfirmWipe] = useState("");
@@ -201,9 +203,32 @@ const SystemSecurity = () => {
                                                 <span className="text-xs font-bold text-gray-300 italic px-3 py-1">Protected</span>
                                             ) : (
                                                 <button
-                                                    onClick={() => {
-                                                        if (confirm(`Are you ABSOLUTELY SURE you want to wipe table '${table.name}'? This cannot be undone.`)) {
+                                                    onClick={async () => {
+                                                        // Step 1: Initial Warning
+                                                        const confirmed1 = await showConfirm(
+                                                            `WARNING: You are about to wipe the '${table.name}' table. This data will be lost FOREVER.`,
+                                                            { title: 'Irreversible Action', confirmLabel: 'I Understand' }
+                                                        );
+                                                        if (!confirmed1) return;
+
+                                                        // Step 2: Confirmation
+                                                        const confirmed2 = await showConfirm(
+                                                            `Are you absolutely sure? This could break the system if linked data exists.`,
+                                                            { title: 'Last Chance', confirmLabel: 'Yes, Wipe It', cancelLabel: 'Go Back' }
+                                                        );
+                                                        if (!confirmed2) return;
+
+                                                        // Step 3: Typo Verification
+                                                        const input = await showPrompt(
+                                                            `Type '${table.name}' to confirm deletion:`,
+                                                            '',
+                                                            { title: 'Final Verification', confirmLabel: 'NUKE IT' }
+                                                        );
+
+                                                        if (input === table.name) {
                                                             runAction('truncate', table.name);
+                                                        } else if (input !== null) {
+                                                            showToast('error', 'Table name mismatch. Action cancelled.');
                                                         }
                                                     }}
                                                     className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 text-xs font-bold uppercase rounded hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
