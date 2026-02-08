@@ -1,30 +1,73 @@
-import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { parsePermissions } from '../utils/permissionUtils';
 import { normalizeUser } from '../utils/userUtils';
 import { api } from '../services/api';
-import type { User, UserRole, AuthContextType } from "../types/types";
+import type { User, AuthContextType } from "../types/types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'konsut_system_auth';
+const INACTIVITY_LIMIT = 24 * 60 * 60 * 1000; // 24 hours
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const lastActivity = useRef<number>(Date.now());
+    const navigate = useNavigate();
 
+    // 1. Load User from SessionStorage (Cleared on Browser Close)
     useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = sessionStorage.getItem(STORAGE_KEY);
         if (stored) {
             try {
-                setUser(JSON.parse(stored));
+                const parsed = JSON.parse(stored);
+                setUser(parsed);
+                // Refresh activity on load
+                lastActivity.current = Date.now();
             } catch (error) {
                 console.error("Auth state recovery failed:", error);
-                localStorage.removeItem(STORAGE_KEY);
+                sessionStorage.removeItem(STORAGE_KEY);
             }
         }
         setIsLoading(false);
     }, []);
+
+    const logout = useCallback(() => {
+        sessionStorage.removeItem(STORAGE_KEY);
+        setUser(null);
+        navigate('/login');
+    }, [navigate]);
+
+    // 2. Inactivity Tracker
+    useEffect(() => {
+        if (!user) return; // Only track if logged in
+
+        const handleActivity = () => {
+            lastActivity.current = Date.now();
+        };
+
+        // Throttled listeners could be better, but native events are okay for now
+        window.addEventListener('mousemove', handleActivity);
+        window.addEventListener('keydown', handleActivity);
+        window.addEventListener('click', handleActivity);
+        window.addEventListener('scroll', handleActivity);
+
+        const interval = setInterval(() => {
+            if (Date.now() - lastActivity.current > INACTIVITY_LIMIT) {
+                console.warn("User inactive for > 24 hours. Logging out.");
+                logout();
+            }
+        }, 60 * 1000); // Check every minute
+
+        return () => {
+            window.removeEventListener('mousemove', handleActivity);
+            window.removeEventListener('keydown', handleActivity);
+            window.removeEventListener('click', handleActivity);
+            window.removeEventListener('scroll', handleActivity);
+            clearInterval(interval);
+        };
+    }, [user, logout]);
+
 
     const login = async (username: string, password: string): Promise<{ success: boolean; forceReset?: boolean; message?: string }> => {
         try {
@@ -32,7 +75,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (response.success && response.user) {
                 const userData = normalizeUser({ ...response.user, token: response.token });
                 setUser(userData);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+                lastActivity.current = Date.now();
                 return { success: true, forceReset: response.forceReset, message: response.message };
             }
             return { success: false, message: response.message || 'Invalid credentials' };
@@ -49,7 +93,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (response.success && response.user) {
                 const userData = normalizeUser({ ...response.user, token: response.token });
                 setUser(userData);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+                lastActivity.current = Date.now();
                 return { success: true, forceReset: response.forceReset, ...response };
             }
             return { success: false, message: response.message || 'Invalid recovery phrase' };
@@ -60,19 +105,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const navigate = useNavigate();
-
-    const logout = useCallback(() => {
-        localStorage.removeItem(STORAGE_KEY);
-        setUser(null);
-        navigate('/login');
-    }, [navigate]);
-
     const updateUser = (data: Partial<User>) => {
         if (!user) return;
         const updated = { ...user, ...data };
         setUser(updated);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     };
 
     const lastRefreshRef = React.useRef<number>(0);
@@ -88,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (self) {
                 const updatedUser = normalizeUser({ ...user, ...self });
                 setUser(updatedUser);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
             }
         } catch (error) {
             console.error("Failed to refresh user auth state", error);
@@ -99,15 +136,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const handleUpdate = () => refreshUser();
         const handleForceLogout = () => {
             console.warn("Session expired (Force Logout initiated)");
-            logout(); // Clear state and redirect to login
-            // detailed message is handled by api.ts error or we can show toast here if we had toast access
+            logout();
         };
 
         window.addEventListener('permission-update', handleUpdate);
         window.addEventListener('force-logout', handleForceLogout);
         window.addEventListener('focus', handleUpdate);
 
-        // Poll every 30 seconds for real-time permission updates
         const interval = setInterval(handleUpdate, 30 * 1000);
 
         return () => {

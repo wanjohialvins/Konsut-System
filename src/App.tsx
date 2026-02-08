@@ -51,12 +51,16 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import AccessDenied from "./pages/core/AccessDenied";
 
+import { useVersionCheck } from "./hooks/useVersionCheck";
+
 /**
  * Main App Component
  * Initializes theme, provides global context (Toast, Error, Auth, Network)
  * and sets up routing for all pages
  */
 const App = () => {
+  useVersionCheck();
+
   return (
     <ErrorBoundary>
       <Router>

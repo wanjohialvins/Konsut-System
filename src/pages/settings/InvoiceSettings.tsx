@@ -1,4 +1,3 @@
-// src/pages/settings/InvoiceSettings.tsx
 /**
  * Invoice Configuration Engine
  * 
