@@ -1,3 +1,15 @@
+// src/pages/settings/CompanyProfile.tsx
+/**
+ * Company Profile Settings Page
+ * 
+ * Manages the organization's identity and contact information.
+ * 
+ * Features:
+ * - Logo management
+ * - Official address and contact details
+ * - Tax/PIN registration
+ * - Web identity configuration
+ */
 import React, { useState, useEffect, useMemo } from "react";
 import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText } from "react-icons/fi";
 import logoUrl from '../../assets/logo.jpg';
@@ -6,6 +18,10 @@ import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
+/**
+ * CompanyProfile Component.
+ * Form for editing the main business details used on invoices.
+ */
 const CompanyProfile = () => {
     const { showToast } = useToast();
     const { user } = useAuth();

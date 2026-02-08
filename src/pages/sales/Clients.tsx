@@ -76,6 +76,12 @@ const stringToColor = (str: string) => {
 /*                                Component                                   */
 /* -------------------------------------------------------------------------- */
 
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Main Clients Component.
+ * Displays client directory with search, filtering, and management capabilities.
+ */
 const Clients: React.FC = () => {
   const { showToast } = useToast();
   const { user } = useAuth();

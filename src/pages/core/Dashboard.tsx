@@ -206,7 +206,10 @@ const Dashboard: React.FC = () => {
   // Protected Component Guard
   if (!user) return <DashboardSkeleton />;
 
-  // New States for v2 Features
+  /**
+   * Loads dashboard statistics from the backend.
+   * Handles date filtering and error states.
+   */
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [chartMetric, setChartMetric] = useState('revenue');
   const dashboardRef = useRef<HTMLDivElement>(null);

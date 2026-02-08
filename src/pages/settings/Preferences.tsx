@@ -1,3 +1,15 @@
+// src/pages/settings/Preferences.tsx
+/**
+ * User Preferences Settings Page
+ * 
+ * Allows users to customize their interface experience.
+ * 
+ * Features:
+ * - Theme selection (Light/Dark)
+ * - UI Density control (Compact/Spacious)
+ * - Accent Color customization
+ * - Real-time preview of changes
+ */
 import React, { useState, useEffect } from "react";
 import { FiSliders, FiSun, FiMoon, FiCheckCircle } from "react-icons/fi";
 import { useTheme } from "../../hooks/useTheme";
@@ -5,6 +17,10 @@ import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { InterfaceSkeleton } from "../../components/skeletons/PageSkeletons";
 
+/**
+ * Preferences Component.
+ * Renders the UI for managing user-specific theme and interface settings.
+ */
 const Preferences = () => {
     const { theme, toggleTheme, uiDensity, setUiDensity, accentColor, setAccentColor } = useTheme();
 

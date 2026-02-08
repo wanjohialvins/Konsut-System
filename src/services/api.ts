@@ -198,7 +198,7 @@ export const api = {
         create: (data: User) => request<{ success: boolean }>('users.php', { method: 'POST', body: JSON.stringify(data) }),
         update: (data: User) => request<{ success: boolean }>('users.php', { method: 'PUT', body: JSON.stringify(data) }),
         updateSelf: (data: Partial<User>) => request<{ success: boolean }>('users.php?action=update_self', { method: 'PUT', body: JSON.stringify(data) }),
-        updateSelf: (data: Partial<User>) => request<{ success: boolean }>('users.php?action=update_self', { method: 'PUT', body: JSON.stringify(data) }),
+
         getPreferences: () => request<{ success: boolean; preferences: any }>('users/preferences.php'),
         updatePreferences: (data: any) => request<{ success: boolean; preferences: any }>('users/preferences.php', { method: 'POST', body: JSON.stringify({ preferences: data }) }),
         delete: (id: string) => request<{ success: boolean }>(`users.php?id=${id}`, { method: 'DELETE' }),

@@ -1,3 +1,16 @@
+// src/pages/auth/Login.tsx
+/**
+ * Authentication Login Page
+ * 
+ * Entry point for the application. Handles user authentication via
+ * username/password and provides access to password recovery protocols.
+ * 
+ * Features:
+ * - Secure login form with validation
+ * - Password recovery (Secret Protocol & Public Request)
+ * - "Dark Mode" aware UI
+ * - Navigation to dashboard upon success
+ */
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';

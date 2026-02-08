@@ -32,6 +32,12 @@ import { SmartTableToolbar } from "../../components/ui/SmartTableToolbar";
 import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
 
 // --- Constants ---
+// --- Constants ---
+
+/**
+ * Main Invoices Component.
+ * Renders the list of invoices/quotations/proformas with filtering and actions.
+ */
 const Invoices = () => {
   const { showConfirm } = useModal();
   const navigate = useNavigate();

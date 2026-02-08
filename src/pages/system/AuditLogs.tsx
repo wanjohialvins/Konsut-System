@@ -1,3 +1,15 @@
+// src/pages/system/AuditLogs.tsx
+/**
+ * System Audit Log Viewer
+ * 
+ * Provides a searchable, filterable history of all system actions.
+ * 
+ * Features:
+ * - Immutable history of Create/Update/Delete actions
+ * - Data snapshot inspection (Before/After states)
+ * - Action Reversal (where applicable)
+ * - Security tracking (IP, User, Time)
+ */
 import { useState, useEffect } from 'react';
 import { FiRotateCcw, FiFilter, FiDownload, FiSearch, FiActivity, FiClock, FiArrowLeft, FiUser } from "react-icons/fi";
 import { PageHeaderSkeleton, TableSkeleton } from "../../components/skeletons/CommonSkeletons";
@@ -21,6 +33,10 @@ interface AuditLog {
     details?: string;
 }
 
+/**
+ * AuditLogs Component.
+ * Displays system audit trails with rollback capabilities.
+ */
 const AuditLogs = () => {
     const { showConfirm } = useModal();
     const { user } = useAuth();

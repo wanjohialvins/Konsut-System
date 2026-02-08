@@ -1,9 +1,25 @@
+// src/pages/settings/InvoiceSettings.tsx
+/**
+ * Invoice Configuration Engine
+ * 
+ * Controls the layout, content, and formulas for generated financial documents.
+ * 
+ * Features:
+ * - Financial formulas (Tax rates, Currency exchange)
+ * - PDF Layout controls (Page size, Orientation, Fonts)
+ * - Visibility toggles for document sections
+ * - Legal disclaimers and default terms
+ */
 import React, { useState, useEffect } from "react";
 import { FiLayout, FiSave, FiEye, FiSettings, FiCheckCircle, FiPercent, FiFileText } from "react-icons/fi";
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
 
+/**
+ * InvoiceSettings Component.
+ * Provides a comprehensive form to configure global invoice settings.
+ */
 const InvoiceSettings = () => {
     const { showToast } = useToast();
     const [saving, setSaving] = useState(false);

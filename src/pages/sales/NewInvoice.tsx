@@ -1,3 +1,16 @@
+// src/pages/sales/NewInvoice.tsx
+/**
+ * New Invoice / Edit Invoice Configuration Page
+ * 
+ * Handles the creation and modification of Invoices, Quotations, and Proformas.
+ * 
+ * Features:
+ * - Dynamic form based on document type
+ * - Client selection/creation
+ * - Item management (products/services)
+ * - Calculation engine (taxes, discounts, totals)
+ * - PDF Preview integration
+ */
 import { DocumentEngine } from "../../utils/DocumentEngine";
 import { SequenceManager } from "../../utils/SequenceManager";
 
@@ -63,6 +76,10 @@ const NewInvoice: React.FC = () => {
   const isEditing = !!editId;
 
   // --- Core State ---
+  /**
+   * Main form state for invoice creation.
+   * Includes loading status, active category, and document type.
+   */
   const [loading, setLoading] = useState<boolean>(false);
   const [activeCategory, setActiveCategory] = useState<Category>("products");
   const [activeDocumentType, setActiveDocumentType] = useState<InvoiceType>(() => {

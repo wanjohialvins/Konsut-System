@@ -1,3 +1,15 @@
+// src/pages/system/SystemData.tsx
+/**
+ * Data Core & System Management
+ * 
+ * Central hub for database integrity, backups, and scheduled tasks.
+ * 
+ * Features:
+ * - Database Backup & Restore (JSON Manifests)
+ * - Cron Task Management (Run/Monitor)
+ * - Registry Sync & Schema Refresh
+ * - Duplicate Data Cleanup
+ */
 import React, { useState, useCallback } from "react";
 import { FiDatabase, FiHardDrive, FiRefreshCcw, FiCopy, FiClock, FiPlay, FiCheckCircle, FiUploadCloud, FiRotateCcw, FiTrash2, FiFile } from "react-icons/fi";
 import { useDropzone } from 'react-dropzone';
@@ -6,6 +18,10 @@ import { useToast } from "../../contexts/ToastContext";
 import { useModal } from "../../contexts/ModalContext";
 import { DataCoreSkeleton } from "../../components/skeletons/PageSkeletons";
 
+/**
+ * SystemData Component.
+ * Admin interface for managing system data, backups, and maintenance tasks.
+ */
 const SystemData = () => {
     const { showToast } = useToast();
     const { showAlert, showConfirm } = useModal();
@@ -116,7 +132,7 @@ const SystemData = () => {
     const handleRestore = async (type: 'latest' | 'file' | 'upload', payload?: any) => {
         const confirmed = await showConfirm(
             "WARNING: This will OVERWRITE the current database with the backup data. Any data created after this backup will be LOST. Are you sure you want to proceed?",
-            { title: "System Restore Warning", confirmLabel: "YES, OVERWRITE DATABASE", cancelLabel: "Cancel", isDestructive: true }
+            { title: "System Restore Warning", confirmLabel: "YES, OVERWRITE DATABASE", cancelLabel: "Cancel" }
         );
 
         if (!confirmed) return;
