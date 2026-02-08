@@ -20,7 +20,7 @@ export const API_BASE_URL = getBaseUrl();
 
 
 const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-    const userJson = localStorage.getItem('konsut_system_auth');
+    const userJson = sessionStorage.getItem('konsut_system_auth');
     const user = userJson ? JSON.parse(userJson) : null;
 
     const headers = {
@@ -236,7 +236,7 @@ export const api = {
             formData.append('backup_file', file);
             // We need to manually construct headers for FormData upload to avoid Content-Type conflict
             // The browser sets the correct boundary automatically when body is FormData
-            const userJson = localStorage.getItem('konsut_system_auth');
+            const userJson = sessionStorage.getItem('konsut_system_auth');
             const user = userJson ? JSON.parse(userJson) : null;
             const headers: any = {};
             if (user) {
@@ -293,7 +293,7 @@ export const api = {
         getAll: () => request('vault.php'),
         add: (data: Record<string, any>) => request('vault.php', { method: 'POST', body: JSON.stringify(data) }),
         upload: (formData: FormData) => {
-            const token = localStorage.getItem('konsut_system_auth');
+            const token = sessionStorage.getItem('konsut_system_auth');
             const headers: any = {};
             if (token) {
                 const user = JSON.parse(token);

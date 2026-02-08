@@ -72,7 +72,7 @@ export const processQueue = async () => {
         try {
             // Re-import api to avoid circular dependency if possible, or use fetch directly
             // Using fetch directly to avoid recursion into api.ts offline logic
-            const token = localStorage.getItem('konsut_system_auth');
+            const token = sessionStorage.getItem('konsut_system_auth');
             const headers: HeadersInit = {
                 'Content-Type': 'application/json'
             };

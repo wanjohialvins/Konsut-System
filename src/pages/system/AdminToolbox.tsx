@@ -114,7 +114,7 @@ const AdminToolbox = () => {
             try {
                 const res = await api.auth.impersonate(user.id);
                 if (res.success && res.user) {
-                    localStorage.setItem('konsut_system_auth', JSON.stringify(res.user));
+                    sessionStorage.setItem('konsut_system_auth', JSON.stringify(res.user));
                     showToast('success', `Impersonating ${user.username}...`);
                     setTimeout(() => window.location.href = '/', 1000); // Reload to reset context
                 }
