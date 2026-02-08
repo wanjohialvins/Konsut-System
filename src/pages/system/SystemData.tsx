@@ -40,9 +40,15 @@ const SystemData = () => {
         setLoading(true);
         try {
             const res = await api.admin.getCrons();
-            if (res && res.tasks) setCrons(res.tasks);
+            if (res && Array.isArray(res.tasks)) {
+                setCrons(res.tasks);
+            } else {
+                console.warn("Invalid crons response:", res);
+                setCrons([]);
+            }
         } catch (e) {
             console.error("Failed to load crons", e);
+            setCrons([]);
         } finally {
             setLoading(false);
         }
@@ -51,9 +57,15 @@ const SystemData = () => {
     const loadBackups = async () => {
         try {
             const res = await api.admin.getBackups();
-            if (res && res.backups) setBackups(res.backups);
+            if (res && Array.isArray(res.backups)) {
+                setBackups(res.backups);
+            } else {
+                console.warn("Invalid backups response:", res);
+                setBackups([]);
+            }
         } catch (e) {
             console.error("Failed to load backups", e);
+            setBackups([]);
         }
     };
 
