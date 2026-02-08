@@ -41,7 +41,9 @@ const SystemData = () => {
         try {
             const res = await api.admin.getCrons();
             if (res && Array.isArray(res.tasks)) {
-                setCrons(res.tasks);
+                // Filter out invalid tasks to prevent render crashes
+                const validTasks = res.tasks.filter(t => t && typeof t === 'object' && t.id);
+                setCrons(validTasks);
             } else {
                 console.warn("Invalid crons response:", res);
                 setCrons([]);
@@ -58,7 +60,9 @@ const SystemData = () => {
         try {
             const res = await api.admin.getBackups();
             if (res && Array.isArray(res.backups)) {
-                setBackups(res.backups);
+                // Filter out invalid backups
+                const validBackups = res.backups.filter(b => b && typeof b === 'object' && b.filename);
+                setBackups(validBackups);
             } else {
                 console.warn("Invalid backups response:", res);
                 setBackups([]);
@@ -182,10 +186,12 @@ const SystemData = () => {
     });
 
     const formatBytes = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
+        if (typeof bytes !== 'number' || isNaN(bytes) || bytes === 0) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
+        // Safety check for index bound
+        if (i < 0 || i >= sizes.length) return bytes + ' Bytes';
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
