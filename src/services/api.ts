@@ -198,6 +198,9 @@ export const api = {
         create: (data: User) => request<{ success: boolean }>('users.php', { method: 'POST', body: JSON.stringify(data) }),
         update: (data: User) => request<{ success: boolean }>('users.php', { method: 'PUT', body: JSON.stringify(data) }),
         updateSelf: (data: Partial<User>) => request<{ success: boolean }>('users.php?action=update_self', { method: 'PUT', body: JSON.stringify(data) }),
+        updateSelf: (data: Partial<User>) => request<{ success: boolean }>('users.php?action=update_self', { method: 'PUT', body: JSON.stringify(data) }),
+        getPreferences: () => request<{ success: boolean; preferences: any }>('users/preferences.php'),
+        updatePreferences: (data: any) => request<{ success: boolean; preferences: any }>('users/preferences.php', { method: 'POST', body: JSON.stringify({ preferences: data }) }),
         delete: (id: string) => request<{ success: boolean }>(`users.php?id=${id}`, { method: 'DELETE' }),
         resetPassword: (id: string) => request<{ success: boolean }>(`users.php?id=${id}&action=reset_password`, { method: 'PATCH' }),
         getAssignable: () => request<User[]>('users.php?action=get_assignable'),
@@ -226,6 +229,38 @@ export const api = {
         markNotificationRead: (id: string) => request(`notifications.php?id=${id}`, { method: 'PUT' }),
         deleteNotification: (id: string) => request(`notifications.php?id=${id}`, { method: 'DELETE' }),
         backup: () => request<any>('admin/backup.php'),
+        getBackups: () => request<{ backups: { filename: string; size: number; date: string }[] }>('admin/restore.php'),
+        restoreBackup: (data: { filename?: string; restore_latest?: boolean }) => request<{ success: boolean; message: string }>('admin/restore.php', { method: 'POST', body: JSON.stringify(data) }),
+        uploadBackup: (file: File) => {
+            const formData = new FormData();
+            formData.append('backup_file', file);
+            // We need to manually construct headers for FormData upload to avoid Content-Type conflict
+            // The browser sets the correct boundary automatically when body is FormData
+            const userJson = localStorage.getItem('konsut_system_auth');
+            const user = userJson ? JSON.parse(userJson) : null;
+            const headers: any = {};
+            if (user) {
+                headers['Authorization'] = user.token ? `Bearer ${user.token}` : '';
+                headers['X-User-Id'] = user.id;
+                headers['X-User-Role'] = user.role;
+                headers['X-User-Permissions'] = JSON.stringify(user.permissions || []);
+            }
+
+            return fetch(`${API_BASE_URL}/admin/restore.php`, {
+                method: 'POST',
+                headers,
+                body: formData
+            }).then(async res => {
+                const text = await res.text();
+                try {
+                    const json = JSON.parse(text);
+                    if (!res.ok) throw new Error(json.error || json.message || 'Upload failed');
+                    return json;
+                } catch (e: any) {
+                    throw new Error(e.message || 'Server response was not JSON: ' + text);
+                }
+            });
+        },
         cleanupDuplicates: (type: 'all' | 'stock' | 'clients' = 'all', mode: 'commit' | 'dry_run' = 'commit') => request<{ merged: { stock: number; clients: number } }>(`admin/cleanup_duplicates.php?type=${type}&mode=${mode}`, { method: 'POST' }),
         getDashboardStats: (start?: string, end?: string) => {
             let query = 'admin/dashboard_stats.php';

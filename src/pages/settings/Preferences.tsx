@@ -49,7 +49,7 @@ const Preferences = () => {
             <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
-                        <div className="p-4 bg-amber-500 text-white rounded-[2rem] shadow-2xl shadow-amber-500/20">
+                        <div className="p-4 bg-brand-500 text-white rounded-[2rem] shadow-2xl shadow-brand-500/20">
                             <FiSliders size={32} />
                         </div>
                         Interface Experience

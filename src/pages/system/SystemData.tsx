@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { FiDatabase, FiHardDrive, FiRefreshCcw, FiCopy, FiClock, FiPlay, FiCheckCircle } from "react-icons/fi";
+import React, { useState, useCallback } from "react";
+import { FiDatabase, FiHardDrive, FiRefreshCcw, FiCopy, FiClock, FiPlay, FiCheckCircle, FiUploadCloud, FiRotateCcw, FiTrash2, FiFile } from "react-icons/fi";
+import { useDropzone } from 'react-dropzone';
 import { api } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { useModal } from "../../contexts/ModalContext";
@@ -12,9 +13,11 @@ const SystemData = () => {
     const [dryRun, setDryRun] = useState(true);
     const [crons, setCrons] = useState<any[]>([]);
     const [runningCron, setRunningCron] = useState<string | null>(null);
+    const [backups, setBackups] = useState<{ filename: string; size: number; date: string }[]>([]);
 
     React.useEffect(() => {
         loadCrons();
+        loadBackups();
     }, []);
 
     const loadCrons = async () => {
@@ -24,9 +27,17 @@ const SystemData = () => {
             if (res && res.tasks) setCrons(res.tasks);
         } catch (e) {
             console.error("Failed to load crons", e);
-            // Don't show toast on initial load error to avoid spam, just log
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadBackups = async () => {
+        try {
+            const res = await api.admin.getBackups();
+            if (res && res.backups) setBackups(res.backups);
+        } catch (e) {
+            console.error("Failed to load backups", e);
         }
     };
 
@@ -58,6 +69,7 @@ const SystemData = () => {
                 a.download = `system_backup_${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
                 showToast('success', 'Backup manifest downloaded');
+                loadBackups(); // Refresh list to show new server copy
             } else if (action === 'sync') {
                 const res = await api.admin.runAction('sync');
                 showToast('success', res.message || 'System synced');
@@ -101,12 +113,60 @@ const SystemData = () => {
         }
     };
 
+    const handleRestore = async (type: 'latest' | 'file' | 'upload', payload?: any) => {
+        const confirmed = await showConfirm(
+            "WARNING: This will OVERWRITE the current database with the backup data. Any data created after this backup will be LOST. Are you sure you want to proceed?",
+            { title: "System Restore Warning", confirmLabel: "YES, OVERWRITE DATABASE", cancelLabel: "Cancel", isDestructive: true }
+        );
+
+        if (!confirmed) return;
+
+        setLoading(true);
+        try {
+            let res;
+            if (type === 'latest') {
+                res = await api.admin.restoreBackup({ restore_latest: true });
+            } else if (type === 'file') {
+                res = await api.admin.restoreBackup({ filename: payload });
+            } else if (type === 'upload') {
+                res = await api.admin.uploadBackup(payload);
+            }
+
+            showToast('success', res?.message || 'System restored successfully');
+            setTimeout(() => window.location.reload(), 1500); // Reload to reflect changes
+        } catch (e: any) {
+            showToast('error', 'Restore failed: ' + e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        if (acceptedFiles.length > 0) {
+            handleRestore('upload', acceptedFiles[0]);
+        }
+    }, []);
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: { 'application/json': ['.json'] },
+        maxFiles: 1
+    });
+
+    const formatBytes = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
     return (
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto space-y-8 animate-fade-in">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
-                        <span className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-900/20">
+                        <span className="p-3 bg-brand-600 text-white rounded-2xl shadow-lg shadow-brand-900/20">
                             <FiDatabase size={24} />
                         </span>
                         Data Core
@@ -117,7 +177,7 @@ const SystemData = () => {
                 <div className="flex items-center gap-3 bg-white dark:bg-midnight-900 p-2 rounded-xl border border-gray-200 dark:border-midnight-800 self-start">
                     <button
                         onClick={() => setDryRun(true)}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${dryRun ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${dryRun ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         Verify Mode
                     </button>
@@ -137,6 +197,14 @@ const SystemData = () => {
                     </div>
                     <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">System Backup</h3>
                     <p className="text-sm text-gray-500">Export full JSON manifest of current system configuration.</p>
+                </button>
+
+                <button onClick={() => handleRestore('latest')} disabled={loading} className="group text-left bg-white dark:bg-midnight-900 p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-midnight-800 hover:border-red-500 transition-all">
+                    <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-[-45deg] transition-transform">
+                        <FiRotateCcw size={24} />
+                    </div>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Auto Restore Latest</h3>
+                    <p className="text-sm text-gray-500">Immediately rollback database to the most recent backup point.</p>
                 </button>
 
                 <button onClick={() => runAction('sync')} disabled={loading} className="group text-left bg-white dark:bg-midnight-900 p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-midnight-800 hover:border-brand-500 transition-all">
@@ -162,6 +230,61 @@ const SystemData = () => {
                     <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Schema Refresh</h3>
                     <p className="text-sm text-gray-500">Apply latest table definitions from database.sql patch file.</p>
                 </button>
+            </div>
+
+            {/* Restore Zone */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white dark:bg-midnight-900 p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-midnight-800">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-6">
+                        <FiRotateCcw className="text-red-500" /> Restore Points
+                    </h3>
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        {backups.map((backup) => (
+                            <div key={backup.filename} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-midnight-950 rounded-xl hover:bg-gray-100 dark:hover:bg-midnight-900 transition-colors group">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white dark:bg-midnight-900 rounded-lg text-gray-400">
+                                        <FiFile size={16} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{backup.filename}</h4>
+                                        <p className="text-xs text-gray-500">{backup.date} • {formatBytes(backup.size)}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleRestore('file', backup.filename)}
+                                    disabled={loading}
+                                    className="px-3 py-1.5 bg-white dark:bg-midnight-900 text-gray-600 dark:text-gray-400 text-xs font-bold rounded-lg border border-gray-200 dark:border-midnight-800 hover:border-red-500 hover:text-red-500 transition-colors"
+                                >
+                                    RESTORE
+                                </button>
+                            </div>
+                        ))}
+                        {backups.length === 0 && (
+                            <div className="text-center py-8 text-gray-400 italic">No valid backup snapshots found.</div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-midnight-900 p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-midnight-800 flex flex-col">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-6">
+                        <FiUploadCloud className="text-brand-500" /> Manual Upload
+                    </h3>
+                    <div
+                        {...getRootProps()}
+                        className={`flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-8 transition-colors cursor-pointer ${isDragActive ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/10' : 'border-gray-200 dark:border-midnight-800 hover:border-brand-400'}`}
+                    >
+                        <input {...getInputProps()} />
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors ${isDragActive ? 'bg-brand-200 text-brand-600' : 'bg-gray-100 dark:bg-midnight-950 text-gray-400'}`}>
+                            <FiUploadCloud size={32} />
+                        </div>
+                        <p className="text-center font-medium text-gray-900 dark:text-white mb-1">
+                            {isDragActive ? "Drop backup file here..." : "Click or drag backup file to restore"}
+                        </p>
+                        <p className="text-xs text-center text-gray-500">
+                            Updates database immediately. Supports .json system manifests.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Scheduled Tasks Section */}

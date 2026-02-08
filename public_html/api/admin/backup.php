@@ -47,12 +47,23 @@ foreach ($tables as $table) {
     }
 }
 
-// Special handling for settings to keep them as objects if they were JSON strings
-// The settings table stores 'setting_value' as JSON column or stringified JSON.
-// Current fetchAll returns raw DB values. Depending on DB driver, JSON columns might be returned as strings.
+
+// Save backup to server for restore functionality
+$backupDir = __DIR__ . '/../../logs/backups/';
+if (!is_dir($backupDir)) {
+    mkdir($backupDir, 0755, true);
+}
+
+$filename = 'system_backup_' . date('Y-m-d_H-i-s') . '.json';
+$filepath = $backupDir . $filename;
+
+$jsonContent = json_encode($backup, JSON_PRETTY_PRINT);
+if (file_put_contents($filepath, $jsonContent) === false) {
+    error_log("Failed to save backup to $filepath");
+}
 
 header('Content-Type: application/json');
-header('Content-Disposition: attachment; filename="system_backup_' . date('Y-m-d') . '.json"');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-echo json_encode($backup, JSON_PRETTY_PRINT);
+echo $jsonContent;
 ?>

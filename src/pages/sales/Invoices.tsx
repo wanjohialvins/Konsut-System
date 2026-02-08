@@ -301,7 +301,7 @@ const Invoices = () => {
   const getStatusColor = (status: InvoiceData["status"]) => {
     switch (status) {
       case "paid": return "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50";
-      case "sent": return "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50";
+      case "sent": return "text-brand-600 bg-brand-100 dark:bg-brand-900/30 dark:text-brand-400 border border-brand-200 dark:border-brand-900/50";
       case "draft": return "text-gray-600 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700";
       case "cancelled": return "text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-900/50";
       default: return "text-gray-600 bg-gray-100 dark:bg-gray-800 dark:text-gray-400";
@@ -579,7 +579,7 @@ const Invoices = () => {
                                     onClick={(e) => { e.stopPropagation(); convertDocument(inv, 'proforma'); setOpenMenuId(null); }}
                                     className="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-midnight-800 rounded-xl flex items-center gap-3 transition-colors"
                                   >
-                                    <FaExchangeAlt className="text-indigo-500" /> To Proforma
+                                    <FaExchangeAlt className="text-brand-500" /> To Proforma
                                   </button>
                                 )}
                                 {activeTab === 'proforma' && (
@@ -587,7 +587,7 @@ const Invoices = () => {
                                     onClick={(e) => { e.stopPropagation(); convertDocument(inv, 'invoice'); setOpenMenuId(null); }}
                                     className="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-midnight-800 rounded-xl flex items-center gap-3 transition-colors"
                                   >
-                                    <FaExchangeAlt className="text-indigo-500" /> To Invoice
+                                    <FaExchangeAlt className="text-brand-500" /> To Invoice
                                   </button>
                                 )}
 

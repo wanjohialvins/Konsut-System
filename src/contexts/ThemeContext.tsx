@@ -14,22 +14,22 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const initTheme = async () => {
             try {
-                // 1. Try to load from backend
-                const settings = await api.settings.get();
-                if (settings && settings.preferences) {
-                    const prefs = settings.preferences;
+                // 1. Try to load from backend (User Specific)
+                const response = await api.users.getPreferences();
+                if (response && response.success && response.preferences) {
+                    const prefs = response.preferences;
                     if (prefs.theme) setThemeState(prefs.theme);
                     if (prefs.uiDensity) setUiDensityState(prefs.uiDensity);
                     if (prefs.accentColor) setAccentColorState(prefs.accentColor);
 
                     applyDOMUpdates(prefs.theme || 'light', prefs.accentColor || 'electric', prefs.uiDensity || 'spacious');
 
-                    // Sync to local storage for backup
+                    // Sync to local storage for backup and faster subsequent loads
                     localStorage.setItem('userPreferences', JSON.stringify(prefs));
                     return;
                 }
-            } catch {
-                console.warn('Backend theme sync failed, falling back to local');
+            } catch (error) {
+                console.warn('Backend theme sync failed, falling back to local', error);
             }
 
             // 2. Fallback to localStorage
@@ -151,11 +151,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         root.style.setProperty('--brand-primary-rgb', hexToRgb(palette.primary));
     };
 
-    const savePreferences = (newPrefs: Record<string, any>) => {
+    const savePreferences = async (newPrefs: Record<string, any>) => {
         try {
+            // 1. Update Local Storage immediately (optimistic)
             const stored = localStorage.getItem('userPreferences');
             const current = stored ? JSON.parse(stored) : {};
-            localStorage.setItem('userPreferences', JSON.stringify({ ...current, ...newPrefs }));
+            const merged = { ...current, ...newPrefs };
+            localStorage.setItem('userPreferences', JSON.stringify(merged));
+
+            // 2. Sync to Backend
+            await api.users.updatePreferences(merged);
         } catch (err) {
             console.error('Failed to save preferences:', err);
         }

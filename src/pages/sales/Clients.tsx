@@ -446,7 +446,7 @@ const Clients: React.FC = () => {
           <div>
             <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Clients</h1>
             <p className="text-slate-500 dark:text-midnight-text-secondary mt-1 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
               Relationship Management
             </p>
           </div>
@@ -539,7 +539,7 @@ const Clients: React.FC = () => {
                     const avatarColor = stringToColor(client.name);
 
                     return (
-                      <tr key={client.id} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors group cursor-pointer" onClick={() => setSelectedClient(client)}>
+                      <tr key={client.id} className="hover:bg-brand-50/30 dark:hover:bg-brand-900/10 transition-colors group cursor-pointer" onClick={() => setSelectedClient(client)}>
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-sm shadow-md" style={{ backgroundColor: avatarColor }}>
@@ -581,7 +581,7 @@ const Clients: React.FC = () => {
                             <button onClick={e => { e.stopPropagation(); setSelectedClient(client); }} className="p-2 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 bg-gray-50 dark:bg-midnight-950 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors border border-gray-200 dark:border-midnight-800" title="View Details">
                               <FaEye />
                             </button>
-                            <button onClick={e => { e.stopPropagation(); navigate(`/new-invoice?clientId=${client.id}`); }} className="p-2 text-blue-400 hover:text-blue-600 bg-gray-50 dark:bg-midnight-950 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors border border-gray-200 dark:border-midnight-800" title="Create Invoice">
+                            <button onClick={e => { e.stopPropagation(); navigate(`/new-invoice?clientId=${client.id}`); }} className="p-2 text-brand-400 hover:text-brand-600 bg-gray-50 dark:bg-midnight-950 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors border border-gray-200 dark:border-midnight-800" title="Create Invoice">
                               <FaFileInvoice />
                             </button>
                           </div>
@@ -766,7 +766,7 @@ const Clients: React.FC = () => {
                             <td className="px-4 py-3 font-bold text-gray-900 dark:text-white text-xs">{(doc.grandTotal || 0).toLocaleString()}</td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black ${(doc.status || '').toLowerCase() === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                                (doc.status || '').toLowerCase() === 'pending' || (doc.status || '').toLowerCase() === 'sent' ? 'bg-blue-100 text-blue-700' :
+                                (doc.status || '').toLowerCase() === 'pending' || (doc.status || '').toLowerCase() === 'sent' ? 'bg-brand-100 text-brand-700' :
                                   (doc.status || '').toLowerCase() === 'overdue' ? 'bg-red-100 text-red-700' :
                                     'bg-gray-100 text-gray-600'
                                 }`}>{doc.status || 'draft'}</span>
@@ -781,7 +781,7 @@ const Clients: React.FC = () => {
                                 </button>
                                 <button
                                   onClick={() => navigate(`/new-invoice?id=${doc.id}&type=${doc.type}`)}
-                                  className="px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded transition-colors"
+                                  className="px-2 py-1 bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/20 dark:hover:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-[10px] font-bold uppercase rounded transition-colors"
                                 >
                                   Edit
                                 </button>

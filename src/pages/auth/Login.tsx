@@ -203,7 +203,7 @@ const Login: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowReset(true)}
-                                className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                                className="text-sm text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
                             >
                                 Forgot Password?
                             </button>
@@ -213,7 +213,7 @@ const Login: React.FC = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? 'Signing in...' : 'Sign In'}
                         {!loading && <FaSignInAlt />}
@@ -276,7 +276,7 @@ const Login: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
                     <div className="w-full max-w-md bg-white dark:bg-midnight-900 rounded-2xl shadow-2xl p-6 border border-gray-200 dark:border-midnight-800">
                         <div className="text-center mb-6">
-                            <div className="inline-block p-3 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 mb-3">
+                            <div className="inline-block p-3 rounded-full bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 mb-3">
                                 <FaTicketAlt size={24} />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Reset Password</h3>
@@ -298,7 +298,7 @@ const Login: React.FC = () => {
                                         type="text"
                                         value={resetIdentity}
                                         onChange={(e) => setResetIdentity(e.target.value)}
-                                        className="w-full p-3 border border-gray-200 dark:border-midnight-700 rounded-xl bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                        className="w-full p-3 border border-gray-200 dark:border-midnight-700 rounded-xl bg-gray-50 dark:bg-midnight-950 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all"
                                         placeholder="e.g. john.doe"
                                         required
                                         autoFocus

@@ -109,7 +109,7 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: CEODashboardProps) 
         <StatCard label="Total Revenue" value={`Ksh ${(data?.metrics?.totalRevenue || 0).toLocaleString()}`} icon={FaMoneyBillWave} color="text-brand-600" bg="bg-brand-50" link="/analytics" trend={`${(data?.metrics?.revenueGrowth || 0) > 0 ? '+' : ''}${data?.metrics?.revenueGrowth || 0}% vs prev`} />
         <StatCard label="Avg Order Value" value={`Ksh ${(data?.metrics?.averageOrderValue || 0).toLocaleString()}`} icon={FaChartLine} color="text-emerald-600" bg="bg-emerald-50" link="/analytics" />
         <StatCard label="Active Users" value={data?.metrics?.activeUsers || 0} icon={FaUsers} color="text-purple-600" bg="bg-purple-50" link="/users" />
-        <StatCard label="System Health" value={data?.databaseStatus || 'Unknown'} icon={FaServer} color="text-blue-600" bg="bg-blue-50" link="/system-health" />
+        <StatCard label="System Health" value={data?.databaseStatus || 'Unknown'} icon={FaServer} color="text-brand-600" bg="bg-brand-50" link="/system-health" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
@@ -170,7 +170,7 @@ const CEODashboard = ({ data, chartMetric, setChartMetric }: CEODashboardProps) 
               {(data?.auditLogs || []).map((log: any, i: number) => (
                 <div key={i} className="flex gap-4 py-3 border-b border-slate-800 hover:bg-white/5 px-2 rounded transition-colors items-center">
                   <span className="text-gray-500 whitespace-nowrap text-[10px]">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  <span className={`font-bold text-xs ${log.action.includes('LOGIN') ? 'text-emerald-400' : 'text-blue-400'}`}>{log.action}</span>
+                  <span className={`font-bold text-xs ${log.action.includes('LOGIN') ? 'text-emerald-400' : 'text-brand-400'}`}>{log.action}</span>
                   <span className="text-gray-400 truncate text-xs">{log.details}</span>
                 </div>
               ))}
@@ -187,7 +187,7 @@ const ManagerDashboard = ({ data }: { data: DashboardData }) => (
   <div className="space-y-6 md:space-y-8 animate-fade-in">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <StatCard label="Pending Orders" value={data?.metrics?.pendingInvoicesCount || 0} icon={FaFileInvoiceDollar} color="text-amber-600" bg="bg-amber-50" link="/invoices" />
-      <StatCard label="Team Tasks" value={data?.metrics?.pendingTasks || 0} icon={FaClipboardList} color="text-indigo-600" bg="bg-indigo-50" link="/tasks" />
+      <StatCard label="Team Tasks" value={data?.metrics?.pendingTasks || 0} icon={FaClipboardList} color="text-brand-600" bg="bg-brand-50" link="/tasks" />
       <StatCard label="Open Issues" value={data?.metrics?.openTickets || 0} icon={FaTicketAlt} color="text-rose-600" bg="bg-rose-50" link="/tickets" />
     </div>
     {/* Reuse CEO logic for charts if needed, or keeping simple */}

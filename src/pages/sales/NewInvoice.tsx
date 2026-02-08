@@ -1099,7 +1099,7 @@ const NewInvoice: React.FC = () => {
                   <button
                     onClick={() => handleConvert('proforma')}
                     title="Convert to Proforma Invoice"
-                    className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 transform hover:scale-105"
+                    className="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-brand-600/20 transform hover:scale-105"
                   >
                     <FaExchangeAlt size={14} /> Convert
                   </button>
@@ -1109,7 +1109,7 @@ const NewInvoice: React.FC = () => {
                   <button
                     onClick={() => handleConvert('invoice')}
                     title="Convert to Final Invoice"
-                    className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 transform hover:scale-105"
+                    className="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wide flex items-center gap-2 transition-all shadow-xl shadow-brand-600/20 transform hover:scale-105"
                   >
                     <FaExchangeAlt size={14} /> Convert
                   </button>

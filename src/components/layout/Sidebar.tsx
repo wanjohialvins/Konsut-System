@@ -55,11 +55,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     const baseClasses = "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden font-medium text-sm";
 
     if (isActive) {
-      const activeBg = isAdmin
-        ? "bg-gradient-to-r from-red-600 to-red-800 shadow-lg shadow-red-900/30"
-        : isCEO
-          ? "bg-gradient-to-r from-indigo-600 to-indigo-800 shadow-lg shadow-indigo-900/30"
-          : "bg-brand-600 dark:bg-brand-600 shadow-lg shadow-brand-900/20";
+      const activeBg = "bg-brand-600 dark:bg-brand-600 shadow-lg shadow-brand-900/20";
 
       return `${baseClasses} ${activeBg} text-white translate-x-1`;
     }
