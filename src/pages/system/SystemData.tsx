@@ -173,6 +173,7 @@ const SystemData = () => {
         }
     };
 
+    /*
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
             handleRestore('upload', acceptedFiles[0]);
@@ -184,6 +185,10 @@ const SystemData = () => {
         accept: { 'application/json': ['.json'] },
         maxFiles: 1
     });
+    */
+    const isDragActive = false; // Mock
+    const getRootProps = () => ({}); // Mock
+    const getInputProps = () => ({}); // Mock
 
     const formatBytes = (bytes: number) => {
         if (typeof bytes !== 'number' || isNaN(bytes) || bytes === 0) return '0 Bytes';
