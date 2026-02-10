@@ -3,7 +3,7 @@
 require_once '../config.php';
 
 $pdo = getDbConnection();
-$userId = getRequestHeader('X-User-Id');
+$userId = $GLOBALS['CURRENT_USER_SESSION']['id'] ?? getRequestHeader('X-User-Id');
 
 if (!$userId) {
     sendError('Unauthorized', 401);

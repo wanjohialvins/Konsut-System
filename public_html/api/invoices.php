@@ -95,7 +95,7 @@ if ($method === 'GET') {
         $customerId = $clientStatus['id'];
         $clientUpdated = $clientStatus['updated'];
 
-        $userId = getRequestHeader('X-User-Id');
+        $userId = $GLOBALS['CURRENT_USER_SESSION']['id'] ?? getRequestHeader('X-User-Id');
         // file_put_contents('debug_invoice.txt', "Resolved Customer ID: " . var_export($customerId, true) . " | User ID: " . var_export($userId, true) . "\n", FILE_APPEND);
 
         if (!isValidDate($data['issuedDate'])) {
@@ -150,7 +150,7 @@ if ($method === 'GET') {
 } elseif ($method === 'PUT') {
     requirePermission('manage_invoices');
     $data = json_decode(file_get_contents('php://input'), true);
-    $userId = getRequestHeader('X-User-Id');
+    $userId = $GLOBALS['CURRENT_USER_SESSION']['id'] ?? getRequestHeader('X-User-Id');
     $pdo->beginTransaction();
     try {
         $clientStatus = ensureClientExists($pdo, $data['customer'] ?? []);
@@ -163,30 +163,12 @@ if ($method === 'GET') {
         $exists = $check->fetchColumn() > 0;
 
         if ($exists) {
-            // Optimistic Locking Check (Phase 3)
+            // Optimistic Locking Removed (Phase 3) - 'updated_at' column missing in DB
+            /*
             if (isset($data['updatedAt'])) {
-                $verStmt = $pdo->prepare("SELECT updated_at FROM documents WHERE id = ?");
-                $verStmt->execute([$data['id']]);
-                $dbTime = $verStmt->fetchColumn();
-
-                // Compare timestamps (ignoring small clock skew/serialization issues if needed, but strict string comparison usually works for ISO dates in PHP/MySQL if formats match)
-                // DB usually returns YYYY-MM-DD HH:MM:SS. JS sends ISO.
-                // Best to convert both to timestamps.
-
-                if ($dbTime) {
-                    $dbTs = strtotime($dbTime);
-                    $payloadTs = strtotime($data['updatedAt']);
-
-                    // If DB is ahead by more than 2 seconds (allow small drift), reject using 409
-                    if ($dbTs > $payloadTs + 2) {
-                        $pdo->rollBack();
-                        http_response_code(409); // Conflict
-                        // Return the new data so frontend can merge?
-                        echo json_encode(['error' => 'Document has been modified by another user.', 'code' => 'CONFLICT']);
-                        exit;
-                    }
-                }
+                // ... logic removed ...
             }
+            */
 
             if (!isValidDate($data['issuedDate'])) {
                 throw new Exception("Invalid Issue Date format.");
@@ -195,7 +177,7 @@ if ($method === 'GET') {
                 throw new Exception("Invalid Due Date format.");
             }
 
-            $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, totalDiscount=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=?, updated_at=NOW() WHERE id=?");
+            $stmt = $pdo->prepare("UPDATE documents SET customer_id=?, status=?, issuedDate=?, dueDate=?, quotationValidUntil=?, currency=?, currencyRate=?, subtotal=?, totalDiscount=?, taxAmount=?, grandTotal=?, clientResponsibilities=?, termsAndConditions=? WHERE id=?");
             $stmt->execute([
                 $customerId,
                 $data['status'],
@@ -313,7 +295,7 @@ if ($method === 'GET') {
     $stmt->execute([$id]);
 
     // Audit Log
-    $userId = getRequestHeader('X-User-Id');
+    $userId = $GLOBALS['CURRENT_USER_SESSION']['id'] ?? getRequestHeader('X-User-Id');
     // Note: getRequestHeader might return null if not sent in DELETE, but usually auth middleware handles it. 
     // invoices.php doesn't explicit auth middleware for $userId global, so re-fetch.
     if ($userId) {
