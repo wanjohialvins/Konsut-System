@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FiBell, FiMenu, FiLogOut, FiSearch } from "react-icons/fi";
+import { FiBell, FiMenu, FiLogOut, FiSearch, FiBookOpen } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "../../hooks/useMediaQuery";
 import { useAuth } from "../../contexts/AuthContext";
@@ -11,9 +11,10 @@ import notificationSound from "../../assets/notification.mp3";
 
 interface TopbarProps {
   onMenuClick: () => void;
+  onHelpClick: () => void;
 }
 
-const Topbar = ({ onMenuClick }: TopbarProps) => {
+const Topbar = ({ onMenuClick, onHelpClick }: TopbarProps) => {
   const isMobile = useIsMobile();
   const { user, logout, companyBranding } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -97,9 +98,17 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
           id="global-search-trigger"
           onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k' }))}
           className="p-2 hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-lg transition-colors"
-          aria-label="Search items"
+          title="Search Console (Ctrl + K)"
         >
           <FiSearch size={20} className="text-gray-600 dark:text-midnight-text-secondary" />
+        </button>
+
+        <button
+          onClick={onHelpClick}
+          className="p-2 hover:bg-brand-50 dark:hover:bg-brand-900/20 text-gray-600 dark:text-midnight-text-secondary hover:text-brand-600 rounded-lg transition-all group"
+          title="System Manual"
+        >
+          <FiBookOpen size={20} className="group-hover:scale-110 transition-transform" />
         </button>
 
         <Link to="/notifications" className="p-2 hover:bg-gray-100 dark:hover:bg-midnight-800 rounded-lg transition-colors relative">

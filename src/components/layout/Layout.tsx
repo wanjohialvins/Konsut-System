@@ -6,8 +6,11 @@ import { useIsMobile } from "../../hooks/useMediaQuery";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import NetworkStatusBar from "../NetworkStatusBar";
 
+import SystemManualModal from "../support/SystemManualModal";
+
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const isMobile = useIsMobile();
   const location = useLocation();
 
@@ -66,8 +69,12 @@ export default function Layout() {
 
       <div className="flex-1 flex flex-col min-w-0 transition-colors duration-300 relative">
         <NetworkStatusBar />
-        <Topbar onMenuClick={toggleSidebar} />
+        <Topbar 
+          onMenuClick={toggleSidebar} 
+          onHelpClick={() => setManualOpen(true)}
+        />
         <main className="flex-1 p-4 md:p-6 overflow-x-hidden text-slate-900 dark:text-midnight-text-primary relative group">
+          <SystemManualModal isOpen={manualOpen} onClose={() => setManualOpen(false)} />
           <AnimatePresence mode="popLayout">
             <motion.div
               key={location.pathname}
