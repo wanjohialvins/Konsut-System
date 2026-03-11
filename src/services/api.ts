@@ -16,8 +16,21 @@ const getBaseUrl = () => {
 };
 
 export const API_BASE_URL = getBaseUrl();
-// Re-triggering deployment with correct domain settings
 
+/**
+ * Resolves an uploaded image path (e.g. from the DB) to an absolute URL
+ */
+export const resolveLogoPath = (path: string | undefined | null) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+        return path;
+    }
+    // Remove /api from the right to get the path relative to the domains public directory
+    const baseUrlDir = API_BASE_URL.replace(/\/api\/?$/, '');
+    return `${baseUrlDir}/${path}`;
+};
+
+// Re-triggering deployment with correct domain settings
 
 const request = async <T,>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     const userJson = sessionStorage.getItem('konsut_system_auth');

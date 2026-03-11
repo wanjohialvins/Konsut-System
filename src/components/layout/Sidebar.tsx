@@ -4,7 +4,7 @@ import { FiFileText, FiUsers, FiPackage, FiBarChart2, FiX, FiShield, FiActivity,
 import { useIsMobile } from "../../hooks/useMediaQuery";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePermissions } from "../../hooks/usePermissions";
-import { api } from "../../services/api";
+import { api, resolveLogoPath } from "../../services/api";
 
 import logoUrl from "../../assets/logo.jpg";
 
@@ -27,7 +27,7 @@ interface SidebarSection {
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const isMobile = useIsMobile();
-  const { user } = useAuth();
+  const { user, companyBranding } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchUnread = async () => {
@@ -164,13 +164,13 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <div className="relative">
             <div className="absolute inset-0 bg-brand-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
             <img
-              src={logoUrl}
+              src={resolveLogoPath(companyBranding?.logo) || logoUrl}
               alt="Konsut Logo"
               className="h-10 w-10 object-cover rounded-xl shadow-sm relative z-10"
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-slate-900 dark:text-white tracking-tight leading-none group-hover:text-brand-600 transition-colors">KONSUT LTD</span>
+            <span className="font-bold text-slate-900 dark:text-white tracking-tight leading-none group-hover:text-brand-600 transition-colors">{companyBranding?.name || 'KONSUT LTD'}</span>
             <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">Konsut System</span>
           </div>
         </div>

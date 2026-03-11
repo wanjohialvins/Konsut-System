@@ -3,7 +3,7 @@ import { FiBell, FiMenu, FiLogOut, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "../../hooks/useMediaQuery";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { api, resolveLogoPath } from "../../services/api";
 import UserAvatar from "../ui/UserAvatar";
 import SystemStatus from "./SystemStatus";
 import logoUrl from "../../assets/logo.jpg";
@@ -15,7 +15,7 @@ interface TopbarProps {
 
 const Topbar = ({ onMenuClick }: TopbarProps) => {
   const isMobile = useIsMobile();
-  const { user, logout } = useAuth();
+  const { user, logout, companyBranding } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const prevCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -79,11 +79,11 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
         {/* Title */}
         <div className="flex items-center gap-3 select-none">
           <img
-            src={logoUrl}
+            src={resolveLogoPath(companyBranding?.logo) || logoUrl}
             alt="Logo"
             className="h-8 w-8 rounded-full object-contain bg-white shadow-sm"
           />
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-midnight-text-primary">KONSUT</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-midnight-text-primary">{companyBranding?.name || 'KONSUT'}</h1>
           <div className="hidden md:block">
             <SystemStatus />
           </div>

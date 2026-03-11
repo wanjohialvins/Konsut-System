@@ -12,10 +12,11 @@ import {
 } from "react-icons/fa";
 import { FiBarChart2, FiSearch } from "react-icons/fi";
 import logoUrl from "../../assets/logo.jpg";
-import { api } from "../../services/api";
+import { api, resolveLogoPath } from "../../services/api";
 import { generateInvoicePDF } from "../../utils/pdfGenerator";
 import { DashboardSkeleton } from "../../components/skeletons/CommonSkeletons";
 import { usePermissions } from "../../hooks/usePermissions";
+import { useAuth } from "../../contexts/AuthContext";
 import ReportPreviewModal from "../../components/modals/ReportPreviewModal";
 
 
@@ -55,6 +56,7 @@ const COLORS = {
  */
 const Analytics: React.FC = () => {
   const { can, hasRole } = usePermissions();
+  const { companyBranding } = useAuth();
   const isAdmin = hasRole('admin');
   const isCEO = hasRole('ceo');
   const canViewFinancials = can('/analytics') || isAdmin || isCEO;
@@ -280,7 +282,7 @@ const Analytics: React.FC = () => {
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-8 mt-4">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-white dark:bg-midnight-900 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-midnight-800">
-              <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain" />
+              <img src={resolveLogoPath(companyBranding?.logo) || logoUrl} alt="Logo" className="h-12 w-auto object-contain" />
             </div>
             <div>
               <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none mb-2 uppercase">Financial Suite</h1>

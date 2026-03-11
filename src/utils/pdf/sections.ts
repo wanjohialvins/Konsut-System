@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { type PdfLayoutConfig, drawBox, loadImageAsDataURL, generateBarcode } from "./layout";
 import logo from "../../assets/logo.jpg";
+import { resolveLogoPath } from "../../services/api";
 
 export const drawHeader = async (doc: jsPDF, COMPANY: any, SETTINGS: any, config: PdfLayoutConfig) => {
     const headerY = config.margin;
@@ -9,15 +10,20 @@ export const drawHeader = async (doc: jsPDF, COMPANY: any, SETTINGS: any, config
 
     // 1. Logo Handling (Left Side)
     if (SETTINGS.includeHeader) {
-        const logoInfo = await loadImageAsDataURL(logo);
-        if (logoInfo) {
+        const logoPath = COMPANY.logo ? resolveLogoPath(COMPANY.logo) : logo;
+        const logoInfo = await loadImageAsDataURL(logoPath).catch(() => null);
+        
+        // Final fallback if the uploaded logo fails to load (e.g. 404 from cPanel server)
+        const finalLogoInfo = logoInfo || await loadImageAsDataURL(logo);
+
+        if (finalLogoInfo) {
             const maxW = 55;
             const maxH = 30;
-            const aspect = logoInfo.width / logoInfo.height;
+            const aspect = finalLogoInfo.width / finalLogoInfo.height;
             let imgW = maxW;
             let imgH = maxW / aspect;
             if (imgH > maxH) { imgH = maxH; imgW = maxH * aspect; }
-            doc.addImage(logoInfo.data, "PNG", config.margin, headerY, imgW, imgH);
+            doc.addImage(finalLogoInfo.data, "PNG", config.margin, headerY, imgW, imgH);
         }
     }
 

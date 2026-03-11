@@ -12,6 +12,7 @@ const INACTIVITY_LIMIT = 24 * 60 * 60 * 1000; // 24 hours
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [companyBranding, setCompanyBranding] = useState<{ name: string; logo: string } | null>(null);
     const lastActivity = useRef<number>(Date.now());
     const navigate = useNavigate();
 
@@ -161,6 +162,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (meta && meta.routeMap) {
                 setPermissionMap(meta.routeMap);
             }
+            if (meta && meta.company) {
+                setCompanyBranding({ name: meta.company.name || '', logo: meta.company.logo || '' });
+            }
         } catch (error) {
             console.error("Failed to fetch system meta:", error);
         }
@@ -181,8 +185,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             refreshUser,
             isAuthenticated: !!user,
             loading: isLoading,
-            permissionMap
-        }}>
+            permissionMap,
+            companyBranding,
+            fetchMeta // Optional: If specific components need to trigger a refresh
+        } as any}>
             {children}
         </AuthContext.Provider>
     );

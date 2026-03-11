@@ -108,6 +108,8 @@ export interface AuthContextType {
   updateUser?: (data: Partial<User>) => void;
   refreshUser?: () => Promise<void>;
   permissionMap: Record<string, string[]>;
+  companyBranding?: { name: string; logo: string } | null;
+  fetchMeta?: () => Promise<void>;
 }
 
 export type ThemeMode = 'light' | 'dark' | 'auto';

@@ -13,7 +13,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText, FiUploadCloud } from "react-icons/fi";
 import logoUrl from '../../assets/logo.jpg';
-import { api, API_BASE_URL } from "../../services/api";
+import { api, API_BASE_URL, resolveLogoPath } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
@@ -103,19 +103,6 @@ const CompanyProfile = () => {
             setUploadingLogo(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
-    };
-
-    // Helper to resolve the correct URL for the image
-    const getResolvedLogoUrl = (path: string) => {
-        if (!path) return '';
-        if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-            return path;
-        }
-        // Assuming path is like "uploads/logos/filename.jpg"
-        // Use API_BASE_URL to resolve relative to the backend
-        // e.g. "http://localhost/public_html/api" -> "http://localhost/public_html/uploads/logos..."
-        const baseUrlDir = API_BASE_URL.replace(/\/api\/?$/, '');
-        return `${baseUrlDir}/${path}`;
     };
 
     if (initialLoading) return <SettingsSkeleton />;
@@ -213,7 +200,7 @@ const CompanyProfile = () => {
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {company.logo ? (
-                                <img src={getResolvedLogoUrl(company.logo)} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain transition-transform group-hover:scale-110" />
+                                <img src={resolveLogoPath(company.logo)} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain transition-transform group-hover:scale-110" />
                             ) : (
                                 <FiBriefcase className="text-gray-300" size={48} />
                             )}
