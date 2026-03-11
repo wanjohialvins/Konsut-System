@@ -188,6 +188,32 @@ export const api = {
     settings: {
         get: () => request<any>('settings.php'),
         save: (data: Record<string, any>) => request<{ success: boolean }>('settings.php', { method: 'POST', body: JSON.stringify(data) }),
+        uploadLogo: (file: File) => {
+            const formData = new FormData();
+            formData.append('logo_file', file);
+            const token = sessionStorage.getItem('konsut_system_auth');
+            const headers: any = {};
+            if (token) {
+                const user = JSON.parse(token);
+                headers['Authorization'] = user.token ? `Bearer ${user.token}` : '';
+                headers['X-User-Id'] = user.id;
+                headers['X-User-Role'] = user.role;
+            }
+            return fetch(`${API_BASE_URL}/upload_logo.php`, {
+                method: 'POST',
+                headers,
+                body: formData
+            }).then(async res => {
+                const text = await res.text();
+                try {
+                    const json = JSON.parse(text);
+                    if (!res.ok) throw new Error(json.error || json.message || 'Upload failed');
+                    return json as { success: boolean; path: string; message: string };
+                } catch (e: any) {
+                    throw new Error(e.message || 'Server response was not JSON: ' + text);
+                }
+            });
+        },
         clearAll: () => request<{ success: boolean }>('settings.php?action=clear', { method: 'DELETE' }),
         getDatabaseStats: () => request<{ name: string; rows_count: number; size: number }[]>('settings.php?action=database_stats', { method: 'POST' }),
         truncateTable: (table: string) => request<{ success: boolean }>('settings.php?action=truncate_table', { method: 'POST', body: JSON.stringify({ table }) }),

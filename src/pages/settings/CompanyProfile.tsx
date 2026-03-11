@@ -10,10 +10,10 @@
  * - Tax/PIN registration
  * - Web identity configuration
  */
-import React, { useState, useEffect, useMemo } from "react";
-import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText } from "react-icons/fi";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { FiBriefcase, FiSave, FiMapPin, FiPhone, FiMail, FiGlobe, FiFileText, FiUploadCloud } from "react-icons/fi";
 import logoUrl from '../../assets/logo.jpg';
-import { api } from "../../services/api";
+import { api, API_BASE_URL } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { SettingsSkeleton } from "../../components/skeletons/CommonSkeletons";
@@ -26,7 +26,9 @@ const CompanyProfile = () => {
     const { showToast } = useToast();
     const { user } = useAuth();
     const [saving, setSaving] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     // Initial state moved to below DEFAULT_COMPANY definition
 
     // Determine edit permission
@@ -69,6 +71,51 @@ const CompanyProfile = () => {
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Basic validation
+        if (file.size > 2 * 1024 * 1024) {
+            showToast('error', 'Image size must be less than 2MB');
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            showToast('error', 'Please upload a valid image file');
+            return;
+        }
+
+        setUploadingLogo(true);
+        try {
+            const response = await api.settings.uploadLogo(file);
+            setCompany({ ...company, logo: response.path });
+            showToast('success', 'Logo uploaded successfully');
+            
+            // Auto-save settings when logo changes
+            const current = await api.settings.get();
+            await api.settings.save({ ...current, company: { ...current.company, logo: response.path } });
+        } catch (error: any) {
+            showToast('error', error.message || 'Failed to upload logo');
+        } finally {
+            setUploadingLogo(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    // Helper to resolve the correct URL for the image
+    const getResolvedLogoUrl = (path: string) => {
+        if (!path) return '';
+        if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+            return path;
+        }
+        // Assuming path is like "uploads/logos/filename.jpg"
+        // Use API_BASE_URL to resolve relative to the backend
+        // e.g. "http://localhost/public_html/api" -> "http://localhost/public_html/uploads/logos..."
+        const baseUrlDir = API_BASE_URL.replace(/\/api\/?$/, '');
+        return `${baseUrlDir}/${path}`;
     };
 
     if (initialLoading) return <SettingsSkeleton />;
@@ -161,16 +208,31 @@ const CompanyProfile = () => {
                 <div className="space-y-8">
                     <div className="bg-white dark:bg-midnight-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-midnight-800 shadow-xl">
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 dark:border-midnight-800 pb-2">Business Logo</h3>
-                        <div className="aspect-square bg-gray-50 dark:bg-midnight-950 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-midnight-800 flex items-center justify-center relative overflow-hidden group">
+                        <div 
+                            className={`aspect-square bg-gray-50 dark:bg-midnight-950 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-midnight-800 flex items-center justify-center relative overflow-hidden group cursor-pointer transition-all ${uploadingLogo ? 'opacity-50 pointer-events-none' : 'hover:border-brand-500'}`}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
                             {company.logo ? (
-                                <img src={company.logo} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain transition-transform group-hover:scale-110" />
+                                <img src={getResolvedLogoUrl(company.logo)} alt="Logo" className="max-w-[80%] max-h-[80%] object-contain transition-transform group-hover:scale-110" />
                             ) : (
                                 <FiBriefcase className="text-gray-300" size={48} />
                             )}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                                <span className="text-white font-black uppercase text-xs tracking-widest">Update Logo</span>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                <FiUploadCloud className="text-white text-3xl mb-1" />
+                                <span className="text-white font-black uppercase text-xs tracking-widest">
+                                    {uploadingLogo ? 'Uploading...' : 'Upload New Logo'}
+                                </span>
                             </div>
                         </div>
+                        
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            onChange={handleLogoUpload} 
+                            accept="image/jpeg,image/png,image/gif,image/webp" 
+                            className="hidden" 
+                        />
+                        
                         <input
                             type="text"
                             value={company.logo}
