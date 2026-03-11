@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, [user, logout]);
 
 
-    const login = async (username: string, password: string): Promise<{ success: boolean; forceReset?: boolean; message?: string }> => {
+    const login = async (username: string, password: string): Promise<{ success: boolean; forceReset?: boolean; message?: string, isFirstLogin?: boolean }> => {
         try {
             const response = await api.auth.login({ username, password });
             if (response.success && response.user) {
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(userData);
                 sessionStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
                 lastActivity.current = Date.now();
-                return { success: true, forceReset: response.forceReset, message: response.message };
+                return { success: true, forceReset: response.forceReset, message: response.message, isFirstLogin: response.user.isFirstLogin };
             }
             return { success: false, message: response.message || 'Invalid credentials' };
         } catch (error: unknown) {

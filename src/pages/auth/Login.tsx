@@ -75,6 +75,8 @@ const Login: React.FC = () => {
             if (result.success) {
                 if (result.forceReset) {
                     navigate('/reset-password', { replace: true });
+                } else if (result.isFirstLogin) {
+                    navigate('/support/guide', { replace: true });
                 } else {
                     navigate(from, { replace: true });
                 }
