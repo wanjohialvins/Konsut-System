@@ -1,6 +1,7 @@
 <?php
 // api/meta.php
 require_once 'config.php';
+$pdo = getDbConnection();
 
 // Check auth (optional - but good for security info)
 // requirePermission('view_settings'); // Or public if needed for login context, but usually roles are need after login.
